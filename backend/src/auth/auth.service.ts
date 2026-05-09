@@ -1,22 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 
-export type UserWithoutPassword = {
-  id: number;
-  email: string;
-};
+export type UserWithoutPassword = { id: number; email: string };
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
   ) {}
+
+  async onApplicationBootstrap() {
+    await this.seedAdmin();
+  }
+
+  private async seedAdmin() {
+    const count = await this.userRepository.count();
+    if (count === 0) {
+      const admin = this.userRepository.create({
+        email: 'admin@example.com',
+        passwordHash: 'admin123', // will be hashed by @BeforeInsert
+      });
+      await this.userRepository.save(admin);
+      console.log('✅ Администратор создан: admin@example.com / admin123');
+    }
+  }
 
   async validateUser(
     email: string,
@@ -31,9 +44,7 @@ export class AuthService {
 
   login(user: UserWithoutPassword) {
     const payload = { sub: user.id, email: user.email };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    return { access_token: this.jwtService.sign(payload) };
   }
 
   async getMe(userId: number): Promise<UserWithoutPassword | null> {
