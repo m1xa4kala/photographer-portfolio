@@ -1,0 +1,50 @@
+.about {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.photo {
+  flex: 1;
+  min-width: 250px;
+}
+
+.photo img {
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s;
+}
+
+.photo img:hover {
+  transform: scale(1.02);
+}
+
+.bio {
+  flex: 2;
+}
+
+.bio h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+.bio p {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .about {
+    flex-direction: column;
+    text-align: center;
+  }
+  .bio h1 {
+    font-size: 2rem;
+  }
+}

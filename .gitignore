@@ -1,0 +1,45 @@
+# Общие для Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+
+# Переменные окружения (секреты)
+.env
+.env.local
+.env.production
+
+# Логи
+logs/
+*.log
+
+# Временные файлы
+*.swp
+*.swo
+*~
+
+# Директории сборки (бэкенд)
+backend/dist/
+backend/build/
+
+# Директории сборки (фронтенд)
+frontend/dist/
+frontend/build/
+
+# Загруженные пользователем файлы (бэкенд)
+backend/uploads/
+backend/uploaded-files/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Файлы отчётов покрытия
+coverage/
+.nyc_output/
