@@ -1,16 +1,24 @@
-import styles from './Reviews.module.css';
-import reviews from '../data/reviews';
+import React from 'react';
+import { useReviews } from '../hooks';
 import ReviewCard from '../components/ReviewCard';
+import styles from './Reviews.module.css';
 
-export default function Reviews() {
+const Reviews: React.FC = () => {
+  const { reviews, loading, error } = useReviews();
+
+  if (loading) return <div className={styles.loader}>Загрузка отзывов...</div>;
+  if (error) return <div className={styles.error}>Ошибка: {error}</div>;
+
   return (
     <div className={styles.reviews}>
       <h1>Отзывы клиентов</h1>
       <div className={styles.list}>
         {reviews.map(review => (
-          <ReviewCard key={review.id} name={review.name} text={review.text} rating={review.rating} />
+          <ReviewCard key={review.id} review={review} />
         ))}
       </div>
     </div>
   );
-}
+};
+
+export default Reviews;

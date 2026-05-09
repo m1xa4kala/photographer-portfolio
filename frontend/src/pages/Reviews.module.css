@@ -1,17 +1,23 @@
+/* src/pages/Reviews.module.css */
 .reviews {
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 1.5rem;
 }
 
 .reviews h1 {
-  font-size: 2.8rem;
   text-align: center;
+  font-size: 2.5rem;
   margin-bottom: 2rem;
+  color: var(--accent);
 }
 
 .list {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.loader, .error {
+  text-align: center;
+  padding: 3rem;
 }

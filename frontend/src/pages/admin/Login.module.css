@@ -1,0 +1,64 @@
+/* src/pages/admin/Login.module.css */
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.loginCard {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #dee2e6;
+}
+
+.loginCard h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #c17b3e;
+  font-family: 'Playfair Display', serif;
+}
+
+.loginCard form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loginCard input {
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #1e1e1e;
+  font-size: 1rem;
+}
+
+.loginCard button {
+  padding: 0.75rem;
+  background: #c17b3e;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.loginCard button:hover {
+  background: #a7622c;
+}
+
+.error {
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+}

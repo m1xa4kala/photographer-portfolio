@@ -1,87 +1,78 @@
+/* src/pages/Home.module.css */
 .home {
-  animation: fadeIn 0.8s ease;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .hero {
-  height: 80vh;
-  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/images/hero-bg.jpg') center/cover no-repeat;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   text-align: center;
-  color: white;
+  padding: 4rem 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 2rem;
   margin-bottom: 3rem;
-  border-radius: 0 0 30px 30px;
 }
 
 .hero h1 {
-  font-size: 4rem;
+  font-size: 3rem;
+  font-family: 'Playfair Display', serif;
+  color: var(--accent);
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .hero p {
   font-size: 1.2rem;
-  max-width: 600px;
+  color: var(--text-secondary);
   margin-bottom: 2rem;
 }
 
 .cta {
-  background: var(--accent);
-  color: #0a0a0a;
-  padding: 0.8rem 2rem;
-  border-radius: 40px;
+  background-color: var(--accent);
+  color: #fff;
+  padding: 0.75rem 2rem;
+  border-radius: 2rem;
   font-weight: 600;
-  font-size: 1rem;
-  transition: var(--transition);
+  transition: background-color 0.2s;
 }
 
 .cta:hover {
-  background: var(--accent-hover);
-  transform: scale(1.05);
-}
-
-.bestSection {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
+  background-color: var(--accent-hover);
 }
 
 .bestSection h2 {
   text-align: center;
   font-size: 2rem;
   margin-bottom: 2rem;
+  color: var(--accent);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
 
 .photoCard {
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px var(--shadow);
+  transition: transform 0.3s;
+  background: #fff;
+}
+
+.photoCard:hover {
+  transform: scale(1.02);
 }
 
 .photoCard img {
   width: 100%;
-  height: 280px;
+  height: 300px;
   object-fit: cover;
-  transition: transform 0.5s;
-}
-
-.photoCard:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow);
+  transition: filter 0.3s;
 }
 
 .photoCard:hover img {
-  transform: scale(1.05);
+  filter: brightness(0.9);
 }
 
 .overlay {
@@ -93,21 +84,25 @@
   color: white;
   padding: 1rem;
   font-weight: 500;
-  transform: translateY(100%);
-  transition: transform 0.3s;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .photoCard:hover .overlay {
-  transform: translateY(0);
+  opacity: 1;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px);}
-  to { opacity: 1; transform: translateY(0);}
+.loader, .error {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
 }
 
-@media (max-width: 640px) {
-  .hero h1 { font-size: 2.5rem; }
-  .hero p { font-size: 1rem; padding: 0 1rem; }
-  .grid { gap: 1rem; }
+.error button {
+  margin-top: 1rem;
+  background: var(--accent);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
 }

@@ -1,17 +1,36 @@
+import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
+import { useAuth } from '../hooks';
 import styles from './Layout.module.css';
 
-export default function Layout() {
+const Layout: React.FC = () => {
+  const { user } = useAuth();
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.logo}>Vlada Photo</div>
         <nav className={styles.nav}>
-          <NavLink to="/" className={({ isActive }) => isActive ? styles.active : ''}>Главная</NavLink>
-          <NavLink to="/portfolio">Портфолио</NavLink>
-          <NavLink to="/price">Прайс</NavLink>
-          <NavLink to="/reviews">Отзывы</NavLink>
-          <NavLink to="/about">Обо мне</NavLink>
+          <NavLink to="/" className={({ isActive }) => (isActive ? styles.active : '')}>
+            Главная
+          </NavLink>
+          <NavLink to="/portfolio" className={({ isActive }) => (isActive ? styles.active : '')}>
+            Портфолио
+          </NavLink>
+          <NavLink to="/price" className={({ isActive }) => (isActive ? styles.active : '')}>
+            Прайс
+          </NavLink>
+          <NavLink to="/reviews" className={({ isActive }) => (isActive ? styles.active : '')}>
+            Отзывы
+          </NavLink>
+          <NavLink to="/about" className={({ isActive }) => (isActive ? styles.active : '')}>
+            Обо мне
+          </NavLink>
+          {user && (
+            <NavLink to="/admin/dashboard" className={({ isActive }) => (isActive ? styles.active : '')}>
+              Админка
+            </NavLink>
+          )}
         </nav>
       </header>
       <main className={styles.main}>
@@ -25,4 +44,6 @@ export default function Layout() {
       </footer>
     </div>
   );
-}
+};
+
+export default Layout;

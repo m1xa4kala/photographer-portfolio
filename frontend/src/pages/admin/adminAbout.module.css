@@ -1,0 +1,65 @@
+/* src/styles/adminAbout.module.css */
+.aboutAdmin {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.aboutAdmin h2 {
+  margin-bottom: 1.5rem;
+  color: #c17b3e;
+}
+
+.aboutAdmin form {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.aboutAdmin label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: block;
+  color: #1e1e1e;
+}
+
+.aboutAdmin input,
+.aboutAdmin textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #1e1e1e;
+  font-family: inherit;
+}
+
+.aboutAdmin textarea {
+  resize: vertical;
+}
+
+.aboutAdmin button {
+  align-self: flex-start;
+  padding: 0.5rem 1.2rem;
+  background: #c17b3e;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.aboutAdmin button:hover {
+  background: #a7622c;
+}
+
+.aboutAdmin img {
+  margin-top: 0.5rem;
+  max-width: 150px;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+}

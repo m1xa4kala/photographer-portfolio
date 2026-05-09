@@ -1,38 +1,40 @@
-import { useState } from 'react';
+import React from 'react';
+import { usePortfolio } from '../hooks';
 import styles from './Portfolio.module.css';
-import portfolioPhotos from '../data/portfolioPhotos';
 
-// получить список уникальных категорий
-const allCategories = ['Все', ...new Set(portfolioPhotos.map(p => p.category))];
+const Portfolio: React.FC = () => {
+  const { categories, activeCategoryId, setActiveCategoryId, filteredPhotos, loading, error, refetch } = usePortfolio();
 
-export default function Portfolio() {
-  const [activeCat, setActiveCat] = useState('Все');
-  const filtered = activeCat === 'Все' 
-    ? portfolioPhotos 
-    : portfolioPhotos.filter(p => p.category === activeCat);
+  if (loading) return <div>Загрузка портфолио...</div>;
+  if (error) return <div>Ошибка: {error} <button onClick={refetch}>Повторить</button></div>;
 
   return (
     <div className={styles.portfolio}>
       <h1>Портфолио</h1>
       <div className={styles.filters}>
-        {allCategories.map(cat => (
-          <button 
-            key={cat}
-            className={activeCat === cat ? styles.activeFilter : ''}
-            onClick={() => setActiveCat(cat)}
+        <button onClick={() => setActiveCategoryId(null)} className={!activeCategoryId ? styles.activeFilter : ''}>
+          Все
+        </button>
+        {categories.map(cat => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategoryId(cat.id)}
+            className={activeCategoryId === cat.id ? styles.activeFilter : ''}
           >
-            {cat}
+            {cat.name}
           </button>
         ))}
       </div>
       <div className={styles.gallery}>
-        {filtered.map(photo => (
+        {filteredPhotos.map(photo => (
           <div key={photo.id} className={styles.photoItem}>
-            <img src={photo.src} alt={photo.title} />
+            <img src={photo.imageUrl} alt={photo.title} />
             <div className={styles.caption}>{photo.title}</div>
           </div>
         ))}
       </div>
     </div>
   );
-}
+};
+
+export default Portfolio;
