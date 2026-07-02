@@ -1,16 +1,37 @@
 :root {
-  /* Цветовая схема: тёмный фон, мягкий текст */
-  --bg-dark: #0a0a0a;
-  --bg-card: #141414;
-  --text-primary: #f5f5f5;
-  --text-secondary: #b0b0b0;
+  /* Цветовая схема: светлый фон, тёмный текст */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-card: #fafafa;
+  --card-bg: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
   --accent: #e4a788;   /* тёплый песочный/золотистый */
   --accent-hover: #d48c6a;
-  --border: #2a2a2a;
-  --shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+  --border: #e0e0e0;
+  --shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+  --overlay-bg: rgba(0, 0, 0, 0.6);
   --transition: all 0.3s ease;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Playfair Display', Georgia, serif;
+  --header-height: 64px;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 * {
@@ -21,7 +42,7 @@
 
 body {
   font-family: var(--font-body);
-  background-color: var(--bg-dark);
+  background-color: #ffffff;
   color: var(--text-primary);
   line-height: 1.6;
   scroll-behavior: smooth;

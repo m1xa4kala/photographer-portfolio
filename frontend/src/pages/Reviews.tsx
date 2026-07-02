@@ -1,6 +1,7 @@
 import React from 'react';
 import { useReviews } from '../hooks';
 import ReviewCard from '../components/ReviewCard';
+import AnimatedSection from '../components/AnimatedSection';
 import styles from './Reviews.module.css';
 
 const Reviews: React.FC = () => {
@@ -10,14 +11,16 @@ const Reviews: React.FC = () => {
   if (error) return <div className={styles.error}>Ошибка: {error}</div>;
 
   return (
-    <div className={styles.reviews}>
-      <h1>Отзывы клиентов</h1>
-      <div className={styles.list}>
-        {reviews.map(review => (
-          <ReviewCard key={review.id} review={review} />
-        ))}
+    <AnimatedSection>
+      <div className={styles.reviews}>
+        <h1>Отзывы клиентов</h1>
+        <div className={styles.list}>
+          {reviews.map(review => (
+            <ReviewCard key={review.id} review={review} />
+          ))}
+        </div>
       </div>
-    </div>
+    </AnimatedSection>
   );
 };
 

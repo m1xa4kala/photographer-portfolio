@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePrice } from '../hooks';
+import AnimatedSection from '../components/AnimatedSection';
 import styles from './Price.module.css';
 
 const Price: React.FC = () => {
@@ -19,19 +20,21 @@ const Price: React.FC = () => {
   }
 
   return (
-    <div className={styles.price}>
-      <h1>Прайс-лист</h1>
-      <div className={styles.cards}>
-        {items.map((item) => (
-          <div key={item.id} className={styles.card}>
-            <h3>{item.name}</h3>
-            <p>{item.description}</p>
-            <span className={styles.price}>{item.price} ₽</span>
-          </div>
-        ))}
+    <AnimatedSection>
+      <div className={styles.price}>
+        <h1>Прайс-лист</h1>
+        <div className={styles.cards}>
+          {items.map((item) => (
+            <div key={item.id} className={styles.card}>
+              <h3>{item.name}</h3>
+              <p>{item.description}</p>
+              <span className={styles.price}>{item.price} ₽</span>
+            </div>
+          ))}
+        </div>
+        <p className={styles.note}>* Точная стоимость обсуждается индивидуально в зависимости от ваших пожеланий</p>
       </div>
-      <p className={styles.note}>* Точная стоимость обсуждается индивидуально в зависимости от ваших пожеланий</p>
-    </div>
+    </AnimatedSection>
   );
 };
 

@@ -2,40 +2,7 @@
 .home {
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.hero {
-  text-align: center;
-  padding: 4rem 1rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 2rem;
-  margin-bottom: 3rem;
-}
-
-.hero h1 {
-  font-size: 3rem;
-  font-family: 'Playfair Display', serif;
-  color: var(--accent);
-  margin-bottom: 1rem;
-}
-
-.hero p {
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
-}
-
-.cta {
-  background-color: var(--accent);
-  color: #fff;
-  padding: 0.75rem 2rem;
-  border-radius: 2rem;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-.cta:hover {
-  background-color: var(--accent-hover);
+  padding-top: 3rem;
 }
 
 .bestSection h2 {
@@ -57,7 +24,7 @@
   border-radius: 1rem;
   box-shadow: 0 4px 12px var(--shadow);
   transition: transform 0.3s;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .photoCard:hover {
@@ -73,23 +40,6 @@
 
 .photoCard:hover img {
   filter: brightness(0.9);
-}
-
-.overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  color: white;
-  padding: 1rem;
-  font-weight: 500;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.photoCard:hover .overlay {
-  opacity: 1;
 }
 
 .loader, .error {

@@ -1,5 +1,7 @@
 import React from 'react';
 import { useHome } from '../hooks';
+import HeroCarousel from '../components/HeroCarousel';
+import AnimatedSection from '../components/AnimatedSection';
 import styles from './Home.module.css';
 
 const Home: React.FC = () => {
@@ -19,25 +21,24 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className={styles.home}>
-      <section className={styles.hero}>
-        <h1>Anna Photo</h1>
-        <p>Запечатлеваю эмоции и моменты, которые останутся с вами навсегда</p>
-        <button className={styles.cta}>Связаться</button>
-      </section>
+    <>
+      <HeroCarousel photos={photos} />
 
-      <section className={styles.bestSection}>
-        <h2>Лучшие работы</h2>
-        <div className={styles.grid}>
-          {photos.map(photo => (
-            <div key={photo.id} className={styles.photoCard}>
-              <img src={photo.imageUrl} alt={photo.title} loading="lazy" />
-              <div className={styles.overlay}>{photo.title}</div>
+      <div className={styles.home}>
+        <AnimatedSection delay={0.2}>
+          <section className={styles.bestSection}>
+            <h2>Лучшие работы</h2>
+            <div className={styles.grid}>
+              {photos.map(photo => (
+                <div key={photo.id} className={styles.photoCard}>
+                  <img src={photo.imageUrl} alt={photo.title} loading="lazy" />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
-    </div>
+          </section>
+        </AnimatedSection>
+      </div>
+    </>
   );
 };
 
