@@ -32,6 +32,7 @@ backend/uploads/
 backend/uploaded-files/
 
 # IDE
+.claude
 .vscode/
 .idea/
 *.suo

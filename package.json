@@ -1,0 +1,26 @@
+{
+  "name": "photographer-project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Photographer portfolio website with admin panel",
+  "scripts": {
+    "db:start": "docker compose up -d postgres",
+    "db:stop": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d postgres",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently -n be,fe -c cyan,magenta \"cd backend && npm run start:dev\" \"cd frontend && npm run dev\"",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build && cd ../backend && npm run build",
+    "start": "node backend/dist/main",
+    "migration:run": "cd backend && npm run migration:run",
+    "migration:generate": "cd backend && npm run migration:generate",
+    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
