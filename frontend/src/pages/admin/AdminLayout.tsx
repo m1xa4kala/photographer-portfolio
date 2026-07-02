@@ -21,6 +21,7 @@ const AdminLayout: React.FC = () => {
             <li><Link to="/admin/dashboard">Дашборд</Link></li>
             <li><Link to="/admin/best-photos">Лучшие фото</Link></li>
             <li><Link to="/admin/portfolio-categories">Категории портфолио</Link></li>
+            <li><Link to="/admin/portfolio-sessions">Фотосессии</Link></li>
             <li><Link to="/admin/portfolio-photos">Фото портфолио</Link></li>
             <li><Link to="/admin/price-items">Прайс-лист</Link></li>
             <li><Link to="/admin/reviews">Отзывы</Link></li>

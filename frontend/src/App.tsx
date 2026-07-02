@@ -13,6 +13,7 @@ import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import BestPhotosAdmin from './pages/admin/BestPhotosAdmin';
 import PortfolioCategoriesAdmin from './pages/admin/PortfolioCategoriesAdmin';
+import PortfolioSessionsAdmin from './pages/admin/PortfolioSessionsAdmin';
 import PortfolioPhotosAdmin from './pages/admin/PortfolioPhotosAdmin';
 import PriceItemsAdmin from './pages/admin/PriceItemsAdmin';
 import ReviewsAdmin from './pages/admin/ReviewsAdmin';
@@ -41,6 +42,7 @@ const App: React.FC = () => {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="best-photos" element={<BestPhotosAdmin />} />
             <Route path="portfolio-categories" element={<PortfolioCategoriesAdmin />} />
+            <Route path="portfolio-sessions" element={<PortfolioSessionsAdmin />} />
             <Route path="portfolio-photos" element={<PortfolioPhotosAdmin />} />
             <Route path="price-items" element={<PriceItemsAdmin />} />
             <Route path="reviews" element={<ReviewsAdmin />} />

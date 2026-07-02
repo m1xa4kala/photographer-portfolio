@@ -11,6 +11,7 @@
   color: var(--accent);
 }
 
+/* ===== Фильтры (категории) ===== */
 .filters {
   display: flex;
   justify-content: center;
@@ -36,6 +37,106 @@
   border-color: var(--accent);
 }
 
+/* ===== Сетка сессий ===== */
+.sessionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.sessionCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.sessionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px var(--shadow);
+}
+
+.sessionImage {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+}
+
+.sessionImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+  border-radius: 0;
+}
+
+.sessionCard:hover .sessionImage img {
+  transform: scale(1.05);
+}
+
+.sessionPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  color: var(--accent);
+  font-size: 3rem;
+  font-family: var(--font-heading);
+}
+
+.sessionInfo {
+  padding: 1rem 1.25rem;
+}
+
+.sessionInfo h3 {
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+  font-family: var(--font-heading);
+}
+
+.sessionInfo p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===== Кнопка назад ===== */
+.backRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.backBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.4rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.sessionTitle {
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+}
+
+/* ===== Галерея фото ===== */
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -47,7 +148,7 @@
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 4px 12px var(--shadow);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .photoItem img {
@@ -55,6 +156,7 @@
   height: 280px;
   object-fit: cover;
   transition: transform 0.3s;
+  border-radius: 0;
 }
 
 .photoItem:hover img {
@@ -72,7 +174,30 @@
   font-size: 0.9rem;
 }
 
+/* ===== Состояния ===== */
 .loader, .error {
   text-align: center;
   padding: 3rem;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 3rem;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .sessionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sessionImage {
+    height: 180px;
+  }
+
+  .gallery {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
 }

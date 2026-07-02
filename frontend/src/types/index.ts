@@ -14,7 +14,15 @@ export interface PortfolioCategory {
   id: number;
   name: string;
   slug: string;
+  coverImageUrl: string | null;
   orderIndex: number;
+}
+
+export interface PortfolioSession {
+  id: number;
+  name: string;
+  orderIndex: number;
+  categoryId: number;
 }
 
 export interface PortfolioPhoto {
@@ -22,7 +30,7 @@ export interface PortfolioPhoto {
   title: string;
   imageUrl: string;
   orderIndex: number;
-  categoryId: number;
+  sessionId: number;
 }
 
 export interface PriceItem {

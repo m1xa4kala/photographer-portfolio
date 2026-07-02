@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { PortfolioCategory } from './portfolio-category.entity';
+import { PortfolioSession } from './portfolio-session.entity';
 
 @Entity('portfolio_photos')
 export class PortfolioPhoto {
@@ -22,9 +22,9 @@ export class PortfolioPhoto {
   orderIndex!: number;
 
   @Column()
-  categoryId!: number;
+  sessionId!: number;
 
-  @ManyToOne(() => PortfolioCategory)
-  @JoinColumn({ name: 'categoryId' })
-  category!: PortfolioCategory;
+  @ManyToOne(() => PortfolioSession, (session) => session.photos)
+  @JoinColumn({ name: 'sessionId' })
+  session!: PortfolioSession;
 }

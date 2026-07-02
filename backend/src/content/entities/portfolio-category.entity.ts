@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { PortfolioPhoto } from './portfolio-photo.entity';
+import { PortfolioSession } from './portfolio-session.entity';
 
 @Entity('portfolio_categories')
 export class PortfolioCategory {
@@ -12,9 +12,12 @@ export class PortfolioCategory {
   @Column({ unique: true })
   slug!: string;
 
+  @Column({ nullable: true })
+  coverImageUrl?: string;
+
   @Column({ default: 0 })
   orderIndex!: number;
 
-  @OneToMany(() => PortfolioPhoto, (photo) => photo.category)
-  photos!: PortfolioPhoto[];
+  @OneToMany(() => PortfolioSession, (session) => session.category)
+  sessions!: PortfolioSession[];
 }

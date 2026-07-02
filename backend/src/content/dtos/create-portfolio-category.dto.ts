@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, Min } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class CreatePortfolioCategoryDto {
   @IsString()
@@ -8,7 +8,6 @@ export class CreatePortfolioCategoryDto {
   slug!: string;
 
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  orderIndex?: number;
+  @IsString()
+  coverImageUrl?: string;
 }

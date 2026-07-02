@@ -8,7 +8,7 @@ export class CreatePortfolioPhotoDto {
   imageUrl!: string;
 
   @IsInt()
-  categoryId!: number;
+  sessionId!: number;
 
   @IsOptional()
   @IsInt()
