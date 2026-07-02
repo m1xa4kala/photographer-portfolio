@@ -16,4 +16,5 @@ export interface AppConfig {
   database: DatabaseConfig;
   jwt: JwtConfig;
   frontendUrl: string;
+  nodeEnv: string;
 }
