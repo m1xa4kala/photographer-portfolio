@@ -1,14 +1,32 @@
-import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks';
 import styles from './Layout.module.css';
 
 const Layout: React.FC = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!isHome) {
+      setScrolled(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      setScrolled(window.scrollY > window.innerHeight - 80);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isHome]);
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
+      <header className={`${styles.header} ${scrolled || !isHome ? styles.scrolled : ''}`}>
         <div className={styles.logo}>Vlada Photo</div>
         <nav className={styles.nav}>
           <NavLink to="/" className={({ isActive }) => (isActive ? styles.active : '')}>

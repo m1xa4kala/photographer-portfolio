@@ -9,19 +9,43 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 2rem;
+  background: transparent;
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Прозрачный хедер — белый текст с тенью для читаемости на фото */
+.header .nav a,
+.header .logo {
+  color: #ffffff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Скролленый хедер — тёмный фон, тёмный текст */
+.header.scrolled {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.header.scrolled .nav a {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+.header.scrolled .logo {
+  color: var(--accent);
+  text-shadow: none;
 }
 
 .logo {
   font-size: 1.5rem;
   font-weight: 600;
   font-family: 'Playfair Display', serif;
-  color: var(--accent);
 }
 
 .nav {
@@ -32,7 +56,6 @@
 .nav a {
   font-weight: 500;
   transition: color 0.2s;
-  color: var(--text-primary);
 }
 
 .nav a:hover {
