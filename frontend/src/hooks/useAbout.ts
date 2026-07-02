@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import api from '../services/api';
+import { useFetch } from './useFetch';
 import { type About } from '../types';
 
 interface UseAboutReturn {
@@ -10,28 +9,12 @@ interface UseAboutReturn {
 }
 
 export const useAbout = (): UseAboutReturn => {
-  const [about, setAbout] = useState<About | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error, refetch } = useFetch<About>('/content/about');
 
-  const fetchAbout = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.get<About>('/content/about');
-      setAbout(res.data);
-    } catch (err) {
-      setError('Не удалось загрузить информацию');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  return {
+    about: data,
+    loading,
+    error,
+    refetch,
   };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchAbout();
-  }, []);
-
-  return { about, loading, error, refetch: fetchAbout };
 };

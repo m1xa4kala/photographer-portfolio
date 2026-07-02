@@ -15,7 +15,9 @@ export const useDashboardStats = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    let cancelled = false;
+
+    const fetch = async () => {
       try {
         const [bestPhotos, categories, photos, priceItems, reviews] = await Promise.all([
           api.get('/admin/best-photos'),
@@ -24,21 +26,26 @@ export const useDashboardStats = () => {
           api.get('/admin/price-items'),
           api.get('/admin/reviews'),
         ]);
-        setStats({
-          bestPhotosCount: bestPhotos.data.length,
-          portfolioCategoriesCount: categories.data.length,
-          portfolioPhotosCount: photos.data.length,
-          priceItemsCount: priceItems.data.length,
-          reviewsCount: reviews.data.length,
-        });
+        if (!cancelled) {
+          setStats({
+            bestPhotosCount: bestPhotos.data.length,
+            portfolioCategoriesCount: categories.data.length,
+            portfolioPhotosCount: photos.data.length,
+            priceItemsCount: priceItems.data.length,
+            reviewsCount: reviews.data.length,
+          });
+        }
       } catch (err) {
-        setError('Не удалось загрузить статистику');
-				throw err;
+        if (!cancelled) setError('Не удалось загрузить статистику');
+        console.error('Dashboard stats error:', err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-    fetchStats();
+
+    fetch();
+
+    return () => { cancelled = true; };
   }, []);
 
   return { stats, loading, error };

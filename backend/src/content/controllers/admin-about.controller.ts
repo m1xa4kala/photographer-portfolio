@@ -1,4 +1,4 @@
-import { Controller, Put, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { AboutService } from '../services/about.service';
 import { UpdateAboutDto } from '../dtos/update-about.dto';
@@ -7,6 +7,11 @@ import { UpdateAboutDto } from '../dtos/update-about.dto';
 @UseGuards(JwtAuthGuard)
 export class AdminAboutController {
   constructor(private aboutService: AboutService) {}
+
+  @Get()
+  async get() {
+    return this.aboutService.get();
+  }
 
   @Put()
   async update(@Body() updateDto: UpdateAboutDto) {

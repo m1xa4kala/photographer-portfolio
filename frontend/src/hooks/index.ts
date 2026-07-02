@@ -7,6 +7,7 @@ export { useAdminAbout } from './admin/useAdminAbout';
 export { useAdminBestPhotos } from './admin/useAdminBestPhotos';
 export { useAdminPortfolioCategories } from './admin/useAdminPortfolioCategories';
 export { useAdminPortfolioPhotos } from './admin/useAdminPortfolioPhotos';
+export { useAdminPortfolioSessions } from './admin/useAdminPortfolioSessions';
 export { useAdminPriceItems } from './admin/useAdminPriceItems';
 export { useAdminReviews } from './admin/useAdminReviews';
 export { useUploadImage } from './admin/useUploadImage';

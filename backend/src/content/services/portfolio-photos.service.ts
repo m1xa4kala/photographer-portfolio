@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { PortfolioPhoto } from '../entities/portfolio-photo.entity';
 import { CreatePortfolioPhotoDto } from '../dtos/create-portfolio-photo.dto';
 import { UpdatePortfolioPhotoDto } from '../dtos/update-portfolio-photo.dto';
+import { ReorderDto } from '../dto/reorder.dto';
 
 @Injectable()
 export class PortfolioPhotosService {
@@ -24,15 +25,16 @@ export class PortfolioPhotosService {
     return item;
   }
 
-  async findByCategory(categoryId: number): Promise<PortfolioPhoto[]> {
+  async findBySession(sessionId: number): Promise<PortfolioPhoto[]> {
     return this.repo.find({
-      where: { categoryId },
+      where: { sessionId },
       order: { orderIndex: 'ASC' },
     });
   }
 
   async create(dto: CreatePortfolioPhotoDto): Promise<PortfolioPhoto> {
-    const newItem = this.repo.create(dto);
+    const max = await this.repo.maximum('orderIndex');
+    const newItem = this.repo.create({ ...dto, orderIndex: (max ?? -1) + 1 });
     return this.repo.save(newItem);
   }
 
@@ -49,6 +51,12 @@ export class PortfolioPhotosService {
     const result = await this.repo.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Portfolio photo with id ${id} not found`);
+    }
+  }
+
+  async reorder(dto: ReorderDto): Promise<void> {
+    for (const { id, orderIndex } of dto.items) {
+      await this.repo.update(id, { orderIndex });
     }
   }
 }

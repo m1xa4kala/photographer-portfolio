@@ -13,6 +13,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PortfolioCategoriesService } from '../services/portfolio-categories.service';
 import { CreatePortfolioCategoryDto } from '../dtos/create-portfolio-category.dto';
 import { UpdatePortfolioCategoryDto } from '../dtos/update-portfolio-category.dto';
+import { ReorderDto } from '../dto/reorder.dto';
 
 @Controller('admin/portfolio-categories')
 @UseGuards(JwtAuthGuard)
@@ -36,6 +37,11 @@ export class AdminPortfolioCategoriesController {
   @Post()
   async create(@Body() createDto: CreatePortfolioCategoryDto) {
     return this.categoriesService.create(createDto);
+  }
+
+  @Patch('reorder')
+  async reorder(@Body() reorderDto: ReorderDto) {
+    return this.categoriesService.reorder(reorderDto);
   }
 
   @Patch(':id')

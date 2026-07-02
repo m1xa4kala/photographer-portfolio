@@ -13,6 +13,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PriceItemsService } from '../services/price-items.service';
 import { CreatePriceItemDto } from '../dtos/create-price-item.dto';
 import { UpdatePriceItemDto } from '../dtos/update-price-item.dto';
+import { ReorderDto } from '../dto/reorder.dto';
 
 @Controller('admin/price-items')
 @UseGuards(JwtAuthGuard)
@@ -36,6 +37,11 @@ export class AdminPriceItemsController {
   @Post()
   async create(@Body() createDto: CreatePriceItemDto) {
     return this.priceItemsService.create(createDto);
+  }
+
+  @Patch('reorder')
+  async reorder(@Body() reorderDto: ReorderDto) {
+    return this.priceItemsService.reorder(reorderDto);
   }
 
   @Patch(':id')

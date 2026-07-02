@@ -7,12 +7,13 @@ import {
   Param,
   Delete,
   UseGuards,
-  BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { BestPhotosService } from '../services/best-photos.service';
 import { CreateBestPhotoDto } from '../dtos/create-best-photo.dto';
 import { UpdateBestPhotoDto } from '../dtos/update-best-photo.dto';
+import { ReorderDto } from '../dto/reorder.dto';
 
 @Controller('admin/best-photos')
 @UseGuards(JwtAuthGuard)
@@ -25,12 +26,8 @@ export class AdminBestPhotosController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) {
-      throw new BadRequestException('Invalid id');
-    }
-    return this.bestPhotosService.findOne(numericId);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.bestPhotosService.findOne(id);
   }
 
   @Post()
@@ -38,21 +35,21 @@ export class AdminBestPhotosController {
     return this.bestPhotosService.create(createDto);
   }
 
+  @Patch('reorder')
+  async reorder(@Body() reorderDto: ReorderDto) {
+    return this.bestPhotosService.reorder(reorderDto);
+  }
+
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateDto: UpdateBestPhotoDto) {
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) {
-      throw new BadRequestException('Invalid id');
-    }
-    return this.bestPhotosService.update(numericId, updateDto);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: UpdateBestPhotoDto,
+  ) {
+    return this.bestPhotosService.update(id, updateDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) {
-      throw new BadRequestException('Invalid id');
-    }
-    return this.bestPhotosService.delete(numericId);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.bestPhotosService.delete(id);
   }
 }

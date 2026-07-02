@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PortfolioPhotosService } from '../services/portfolio-photos.service';
 import { CreatePortfolioPhotoDto } from '../dtos/create-portfolio-photo.dto';
 import { UpdatePortfolioPhotoDto } from '../dtos/update-portfolio-photo.dto';
+import { ReorderDto } from '../dto/reorder.dto';
 
 @Controller('admin/portfolio-photos')
 @UseGuards(JwtAuthGuard)
@@ -21,13 +22,13 @@ export class AdminPortfolioPhotosController {
   constructor(private photosService: PortfolioPhotosService) {}
 
   @Get()
-  async findAll(@Query('categoryId') categoryId?: string) {
-    if (categoryId) {
-      const catId = parseInt(categoryId, 10);
-      if (isNaN(catId)) {
-        throw new BadRequestException('Invalid categoryId');
+  async findAll(@Query('sessionId') sessionId?: string) {
+    if (sessionId) {
+      const sId = parseInt(sessionId, 10);
+      if (isNaN(sId)) {
+        throw new BadRequestException('Invalid sessionId');
       }
-      return this.photosService.findByCategory(catId);
+      return this.photosService.findBySession(sId);
     }
     return this.photosService.findAll();
   }
@@ -44,6 +45,11 @@ export class AdminPortfolioPhotosController {
   @Post()
   async create(@Body() createDto: CreatePortfolioPhotoDto) {
     return this.photosService.create(createDto);
+  }
+
+  @Patch('reorder')
+  async reorder(@Body() reorderDto: ReorderDto) {
+    return this.photosService.reorder(reorderDto);
   }
 
   @Patch(':id')

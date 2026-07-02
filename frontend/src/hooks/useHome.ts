@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import api from '../services/api';
+import { useFetch } from './useFetch';
 import { type BestPhoto } from '../types';
 
 interface UseHomeReturn {
@@ -10,28 +9,12 @@ interface UseHomeReturn {
 }
 
 export const useHome = (): UseHomeReturn => {
-  const [photos, setPhotos] = useState<BestPhoto[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error, refetch } = useFetch<BestPhoto[]>('/content/best-photos');
 
-  const fetchPhotos = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.get<BestPhoto[]>('/content/best-photos');
-      setPhotos(res.data);
-    } catch (err) {
-      setError('Не удалось загрузить фотографии');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  return {
+    photos: data ?? [],
+    loading,
+    error,
+    refetch,
   };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchPhotos();
-  }, []);
-
-  return { photos, loading, error, refetch: fetchPhotos };
 };

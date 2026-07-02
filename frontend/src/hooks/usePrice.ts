@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import api from '../services/api';
+import { useFetch } from './useFetch';
 import { type PriceItem } from '../types';
 
 interface UsePriceReturn {
@@ -10,28 +9,12 @@ interface UsePriceReturn {
 }
 
 export const usePrice = (): UsePriceReturn => {
-  const [items, setItems] = useState<PriceItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error, refetch } = useFetch<PriceItem[]>('/content/price-items');
 
-  const fetchItems = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.get<PriceItem[]>('/content/price-items');
-      setItems(res.data);
-    } catch (err) {
-      setError('Не удалось загрузить прайс-лист');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  return {
+    items: data ?? [],
+    loading,
+    error,
+    refetch,
   };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchItems();
-  }, []);
-
-  return { items, loading, error, refetch: fetchItems };
 };

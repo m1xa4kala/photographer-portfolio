@@ -18,7 +18,7 @@ export const useAdminAbout = (): UseAdminAboutReturn => {
   const fetchAbout = async () => {
     setLoading(true);
     try {
-      const res = await api.get<About>('/admin/about'); // сделайте эндпоинт GET /admin/about
+      const res = await api.get<About>('/admin/about');
       setAbout(res.data);
     } catch {
       setError('Не удалось загрузить информацию');
@@ -26,6 +26,26 @@ export const useAdminAbout = (): UseAdminAboutReturn => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const init = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get<About>('/admin/about');
+        if (!cancelled) setAbout(res.data);
+      } catch {
+        if (!cancelled) setError('Не удалось загрузить информацию');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    init();
+
+    return () => { cancelled = true; };
+  }, []);
 
   const updateAbout = async (data: Partial<About>) => {
     try {
@@ -36,11 +56,6 @@ export const useAdminAbout = (): UseAdminAboutReturn => {
       throw new Error('Update failed');
     }
   };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchAbout();
-  }, []);
 
   return { about, loading, error, fetchAbout, updateAbout };
 };

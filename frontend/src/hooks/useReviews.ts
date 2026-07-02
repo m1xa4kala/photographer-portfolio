@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import api from '../services/api';
+import { useFetch } from './useFetch';
 import { type Review } from '../types';
 
 interface UseReviewsReturn {
@@ -10,29 +9,12 @@ interface UseReviewsReturn {
 }
 
 export const useReviews = (): UseReviewsReturn => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error, refetch } = useFetch<Review[]>('/content/reviews');
 
-  const fetchReviews = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // получаем только активные отзывы
-      const res = await api.get<Review[]>('/content/reviews');
-      setReviews(res.data);
-    } catch (err) {
-      setError('Не удалось загрузить отзывы');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  return {
+    reviews: data ?? [],
+    loading,
+    error,
+    refetch,
   };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchReviews();
-  }, []);
-
-  return { reviews, loading, error, refetch: fetchReviews };
 };

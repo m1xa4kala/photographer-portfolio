@@ -1,7 +1,11 @@
 import axios, { type AxiosInstance } from 'axios';
 
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  // In development, Vite proxy handles /api, /uploads -> backend
+  // In production, backend serves both frontend and API on the same port
+  baseURL: import.meta.env.DEV
+    ? `${import.meta.env.VITE_BACKEND_URL}/api`
+    : '/api',
 });
 
 api.interceptors.request.use((config) => {

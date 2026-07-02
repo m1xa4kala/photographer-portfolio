@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { PriceItem } from '../entities/price-item.entity';
 import { CreatePriceItemDto } from '../dtos/create-price-item.dto';
 import { UpdatePriceItemDto } from '../dtos/update-price-item.dto';
+import { ReorderDto } from '../dto/reorder.dto';
 
 @Injectable()
 export class PriceItemsService {
@@ -25,7 +26,8 @@ export class PriceItemsService {
   }
 
   async create(dto: CreatePriceItemDto): Promise<PriceItem> {
-    const newItem = this.repo.create(dto);
+    const max = await this.repo.maximum('orderIndex');
+    const newItem = this.repo.create({ ...dto, orderIndex: (max ?? -1) + 1 });
     return this.repo.save(newItem);
   }
 
@@ -39,6 +41,12 @@ export class PriceItemsService {
     const result = await this.repo.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Price item with id ${id} not found`);
+    }
+  }
+
+  async reorder(dto: ReorderDto): Promise<void> {
+    for (const { id, orderIndex } of dto.items) {
+      await this.repo.update(id, { orderIndex });
     }
   }
 }
