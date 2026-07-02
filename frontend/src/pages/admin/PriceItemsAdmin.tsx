@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useAdminPriceItems } from '../../hooks';
+import { confirmDelete } from '../../utils/confirmDelete';
+import DraggableTable from '../../components/DraggableTable';
+import type { Column } from '../../components/DraggableTable';
 import type { PriceItem } from '../../types';
 import styles from './adminCrud.module.css';
 
 const PriceItemsAdmin: React.FC = () => {
-  const { items, loading, error, createItem, updateItem, deleteItem } = useAdminPriceItems();
+  const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminPriceItems();
   const [editing, setEditing] = useState<PriceItem | null>(null);
-  const [form, setForm] = useState<Omit<PriceItem, 'id'>>({ name: '', description: '', price: '', orderIndex: 0 });
+  const [form, setForm] = useState<Pick<PriceItem, 'name' | 'description' | 'price'>>({ name: '', description: '', price: '' });
 
   const handleSubmit = async () => {
     if (editing) {
@@ -15,15 +18,26 @@ const PriceItemsAdmin: React.FC = () => {
       await createItem(form);
     }
     setEditing(null);
-    setForm({ name: '', description: '', price: '', orderIndex: 0 });
+    setForm({ name: '', description: '', price: '' });
   };
 
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div>Ошибка: {error}</div>;
+  const handleReorder = async (orderedIds: number[]) => {
+    await reorderItems(orderedIds.map((id, idx) => ({ id, orderIndex: idx })));
+  };
+
+  const columns: Column<PriceItem>[] = [
+    { key: 'id', header: 'ID', render: (item) => item.id },
+    { key: 'name', header: 'Название', render: (item) => item.name },
+    { key: 'description', header: 'Описание', render: (item) => item.description },
+    { key: 'price', header: 'Цена', render: (item) => `${item.price} ₽` },
+  ];
 
   return (
     <div className={styles.crudPage}>
       <h2>Прайс-лист</h2>
+
+      {error && <div className={styles.error}>Ошибка: {error}</div>}
+
       <div className={styles.form}>
         <input
           type="text"
@@ -42,35 +56,26 @@ const PriceItemsAdmin: React.FC = () => {
           value={form.price}
           onChange={e => setForm({ ...form, price: e.target.value })}
         />
-        <input
-          type="number"
-          placeholder="Порядок"
-          value={form.orderIndex}
-          onChange={e => setForm({ ...form, orderIndex: +e.target.value })}
-        />
         <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
-        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', description: '', price: '', orderIndex: 0 }); }}>Отмена</button>}
+        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', description: '', price: '' }); }}>Отмена</button>}
       </div>
-      <table className={styles.table}>
-        <thead>
-          <tr><th>ID</th><th>Название</th><th>Описание</th><th>Цена</th><th>Порядок</th><th>Действия</th></tr>
-        </thead>
-        <tbody>
-          {items.map(item => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.name}</td>
-              <td>{item.description}</td>
-              <td>{item.price} ₽</td>
-              <td>{item.orderIndex}</td>
-              <td>
-                <button onClick={() => { setEditing(item); setForm({ name: item.name, description: item.description, price: item.price, orderIndex: item.orderIndex }); }}>✏️</button>
-                <button onClick={() => deleteItem(item.id)}>🗑️</button>
-               </td>
-             </tr>
-          ))}
-        </tbody>
-      </table>
+
+      <DraggableTable
+        columns={columns}
+        items={items}
+        loading={loading}
+        onReorder={handleReorder}
+        actions={(item) => (
+          <>
+            <button onClick={() => { setEditing(item); setForm({ name: item.name, description: item.description, price: item.price }); }}>✏️</button>
+            <button onClick={() => {
+              if (confirmDelete(`услугу "${item.name}"`)) {
+                deleteItem(item.id);
+              }
+            }}>🗑️</button>
+          </>
+        )}
+      />
     </div>
   );
 };

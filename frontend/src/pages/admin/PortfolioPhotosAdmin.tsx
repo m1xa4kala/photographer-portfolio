@@ -1,89 +1,121 @@
-import React, { useState } from 'react';
-import { useAdminPortfolioPhotos, useUploadImage, useAdminPortfolioCategories } from '../../hooks';
+import { useState } from 'react';
+import { useAdminPortfolioPhotos, useAdminPortfolioCategories, useAdminPortfolioSessions } from '../../hooks';
+import { confirmDelete } from '../../utils/confirmDelete';
+import DropZone from '../../components/DropZone';
+import type { UploadedFileInfo } from '../../components/DropZone';
+import DraggableTable from '../../components/DraggableTable';
+import type { Column } from '../../components/DraggableTable';
 import type { PortfolioPhoto } from '../../types';
 import styles from './adminCrud.module.css';
 
 const PortfolioPhotosAdmin: React.FC = () => {
-  const { items, loading, error, createItem, updateItem, deleteItem } = useAdminPortfolioPhotos();
+  const { items, loading, error, createItem, deleteItem, reorderItems } = useAdminPortfolioPhotos();
   const { items: categories } = useAdminPortfolioCategories();
-  const { uploadImage, uploading } = useUploadImage();
-  const [editing, setEditing] = useState<PortfolioPhoto | null>(null);
-  const [form, setForm] = useState<Omit<PortfolioPhoto, 'id'>>({ title: '', imageUrl: '', categoryId: 0, orderIndex: 0 });
+  const { items: sessions } = useAdminPortfolioSessions();
+  const [bulkSessionId, setBulkSessionId] = useState<number>(0);
+  const [bulkCategoryId, setBulkCategoryId] = useState<number>(0);
+  const [bulkError, setBulkError] = useState<string | null>(null);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = await uploadImage(file);
-      setForm(prev => ({ ...prev, imageUrl: url }));
+  const handleBulkUpload = async (files: UploadedFileInfo[]) => {
+    if (!bulkSessionId || files.length === 0) return;
+    setBulkError(null);
+    for (const { url, name } of files) {
+      try {
+        await createItem({ title: name, imageUrl: url, sessionId: bulkSessionId });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Неизвестная ошибка';
+        setBulkError(`Ошибка при сохранении "${name}": ${message}`);
+        return;
+      }
     }
   };
 
-  const handleSubmit = async () => {
-    if (editing) {
-      await updateItem(editing.id, form);
-    } else {
-      await createItem(form);
-    }
-    setEditing(null);
-    setForm({ title: '', imageUrl: '', categoryId: 0, orderIndex: 0 });
+  const handleReorder = async (orderedIds: number[]) => {
+    await reorderItems(orderedIds.map((id, idx) => ({ id, orderIndex: idx })));
   };
 
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div>Ошибка: {error}</div>;
+  const bulkFilteredSessions = bulkCategoryId
+    ? sessions.filter(s => s.categoryId === bulkCategoryId)
+    : sessions;
+
+  const getSessionName = (sessionId: number) => {
+    const session = sessions.find(s => s.id === sessionId);
+    return session ? session.name : '—';
+  };
+
+  const getCategoryName = (sessionId: number) => {
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return '—';
+    const cat = categories.find(c => c.id === session.categoryId);
+    return cat ? cat.name : '—';
+  };
+
+  const columns: Column<PortfolioPhoto>[] = [
+    { key: 'id', header: 'ID', render: (item) => item.id },
+    { key: 'title', header: 'Название', render: (item) => item.title || '—' },
+    { key: 'category', header: 'Категория', render: (item) => getCategoryName(item.sessionId) },
+    { key: 'session', header: 'Фотосессия', render: (item) => getSessionName(item.sessionId) },
+    {
+      key: 'image',
+      header: 'Изображение',
+      render: (item) => <img src={item.imageUrl} width="50" />,
+    },
+  ];
 
   return (
     <div className={styles.crudPage}>
       <h2>Фото портфолио</h2>
-      <div className={styles.form}>
-        <input
-          type="text"
-          placeholder="Название"
-          value={form.title}
-          onChange={e => setForm({ ...form, title: e.target.value })}
-        />
-        <select
-          value={form.categoryId}
-          onChange={e => setForm({ ...form, categoryId: +e.target.value })}
-        >
-          <option value={0}>Выберите категорию</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
-        <input
-          type="number"
-          placeholder="Порядок"
-          value={form.orderIndex}
-          onChange={e => setForm({ ...form, orderIndex: +e.target.value })}
-        />
-        <input type="file" onChange={handleFileChange} disabled={uploading} />
-        {form.imageUrl && <img src={form.imageUrl} alt="preview" width="80" />}
-        <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
-        {editing && <button onClick={() => { setEditing(null); setForm({ title: '', imageUrl: '', categoryId: 0, orderIndex: 0 }); }}>Отмена</button>}
+
+      {error && <div className={styles.error}>Ошибка: {error}</div>}
+
+      {/* ===== МАССОВАЯ ЗАГРУЗКА ===== */}
+      <div className={styles.sectionCard}>
+        <h3>📸 Массовая загрузка фото</h3>
+        <div className={styles.formRow}>
+          <select
+            value={bulkCategoryId}
+            onChange={e => {
+              setBulkCategoryId(+e.target.value);
+              setBulkSessionId(0);
+            }}
+          >
+            <option value={0}>Выберите категорию</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+          <select
+            value={bulkSessionId}
+            onChange={e => setBulkSessionId(+e.target.value)}
+          >
+            <option value={0}>Выберите фотосессию</option>
+            {bulkFilteredSessions.map(s => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+        {bulkError && <div className={styles.error}>{bulkError}</div>}
+        {bulkSessionId ? (
+          <DropZone onUploadComplete={handleBulkUpload} />
+        ) : (
+          <p className={styles.hint}>Сначала выберите категорию и фотосессию</p>
+        )}
       </div>
-      <table className={styles.table}>
-        <thead>
-          <tr><th>ID</th><th>Название</th><th>Категория</th><th>Порядок</th><th>Изображение</th><th>Действия</th></tr>
-        </thead>
-        <tbody>
-          {items.map(item => {
-            const catName = categories.find(c => c.id === item.categoryId)?.name || '—';
-            return (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.title}</td>
-                <td>{catName}</td>
-                <td>{item.orderIndex}</td>
-                <td><img src={item.imageUrl} width="50" /></td>
-                <td>
-                  <button onClick={() => { setEditing(item); setForm({ title: item.title, imageUrl: item.imageUrl, categoryId: item.categoryId, orderIndex: item.orderIndex }); }}>✏️</button>
-                  <button onClick={() => deleteItem(item.id)}>🗑️</button>
-                </td>
-               </tr>
-            );
-          })}
-        </tbody>
-       </table>
+
+      {/* ===== ТАБЛИЦА ===== */}
+      <DraggableTable
+        columns={columns}
+        items={items}
+        loading={loading}
+        onReorder={handleReorder}
+        actions={(item) => (
+          <button onClick={() => {
+            if (confirmDelete(`фото "${item.title}"`)) {
+              deleteItem(item.id);
+            }
+          }}>🗑️</button>
+        )}
+      />
     </div>
   );
 };

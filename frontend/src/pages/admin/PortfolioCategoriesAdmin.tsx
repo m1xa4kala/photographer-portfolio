@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
-import { useAdminPortfolioCategories } from '../../hooks';
+import { useAdminPortfolioCategories, useUploadImage } from '../../hooks';
+import { confirmDelete } from '../../utils/confirmDelete';
+import DraggableTable from '../../components/DraggableTable';
+import type { Column } from '../../components/DraggableTable';
 import type { PortfolioCategory } from '../../types';
 import styles from './adminCrud.module.css';
 
 const PortfolioCategoriesAdmin: React.FC = () => {
-  const { items, loading, error, createItem, updateItem, deleteItem } = useAdminPortfolioCategories();
+  const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminPortfolioCategories();
+  const { uploadImage, uploading } = useUploadImage();
   const [editing, setEditing] = useState<PortfolioCategory | null>(null);
-  const [form, setForm] = useState<Omit<PortfolioCategory, 'id'>>({ name: '', slug: '', orderIndex: 0 });
+  const [form, setForm] = useState<Pick<PortfolioCategory, 'name' | 'slug' | 'coverImageUrl'>>({ name: '', slug: '', coverImageUrl: '' });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = await uploadImage(file);
+      setForm(prev => ({ ...prev, coverImageUrl: url }));
+    }
+  };
 
   const handleSubmit = async () => {
     if (editing) {
@@ -15,11 +27,8 @@ const PortfolioCategoriesAdmin: React.FC = () => {
       await createItem(form);
     }
     setEditing(null);
-    setForm({ name: '', slug: '', orderIndex: 0 });
+    setForm({ name: '', slug: '', coverImageUrl: '' });
   };
-
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div>Ошибка: {error}</div>;
 
   // Генерация slug из name
   const generateSlug = (name: string) => {
@@ -33,9 +42,27 @@ const PortfolioCategoriesAdmin: React.FC = () => {
     setForm(prev => ({ ...prev, name, slug: generateSlug(name) }));
   };
 
+  const handleReorder = async (orderedIds: number[]) => {
+    await reorderItems(orderedIds.map((id, idx) => ({ id, orderIndex: idx })));
+  };
+
+  const columns: Column<PortfolioCategory>[] = [
+    { key: 'id', header: 'ID', render: (item) => item.id },
+    { key: 'name', header: 'Название', render: (item) => item.name },
+    { key: 'slug', header: 'Slug', render: (item) => item.slug },
+    {
+      key: 'cover',
+      header: 'Изображение',
+      render: (item) => item.coverImageUrl ? <img src={item.coverImageUrl} width="50" /> : '—',
+    },
+  ];
+
   return (
     <div className={styles.crudPage}>
       <h2>Категории портфолио</h2>
+
+      {error && <div className={styles.error}>Ошибка: {error}</div>}
+
       <div className={styles.form}>
         <input
           type="text"
@@ -49,34 +76,28 @@ const PortfolioCategoriesAdmin: React.FC = () => {
           value={form.slug}
           onChange={e => setForm({ ...form, slug: e.target.value })}
         />
-        <input
-          type="number"
-          placeholder="Порядок"
-          value={form.orderIndex}
-          onChange={e => setForm({ ...form, orderIndex: +e.target.value })}
-        />
+        <input type="file" onChange={handleFileChange} disabled={uploading} />
+        {form.coverImageUrl && <img src={form.coverImageUrl} alt="preview" width="80" />}
         <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
-        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', slug: '', orderIndex: 0 }); }}>Отмена</button>}
+        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', slug: '', coverImageUrl: '' }); }}>Отмена</button>}
       </div>
-      <table className={styles.table}>
-        <thead>
-          <tr><th>ID</th><th>Название</th><th>Slug</th><th>Порядок</th><th>Действия</th></tr>
-        </thead>
-        <tbody>
-          {items.map(item => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.name}</td>
-              <td>{item.slug}</td>
-              <td>{item.orderIndex}</td>
-              <td>
-                <button onClick={() => { setEditing(item); setForm({ name: item.name, slug: item.slug, orderIndex: item.orderIndex }); }}>✏️</button>
-                <button onClick={() => deleteItem(item.id)}>🗑️</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-       </table>
+
+      <DraggableTable
+        columns={columns}
+        items={items}
+        loading={loading}
+        onReorder={handleReorder}
+        actions={(item) => (
+          <>
+            <button onClick={() => { setEditing(item); setForm({ name: item.name, slug: item.slug, coverImageUrl: item.coverImageUrl || '' }); }}>✏️</button>
+            <button onClick={() => {
+              if (confirmDelete(`категорию "${item.name}" (все фото в ней тоже удалятся)`)) {
+                deleteItem(item.id);
+              }
+            }}>🗑️</button>
+          </>
+        )}
+      />
     </div>
   );
 };

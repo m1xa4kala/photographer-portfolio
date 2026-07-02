@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAdminReviews } from '../../hooks';
+import { confirmDelete } from '../../utils/confirmDelete';
 import type { Review } from '../../types';
 import styles from './adminCrud.module.css';
 
@@ -17,18 +18,18 @@ const ReviewsAdmin: React.FC = () => {
     if (editing) {
       await updateItem(editing.id, form);
     } else {
-      await createItem(form);
+      await createItem({ ...form, date: new Date().toISOString() });
     }
     setEditing(null);
     setForm({ clientName: '', text: '', rating: 5, isActive: true });
   };
 
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div>Ошибка: {error}</div>;
-
   return (
     <div className={styles.crudPage}>
       <h2>Отзывы</h2>
+
+      {error && <div className={styles.error}>Ошибка: {error}</div>}
+
       <div className={styles.form}>
         <input
           type="text"
@@ -58,27 +59,36 @@ const ReviewsAdmin: React.FC = () => {
         <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
         {editing && <button onClick={() => { setEditing(null); setForm({ clientName: '', text: '', rating: 5, isActive: true }); }}>Отмена</button>}
       </div>
-      <table className={styles.table}>
-        <thead>
-          <tr><th>ID</th><th>Клиент</th><th>Текст</th><th>Рейтинг</th><th>Активен</th><th>Дата</th><th>Действия</th></tr>
-        </thead>
-        <tbody>
-          {items.map(item => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.clientName}</td>
-              <td>{item.text.substring(0, 50)}...</td>
-              <td>{item.rating}</td>
-              <td>{item.isActive ? 'Да' : 'Нет'}</td>
-              <td>{new Date(item.date).toLocaleDateString()}</td>
-              <td>
-                <button onClick={() => { setEditing(item); setForm({ clientName: item.clientName, text: item.text, rating: item.rating, isActive: item.isActive }); }}>✏️</button>
-                <button onClick={() => deleteItem(item.id)}>🗑️</button>
-               </td>
-             </tr>
-          ))}
-        </tbody>
-      </table>
+
+      {loading ? (
+        <div>Загрузка...</div>
+      ) : (
+        <table className={styles.table}>
+          <thead>
+            <tr><th>ID</th><th>Клиент</th><th>Текст</th><th>Рейтинг</th><th>Активен</th><th>Дата</th><th>Действия</th></tr>
+          </thead>
+          <tbody>
+            {items.map(item => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>{item.clientName}</td>
+                <td>{item.text.substring(0, 50)}...</td>
+                <td>{item.rating}</td>
+                <td>{item.isActive ? 'Да' : 'Нет'}</td>
+                <td>{new Date(item.date).toLocaleDateString()}</td>
+                <td>
+                  <button onClick={() => { setEditing(item); setForm({ clientName: item.clientName, text: item.text, rating: item.rating, isActive: item.isActive }); }}>✏️</button>
+                  <button onClick={() => {
+                  if (confirmDelete(`отзыв "${item.clientName}"`)) {
+                    deleteItem(item.id);
+                  }
+                }}>🗑️</button>
+                 </td>
+               </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
