@@ -6,30 +6,21 @@
 
 .crudPage h2 {
   margin-bottom: 1.5rem;
-  color: #c17b3e;
+  color: var(--accent);
 }
 
 .error {
-  background: #fce4e4;
-  border: 1px solid #e74c3c;
-  color: #c0392b;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  composes: error from '../../styles/shared-admin.module.css';
 }
 
 .sectionCard {
-  background: #ffffff;
-  border: 1px solid #dee2e6;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  composes: card from '../../styles/shared-admin.module.css';
 }
 
 .sectionCard h3 {
   margin: 0 0 1rem 0;
   font-size: 1.2rem;
-  color: #1e1e1e;
+  color: var(--admin-text);
 }
 
 .formRow {
@@ -41,22 +32,22 @@
 .formRow select {
   flex: 1;
   padding: 0.5rem;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--admin-border);
   border-radius: 0.5rem;
-  background: #ffffff;
-  color: #1e1e1e;
+  background: var(--admin-card-bg);
+  color: var(--admin-text);
   font-size: 0.9rem;
 }
 
 .hint {
-  color: #6c757d;
+  color: var(--admin-text-muted);
   font-size: 0.9rem;
   padding: 1rem 0;
 }
 
 .form {
-  background: #ffffff;
-  border: 1px solid #dee2e6;
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -70,17 +61,17 @@
   width: 100%;
   margin: 0 0 0.5rem 0;
   font-size: 1.2rem;
-  color: #1e1e1e;
+  color: var(--admin-text);
 }
 
 .form input,
 .form select,
 .form textarea {
   padding: 0.5rem;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--admin-border);
   border-radius: 0.5rem;
-  background: #ffffff;
-  color: #1e1e1e;
+  background: var(--admin-card-bg);
+  color: var(--admin-text);
   font-size: 0.9rem;
   flex: 1;
   min-width: 150px;
@@ -88,7 +79,7 @@
 
 .form button {
   padding: 0.5rem 1.2rem;
-  background: #c17b3e;
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 0.5rem;
@@ -98,41 +89,11 @@
 }
 
 .form button:hover {
-  background: #a7622c;
+  background: var(--accent-hover);
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #ffffff;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid #dee2e6;
-}
-
-.table th,
-.table td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.table th {
-  background: #f1f3f5;
-  font-weight: 600;
-  color: #1e1e1e;
-}
-
-.table tr:hover {
-  background: #f8f9fa;
-}
-
-.table img {
-  max-width: 60px;
-  max-height: 60px;
-  object-fit: cover;
-  border-radius: 0.25rem;
+  composes: table from '../../styles/shared-admin.module.css';
 }
 
 .table button {
@@ -141,13 +102,13 @@
   cursor: pointer;
   font-size: 1.2rem;
   margin-right: 0.5rem;
-  color: #6c757d;
+  color: var(--admin-text-muted);
   transition: transform 0.1s;
 }
 
 .table button:hover {
   transform: scale(1.1);
-  color: #c17b3e;
+  color: var(--accent);
 }
 
 @media (max-width: 768px) {

@@ -15,8 +15,10 @@ const Login: React.FC = () => {
     try {
       await login(email, password);
       navigate('/admin/dashboard');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Неверный email или пароль';
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string | string[] } } } | null;
+      const serverMsg = axiosError?.response?.data?.message;
+      const errorMessage = Array.isArray(serverMsg) ? serverMsg[0] : serverMsg || 'Неверный email или пароль';
       setError(errorMessage);
     }
   };

@@ -7,19 +7,23 @@ interface ReviewCardProps {
 }
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
-  const { clientName, text, rating } = review;
-
-  const renderStars = () => {
-    const fullStars = '★'.repeat(rating);
-    const emptyStars = '☆'.repeat(5 - rating);
-    return `${fullStars}${emptyStars}`;
-  };
+  const { clientName, text, clientPhotoUrl } = review;
 
   return (
     <div className={styles.card}>
-      <div className={styles.stars}>{renderStars()}</div>
+      <div className={styles.header}>
+        <div className={styles.avatar}>
+          {clientPhotoUrl ? (
+            <img src={clientPhotoUrl} alt={clientName} />
+          ) : (
+            <span className={styles.avatarFallback}>
+              {clientName.charAt(0).toUpperCase()}
+            </span>
+          )}
+        </div>
+        <h4 className={styles.clientName}>{clientName}</h4>
+      </div>
       <p>«{text}»</p>
-      <h4>— {clientName}</h4>
     </div>
   );
 };

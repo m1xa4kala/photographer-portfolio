@@ -1,12 +1,31 @@
 import React from 'react';
 import { useAbout } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
+import Skeleton from '../components/Skeleton';
 import styles from './About.module.css';
+
+const AboutSkeleton: React.FC = () => (
+  <AnimatedSection>
+    <div className={styles.about}>
+      <div className={styles.photo}>
+        <Skeleton variant="circle" width="100%" height="auto" style={{ aspectRatio: '1' }} />
+      </div>
+      <div className={styles.bio}>
+        <Skeleton variant="text" width="60%" height="2rem" />
+        <Skeleton variant="text" width="100%" height="1rem" />
+        <Skeleton variant="text" width="100%" height="1rem" />
+        <Skeleton variant="text" width="100%" height="1rem" />
+        <Skeleton variant="text" width="80%" height="1rem" />
+        <Skeleton variant="text" width="50%" height="1rem" />
+      </div>
+    </div>
+  </AnimatedSection>
+);
 
 const About: React.FC = () => {
   const { about, loading, error, refetch } = useAbout();
 
-  if (loading) return <div>Загрузка информации...</div>;
+  if (loading) return <AboutSkeleton />;
   if (error) return <div>Ошибка: {error} <button onClick={refetch}>Повторить</button></div>;
   if (!about) return null;
 
@@ -14,19 +33,15 @@ const About: React.FC = () => {
     <AnimatedSection>
       <div className={styles.about}>
         <div className={styles.photo}>
-          <img src={about.photoUrl || '/images/default-avatar.jpg'} alt={about.fullName} />
+          <img
+            src={about.photoUrl || '/images/default-avatar.svg'}
+            alt={about.fullName}
+            loading="eager"
+          />
         </div>
         <div className={styles.bio}>
           <h1>{about.fullName}</h1>
           <p>{about.bioText}</p>
-          {about.equipmentText && <p><strong>Оборудование:</strong> {about.equipmentText}</p>}
-          {about.experience && <p><strong>Опыт:</strong> {about.experience}</p>}
-          {(about.email || about.phone) && (
-            <div className={styles.contacts}>
-              {about.email && <p>Email: {about.email}</p>}
-              {about.phone && <p>Телефон: {about.phone}</p>}
-            </div>
-          )}
         </div>
       </div>
     </AnimatedSection>

@@ -28,7 +28,10 @@ const AdminLayout: React.FC = () => {
             <li><Link to="/admin/about">Обо мне</Link></li>
           </ul>
         </nav>
-        <button onClick={handleLogout} className={styles.logoutBtn}>Выйти</button>
+        <div className={styles.bottomLinks}>
+          <Link to="/" className={styles.homeLink}>← На сайт</Link>
+          <button onClick={handleLogout} className={styles.logoutBtn}>Выйти</button>
+        </div>
       </aside>
       <main className={styles.content}>
         <Outlet />

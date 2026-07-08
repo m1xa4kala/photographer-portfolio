@@ -40,7 +40,7 @@
 /* ===== Сетка сессий ===== */
 .sessionGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
@@ -61,8 +61,10 @@
 
 .sessionImage {
   width: 100%;
-  height: 220px;
+  aspect-ratio: 9 / 16;
+  max-height: 500px;
   overflow: hidden;
+  background: var(--bg-card);
 }
 
 .sessionImage img {
@@ -97,7 +99,6 @@
   font-size: 1.2rem;
   color: var(--text-primary);
   margin-bottom: 0.4rem;
-  font-family: var(--font-heading);
 }
 
 .sessionInfo p {
@@ -133,7 +134,6 @@
 .sessionTitle {
   font-size: 1.2rem;
   color: var(--text-primary);
-  font-family: var(--font-heading);
 }
 
 /* ===== Галерея фото ===== */
@@ -149,29 +149,20 @@
   overflow: hidden;
   box-shadow: 0 4px 12px var(--shadow);
   background: var(--card-bg);
+  cursor: pointer;
 }
 
 .photoItem img {
   width: 100%;
-  height: 280px;
+  aspect-ratio: 9 / 16;
   object-fit: cover;
+  max-height: 350px;
   transition: transform 0.3s;
   border-radius: 0;
 }
 
 .photoItem:hover img {
   transform: scale(1.05);
-}
-
-.caption {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  padding: 0.5rem;
-  text-align: center;
-  font-size: 0.9rem;
 }
 
 /* ===== Состояния ===== */
@@ -191,10 +182,6 @@
 @media (max-width: 768px) {
   .sessionGrid {
     grid-template-columns: 1fr;
-  }
-
-  .sessionImage {
-    height: 180px;
   }
 
   .gallery {

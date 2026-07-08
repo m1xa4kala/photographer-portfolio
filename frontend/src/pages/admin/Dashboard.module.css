@@ -6,12 +6,12 @@
 
 .dashboard h1 {
   margin-bottom: 0.5rem;
-  color: #c17b3e;
+  color: var(--accent);
   font-size: 1.8rem;
 }
 
 .subtitle {
-  color: #6c757d;
+  color: var(--admin-text-muted);
   margin-bottom: 2rem;
   font-size: 1rem;
 }
@@ -19,11 +19,11 @@
 .loader, .error {
   text-align: center;
   padding: 2rem;
-  color: #6c757d;
+  color: var(--admin-text-muted);
 }
 
 .error {
-  color: #e74c3c;
+  color: var(--admin-danger);
 }
 
 .statsGrid {
@@ -34,12 +34,12 @@
 }
 
 .statCard {
-  background: #ffffff;
-  border: 1px solid #dee2e6;
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
   border-radius: 1rem;
   padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-soft);
   transition: transform 0.2s;
 }
 
@@ -50,19 +50,19 @@
 
 .statCard h3 {
   font-size: 1rem;
-  color: #6c757d;
+  color: var(--admin-text-muted);
   margin-bottom: 0.75rem;
 }
 
 .statNumber {
   font-size: 2.5rem;
   font-weight: 600;
-  color: #c17b3e;
+  color: var(--accent);
 }
 
 .infoBox {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
   border-radius: 1rem;
   padding: 1.5rem;
   margin-top: 1rem;
@@ -70,7 +70,7 @@
 
 .infoBox h3 {
   margin-bottom: 1rem;
-  color: #1e1e1e;
+  color: var(--admin-text);
 }
 
 .actions {
@@ -81,7 +81,7 @@
 
 .actionLink {
   display: inline-block;
-  background: #c17b3e;
+  background: var(--accent);
   color: #fff;
   padding: 0.5rem 1rem;
   border-radius: 2rem;
@@ -90,7 +90,7 @@
 }
 
 .actionLink:hover {
-  background: #a7622c;
+  background: var(--accent-hover);
   text-decoration: none;
 }
 

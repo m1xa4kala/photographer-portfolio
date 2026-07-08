@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useDashboardStats, useAuth } from '../../hooks';
 import styles from './Dashboard.module.css';
 
@@ -40,11 +41,11 @@ const Dashboard: React.FC = () => {
       <div className={styles.infoBox}>
         <h3>Быстрые действия</h3>
         <div className={styles.actions}>
-          <a href="/admin/best-photos" className={styles.actionLink}>+ Добавить лучшее фото</a>
-          <a href="/admin/portfolio-categories" className={styles.actionLink}>+ Создать категорию</a>
-          <a href="/admin/portfolio-photos" className={styles.actionLink}>+ Добавить фото портфолио</a>
-          <a href="/admin/price-items" className={styles.actionLink}>+ Добавить услугу</a>
-          <a href="/admin/reviews" className={styles.actionLink}>+ Добавить отзыв</a>
+          <Link to="/admin/best-photos" className={styles.actionLink}>+ Добавить лучшее фото</Link>
+          <Link to="/admin/portfolio-categories" className={styles.actionLink}>+ Создать категорию</Link>
+          <Link to="/admin/portfolio-photos" className={styles.actionLink}>+ Добавить фото портфолио</Link>
+          <Link to="/admin/price-items" className={styles.actionLink}>+ Добавить услугу</Link>
+          <Link to="/admin/reviews" className={styles.actionLink}>+ Добавить отзыв</Link>
         </div>
       </div>
     </div>

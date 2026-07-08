@@ -60,30 +60,6 @@ const AboutAdmin: React.FC = () => {
               rows={5}
             />
           </div>
-          <div>
-            <label>Оборудование</label>
-            <textarea
-              value={form.equipmentText || ''}
-              onChange={e => setForm({ ...form, equipmentText: e.target.value })}
-              rows={3}
-            />
-          </div>
-          <div>
-            <label>Email</label>
-            <input
-              type="email"
-              value={form.email || ''}
-              onChange={e => setForm({ ...form, email: e.target.value })}
-            />
-          </div>
-          <div>
-            <label>Телефон</label>
-            <input
-              type="text"
-              value={form.phone || ''}
-              onChange={e => setForm({ ...form, phone: e.target.value })}
-            />
-          </div>
           <button type="submit">Сохранить</button>
         </form>
       )}

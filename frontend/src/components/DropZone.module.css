@@ -15,7 +15,7 @@
 .dropArea:hover,
 .dragOver {
   border-color: var(--accent);
-  background: rgba(228, 167, 136, 0.05);
+  background: rgba(90, 138, 138, 0.05);
 }
 
 .dropText {
@@ -60,7 +60,7 @@
 }
 
 .previewItem.error {
-  border-color: #e74c3c;
+  border-color: var(--admin-danger);
 }
 
 .previewItem img {
@@ -101,7 +101,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #27ae60;
+  background: var(--admin-success);
   color: #fff;
   font-size: 12px;
   display: flex;
@@ -116,7 +116,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #e74c3c;
+  background: var(--admin-danger);
   color: #fff;
   font-size: 12px;
   display: flex;
@@ -151,7 +151,7 @@
 
 .successText {
   text-align: center;
-  color: #27ae60;
+  color: var(--admin-success);
   margin-top: 0.75rem;
   font-weight: 500;
 }

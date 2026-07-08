@@ -6,15 +6,34 @@
   --card-bg: #ffffff;
   --text-primary: #1a1a1a;
   --text-secondary: #666666;
-  --accent: #e4a788;   /* тёплый песочный/золотистый */
-  --accent-hover: #d48c6a;
+  --accent: #7a8a5a;
+  --accent-hover: #647348;
   --border: #e0e0e0;
+  --shadow-soft: 0 2px 8px rgba(0,0,0,0.05);
   --shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
   --overlay-bg: rgba(0, 0, 0, 0.6);
   --transition: all 0.3s ease;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-heading: 'DM Serif Display', Georgia, serif;
+  --font-heading-display: 'Bad Script', cursive;
   --header-height: 64px;
+
+  /* Цвета для админки */
+  --admin-bg: #f8f9fa;
+  --admin-sidebar-bg: #f1f3f5;
+  --admin-card-bg: #ffffff;
+  --admin-border: #dee2e6;
+  --admin-text: #1e1e1e;
+  --admin-text-muted: #6c757d;
+  --admin-hover-bg: #e9ecef;
+  --admin-hover-border: #dee2e6;
+  --admin-error-bg: #fce4e4;
+  --admin-error-text: #c0392b;
+  --admin-danger: #e74c3c;
+  --admin-danger-hover: #c0392b;
+  --admin-success: #27ae60;
+  --admin-star: #f5b042;
+  --font-admin: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* Анимации */
@@ -48,9 +67,9 @@ body {
   scroll-behavior: smooth;
 }
 
-h1, h2, h3, .logo {
-  font-family: var(--font-heading);
-  font-weight: 500;
+h1, h2, h3 {
+  font-family: var(--font-heading-display);
+  font-weight: 400;
   letter-spacing: -0.02em;
 }
 
@@ -71,4 +90,88 @@ img {
   max-width: 100%;
   display: block;
   border-radius: 8px;
+}
+
+/* ===== Админка: общие классы для форм и карточек ===== */
+
+/* Кнопка-акцент (сохранить, добавить) */
+.adminBtn {
+  padding: 0.5rem 1.2rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.adminBtn:hover {
+  background: var(--accent-hover);
+}
+
+/* Поле ввода */
+.adminInput,
+.adminTextarea,
+.adminSelect {
+  padding: 0.5rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  background: var(--admin-card-bg);
+  color: var(--admin-text);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+.adminTextarea {
+  resize: vertical;
+  width: 100%;
+}
+
+/* Блок ошибки */
+.adminError {
+  background: var(--admin-error-bg);
+  border: 1px solid var(--admin-danger);
+  color: var(--admin-error-text);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Карточка секции */
+.adminCard {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Таблица */
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--admin-card-bg);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--admin-border);
+}
+.adminTable th,
+.adminTable td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--admin-border);
+}
+.adminTable th {
+  background: var(--admin-sidebar-bg);
+  font-weight: 600;
+  color: var(--admin-text);
+}
+.adminTable tr:hover {
+  background: var(--admin-bg);
+}
+.adminTable img {
+  max-width: 60px;
+  max-height: 60px;
+  object-fit: cover;
+  border-radius: 0.25rem;
 }

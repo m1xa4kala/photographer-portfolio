@@ -1,6 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { BestPhoto } from '../types';
 import styles from './HeroCarousel.module.css';
+
+const VISIBLE_COUNT = 3;
+const SLIDE_WIDTH = 100 / VISIBLE_COUNT;
+const TRANSITION_DURATION = 600;
+const SAFETY_FALLOUT = TRANSITION_DURATION + 100;
 
 interface HeroCarouselProps {
   photos: BestPhoto[];
@@ -11,28 +17,99 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
   photos,
   autoPlayInterval = 6000,
 }) => {
-  const [current, setCurrent] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const total = photos.length;
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isAnimating = useRef(false);
+  const snapPending = useRef(false);
 
-  const goTo = useCallback(
-    (index: number) => {
-      setCurrent(((index % total) + total) % total);
-    },
-    [total]
-  );
+  // Расширенный список для бесконечного цикла:
+  // [последние 3, все фото, первые 3]
+  // Стартуем с индекса VISIBLE_COUNT — первого реального фото
+  const extended = useMemo(() => {
+    if (total === 0) return [];
+    if (total <= VISIBLE_COUNT) return photos;
+    return [
+      ...photos.slice(-VISIBLE_COUNT),
+      ...photos,
+      ...photos.slice(0, VISIBLE_COUNT),
+    ];
+  }, [photos, total]);
 
-  const next = useCallback(() => goTo(current + 1), [current, goTo]);
-  const prev = useCallback(() => goTo(current - 1), [current, goTo]);
+  const [current, setCurrent] = useState(total <= VISIBLE_COUNT ? 0 : VISIBLE_COUNT);
+  const currentRef = useRef(current);
+  const [transitionEnabled, setTransitionEnabled] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
-  const scrollToNext = () => {
-    window.scrollTo({
-      top: window.innerHeight,
-      behavior: 'smooth',
-    });
-  };
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentRef.current = current;
+  }, [current]);
+
+  // Снэп — отключаем transition, меняем позицию
+  const snapTo = useCallback((target: number) => {
+    snapPending.current = true;
+    isAnimating.current = false;
+    setTransitionEnabled(false);
+    setCurrent(target);
+  }, []);
+
+  // После того как DOM обновился с transition: none — форсируем reflow
+  // и включаем transition обратно, чтобы браузер не успел увидеть прыжок
+  useLayoutEffect(() => {
+    if (!transitionEnabled && snapPending.current) {
+      // Форсируем reflow — браузер применяет transition: None и новую позицию
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      document.body.offsetHeight;
+      snapPending.current = false;
+      setTransitionEnabled(true);
+    }
+  }, [transitionEnabled]);
+
+  // После завершения CSS-анимации — снэп к реальному фото
+  const handleTransitionEnd = useCallback((e: React.TransitionEvent) => {
+    // Игнорируем события не от transform (например, от других CSS-свойств)
+    if (e.propertyName !== 'transform') return;
+    // Игнорируем, если уже внутри снэпа
+    if (snapPending.current) return;
+
+    if (total <= VISIBLE_COUNT) {
+      isAnimating.current = false;
+      return;
+    }
+
+    const cur = currentRef.current;
+    if (cur >= VISIBLE_COUNT + total) {
+      snapTo(cur - total);
+    } else if (cur < VISIBLE_COUNT) {
+      snapTo(cur + total);
+    } else {
+      // Нормальный переход — просто снимаем блокировку
+      isAnimating.current = false;
+    }
+  }, [total, snapTo]);
+
+  const navigate = useCallback((direction: 1 | -1) => {
+    if (isAnimating.current || total === 0) return;
+    isAnimating.current = true;
+
+    if (total <= VISIBLE_COUNT) {
+      setCurrent(prev => (prev + direction + total) % total);
+      isAnimating.current = false;
+      return;
+    }
+
+    setCurrent(prev => prev + direction);
+
+    // Safety fallback: если handleTransitionEnd не сработает
+    // (неактивная вкладка, прерванный транзишн),
+    // разблокируем навигацию через таймаут
+    setTimeout(() => {
+      isAnimating.current = false;
+    }, SAFETY_FALLOUT);
+  }, [total]);
+
+  const next = useCallback(() => navigate(1), [navigate]);
+  const prev = useCallback(() => navigate(-1), [navigate]);
 
   /* Auto-play */
   useEffect(() => {
@@ -58,6 +135,19 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     return () => window.removeEventListener('keydown', handleKey);
   }, [prev, next]);
 
+  const routerNavigate = useNavigate();
+
+  const scrollToNext = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: 'smooth',
+    });
+  };
+
+  const goToPrice = () => {
+    routerNavigate('/price');
+  };
+
   if (total === 0) {
     return (
       <div className={styles.carousel}>
@@ -66,17 +156,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     );
   }
 
-  if (total === 1) {
-    return (
-      <div className={styles.carousel}>
-        <div className={styles.track} style={{ transform: 'translateX(0)' }}>
-          <div className={styles.slide}>
-            <img src={photos[0].imageUrl} alt={photos[0].title} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const displayPhotos = total <= VISIBLE_COUNT ? photos : extended;
 
   return (
     <div
@@ -86,24 +166,42 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     >
       <div
         className={styles.track}
-        style={{ transform: `translateX(-${current * 100}%)` }}
+        onTransitionEnd={handleTransitionEnd}
+        style={{
+          transform: `translateX(-${current * SLIDE_WIDTH}%)`,
+          transition: transitionEnabled
+            ? `transform ${TRANSITION_DURATION}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`
+            : 'none',
+        }}
       >
-        {photos.map((photo) => (
-          <div key={photo.id} className={styles.slide}>
-            <img src={photo.imageUrl} alt={photo.title} />
+        {displayPhotos.map((photo, i) => (
+          <div
+            key={i}
+            className={styles.slide}
+            style={{ minWidth: `${SLIDE_WIDTH}%` }}
+          >
+            <img src={photo.imageUrl} alt={photo.title} loading="eager" />
           </div>
         ))}
       </div>
 
-      <button className={`${styles.arrow} ${styles.arrowLeft}`} onClick={prev} aria-label="Предыдущее фото">
+      <button className={`${styles.arrow} ${styles.arrowLeft}`} onClick={prev} aria-label="Предыдущее">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
-      <button className={`${styles.arrow} ${styles.arrowRight}`} onClick={next} aria-label="Следующее фото">
+      <button className={`${styles.arrow} ${styles.arrowRight}`} onClick={next} aria-label="Следующее">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="9 18 15 12 9 6" />
         </svg>
+      </button>
+
+      <button className={styles.goToPrice} onClick={goToPrice} aria-label="Перейти к прайсу">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="12" y1="1" x2="12" y2="23" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+        <span>Прайс</span>
       </button>
 
       <button className={styles.scrollDown} onClick={scrollToNext} aria-label="Прокрутить ниже">

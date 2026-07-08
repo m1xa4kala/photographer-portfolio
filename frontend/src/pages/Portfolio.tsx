@@ -1,7 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePortfolio } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
+import ImageLightbox from '../components/ImageLightbox';
+import Skeleton from '../components/Skeleton';
 import styles from './Portfolio.module.css';
+
+const PortfolioSkeleton: React.FC = () => (
+  <AnimatedSection>
+    <div className={styles.portfolio}>
+      <Skeleton variant="text" width="250px" height="2.5rem" style={{ margin: '0 auto 2rem' }} />
+      <div className={styles.filters}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} variant="text" width="80px" height="36px" borderRadius="2rem" />
+        ))}
+      </div>
+      <div className={styles.sessionGrid}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className={styles.sessionCard}>
+            <Skeleton variant="rect" width="100%" height="220px" />
+            <div style={{ padding: '1rem' }}>
+              <Skeleton variant="text" width="60%" height="1.2rem" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </AnimatedSection>
+);
 
 const Portfolio: React.FC = () => {
   const {
@@ -18,7 +43,10 @@ const Portfolio: React.FC = () => {
     refetch,
   } = usePortfolio();
 
-  if (loading) return <div className={styles.loader}>Загрузка портфолио...</div>;
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const lightboxImages = activeSessionId ? filteredPhotos.map(p => p.imageUrl) : [];
+
+  if (loading) return <PortfolioSkeleton />;
   if (error) return <div className={styles.error}>Ошибка: {error} <button onClick={refetch}>Повторить</button></div>;
 
   const selectedCategory = categories.find(c => c.id === activeCategoryId);
@@ -28,11 +56,12 @@ const Portfolio: React.FC = () => {
   const getSessionCover = (sessionId: number) => {
     const firstPhoto = photos
       .filter(p => p.sessionId === sessionId)
-      .sort((a, b) => a.orderIndex - b.orderIndex)[0];
+      .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))[0];
     return firstPhoto?.imageUrl || null;
   };
 
   return (
+    <>
     <AnimatedSection>
       <div className={styles.portfolio}>
         <h1>Портфолио</h1>
@@ -66,7 +95,7 @@ const Portfolio: React.FC = () => {
                 >
                   <div className={styles.sessionImage}>
                     {coverUrl ? (
-                      <img src={coverUrl} alt={session.name} />
+                      <img src={coverUrl} alt={session.name} loading="lazy" />
                     ) : (
                       <div className={styles.sessionPlaceholder}>
                         <span>{session.name.charAt(0)}</span>
@@ -92,13 +121,17 @@ const Portfolio: React.FC = () => {
               <button className={styles.backBtn} onClick={() => setActiveSessionId(null)}>
                 ← Назад к {selectedCategory ? selectedCategory.name : 'всем сессиям'}
               </button>
-              {selectedSession && <span className={styles.sessionTitle}>{selectedSession.name}</span>}
+              {selectedSession && <h3 className={styles.sessionTitle}>{selectedSession.name}</h3>}
             </div>
             <div className={styles.gallery}>
               {filteredPhotos.map(photo => (
                 <div key={photo.id} className={styles.photoItem}>
-                  <img src={photo.imageUrl} alt={photo.title} />
-                  {photo.title && <div className={styles.caption}>{photo.title}</div>}
+                  <img
+                    src={photo.imageUrl}
+                    alt={selectedSession?.name || 'Фото'}
+                    loading="lazy"
+                    onClick={() => setLightboxIndex(filteredPhotos.indexOf(photo))}
+                  />
                 </div>
               ))}
               {filteredPhotos.length === 0 && (
@@ -109,6 +142,15 @@ const Portfolio: React.FC = () => {
         )}
       </div>
     </AnimatedSection>
+    {lightboxIndex !== null && (
+      <ImageLightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        alt={selectedSession?.name || 'Фото'}
+        onClose={() => setLightboxIndex(null)}
+      />
+    )}
+    </>
   );
 };
 

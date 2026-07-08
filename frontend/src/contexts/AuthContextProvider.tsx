@@ -47,7 +47,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<void> => {
     const res = await api.post<LoginResponse>('/auth/login', { email, password });
-    localStorage.setItem('access_token', res.data.access_token);
+    const token = res.data.access_token;
+    if (!token) {
+      throw new Error('Неверный email или пароль');
+    }
+    localStorage.setItem('access_token', token);
     const me = await api.get<User>('/auth/me');
     setUser(me.data);
   };

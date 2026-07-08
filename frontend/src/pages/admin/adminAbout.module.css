@@ -6,21 +6,16 @@
 
 .aboutAdmin h2 {
   margin-bottom: 1.5rem;
-  color: #c17b3e;
+  color: var(--accent);
 }
 
 .error {
-  background: #fce4e4;
-  border: 1px solid #e74c3c;
-  color: #c0392b;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  composes: error from '../../styles/shared-admin.module.css';
 }
 
 .aboutAdmin form {
-  background: #ffffff;
-  border: 1px solid #dee2e6;
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
   border-radius: 1rem;
   padding: 1.5rem;
   display: flex;
@@ -32,17 +27,17 @@
   font-weight: 600;
   margin-bottom: 0.25rem;
   display: block;
-  color: #1e1e1e;
+  color: var(--admin-text);
 }
 
 .aboutAdmin input,
 .aboutAdmin textarea {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--admin-border);
   border-radius: 0.5rem;
-  background: #ffffff;
-  color: #1e1e1e;
+  background: var(--admin-card-bg);
+  color: var(--admin-text);
   font-family: inherit;
 }
 
@@ -53,7 +48,7 @@
 .aboutAdmin button {
   align-self: flex-start;
   padding: 0.5rem 1.2rem;
-  background: #c17b3e;
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 0.5rem;
@@ -63,12 +58,12 @@
 }
 
 .aboutAdmin button:hover {
-  background: #a7622c;
+  background: var(--accent-hover);
 }
 
 .aboutAdmin img {
   margin-top: 0.5rem;
   max-width: 150px;
   border-radius: 0.5rem;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--admin-border);
 }

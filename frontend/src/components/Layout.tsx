@@ -27,7 +27,10 @@ const Layout: React.FC = () => {
   return (
     <div className={styles.container}>
       <header className={`${styles.header} ${scrolled || !isHome ? styles.scrolled : ''}`}>
-        <div className={styles.logo}>Vlada Photo</div>
+        <div className={styles.logo}>
+          <span className={styles.logoName}>Vlada Khaybullina</span>
+          <span className={styles.logoSub}>Photographer</span>
+        </div>
         <nav className={styles.nav}>
           <NavLink to="/" className={({ isActive }) => (isActive ? styles.active : '')}>
             Главная
@@ -55,7 +58,7 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
       <footer className={styles.footer}>
-        <p>© {new Date().getFullYear()} Vlada Photo. Все права защищены.</p>
+        <p>© {new Date().getFullYear()} Vlada Khaybullina. Все права защищены.</p>
         <div className={styles.socials}>
           <a href="#">Instagram</a> | <a href="#">Telegram</a>
         </div>

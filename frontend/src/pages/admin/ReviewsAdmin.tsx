@@ -1,27 +1,39 @@
 import React, { useState } from 'react';
-import { useAdminReviews } from '../../hooks';
+import { useAdminReviews, useUploadImage } from '../../hooks';
 import { confirmDelete } from '../../utils/confirmDelete';
 import type { Review } from '../../types';
 import styles from './adminCrud.module.css';
 
 const ReviewsAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem } = useAdminReviews();
+  const { uploadImage, uploading } = useUploadImage();
   const [editing, setEditing] = useState<Review | null>(null);
-  const [form, setForm] = useState<Omit<Review, 'id' | 'date'>>({
+  const [form, setForm] = useState<{
+    clientName: string;
+    text: string;
+    clientPhotoUrl: string | null;
+  }>({
     clientName: '',
     text: '',
-    rating: 5,
-    isActive: true,
+    clientPhotoUrl: null,
   });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = await uploadImage(file);
+      setForm(prev => ({ ...prev, clientPhotoUrl: url }));
+    }
+  };
 
   const handleSubmit = async () => {
     if (editing) {
       await updateItem(editing.id, form);
     } else {
-      await createItem({ ...form, date: new Date().toISOString() });
+      await createItem(form);
     }
     setEditing(null);
-    setForm({ clientName: '', text: '', rating: 5, isActive: true });
+    setForm({ clientName: '', text: '', clientPhotoUrl: null });
   };
 
   return (
@@ -42,22 +54,33 @@ const ReviewsAdmin: React.FC = () => {
           value={form.text}
           onChange={e => setForm({ ...form, text: e.target.value })}
         />
-        <select
-          value={form.rating}
-          onChange={e => setForm({ ...form, rating: +e.target.value })}
-        >
-          {[1,2,3,4,5].map(r => <option key={r} value={r}>{r} звезд</option>)}
-        </select>
-        <label>
+        <div>
+          <label>Фото клиента (аватар)</label>
           <input
-            type="checkbox"
-            checked={form.isActive}
-            onChange={e => setForm({ ...form, isActive: e.target.checked })}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            disabled={uploading}
           />
-          Активен
-        </label>
+          {form.clientPhotoUrl && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <img
+                src={form.clientPhotoUrl}
+                alt="avatar preview"
+                style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }}
+              />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, clientPhotoUrl: null })}
+                style={{ color: 'red', cursor: 'pointer', background: 'none', border: 'none' }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
         <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
-        {editing && <button onClick={() => { setEditing(null); setForm({ clientName: '', text: '', rating: 5, isActive: true }); }}>Отмена</button>}
+        {editing && <button onClick={() => { setEditing(null); setForm({ clientName: '', text: '', clientPhotoUrl: null }); }}>Отмена</button>}
       </div>
 
       {loading ? (
@@ -65,19 +88,27 @@ const ReviewsAdmin: React.FC = () => {
       ) : (
         <table className={styles.table}>
           <thead>
-            <tr><th>ID</th><th>Клиент</th><th>Текст</th><th>Рейтинг</th><th>Активен</th><th>Дата</th><th>Действия</th></tr>
+            <tr><th>ID</th><th>Фото</th><th>Клиент</th><th>Текст</th><th>Действия</th></tr>
           </thead>
           <tbody>
             {items.map(item => (
               <tr key={item.id}>
                 <td>{item.id}</td>
+                <td>
+                  {item.clientPhotoUrl ? (
+                    <img
+                      src={item.clientPhotoUrl}
+                      alt=""
+                      style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span style={{ color: 'var(--admin-text-muted)' }}>—</span>
+                  )}
+                </td>
                 <td>{item.clientName}</td>
                 <td>{item.text.substring(0, 50)}...</td>
-                <td>{item.rating}</td>
-                <td>{item.isActive ? 'Да' : 'Нет'}</td>
-                <td>{new Date(item.date).toLocaleDateString()}</td>
                 <td>
-                  <button onClick={() => { setEditing(item); setForm({ clientName: item.clientName, text: item.text, rating: item.rating, isActive: item.isActive }); }}>✏️</button>
+                  <button onClick={() => { setEditing(item); setForm({ clientName: item.clientName, text: item.text, clientPhotoUrl: item.clientPhotoUrl }); }}>✏️</button>
                   <button onClick={() => {
                   if (confirmDelete(`отзыв "${item.clientName}"`)) {
                     deleteItem(item.id);

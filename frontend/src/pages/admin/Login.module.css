@@ -4,24 +4,28 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--admin-bg);
+  font-family: var(--font-admin);
+}
+
+.loginContainer h2 {
+  font-family: var(--font-admin);
 }
 
 .loginCard {
-  background: #ffffff;
+  background: var(--admin-card-bg);
   padding: 2rem;
   border-radius: 1rem;
   width: 100%;
   max-width: 400px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--admin-border);
 }
 
 .loginCard h2 {
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #c17b3e;
-  font-family: 'Playfair Display', serif;
+  color: var(--accent);
 }
 
 .loginCard form {
@@ -32,16 +36,16 @@
 
 .loginCard input {
   padding: 0.75rem;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--admin-border);
   border-radius: 0.5rem;
-  background: #ffffff;
-  color: #1e1e1e;
+  background: var(--admin-card-bg);
+  color: var(--admin-text);
   font-size: 1rem;
 }
 
 .loginCard button {
   padding: 0.75rem;
-  background: #c17b3e;
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 0.5rem;
@@ -51,12 +55,12 @@
 }
 
 .loginCard button:hover {
-  background: #a7622c;
+  background: var(--accent-hover);
 }
 
 .error {
   background: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
+  color: var(--admin-danger);
   padding: 0.5rem;
   border-radius: 0.5rem;
   text-align: center;
