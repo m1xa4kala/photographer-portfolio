@@ -32,7 +32,10 @@ backend/uploads/
 backend/uploaded-files/
 
 # IDE
-.claude
+.claude/settings.local.json
+.claude/settings.json
+.claude/projects/
+.claude/hooks/
 .vscode/
 .idea/
 *.suo
