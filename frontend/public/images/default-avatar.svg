@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Круглый фон -->
+  <circle cx="100" cy="100" r="100" fill="#e8e0d8"/>
+  <!-- Силуэт человека -->
+  <circle cx="100" cy="72" r="28" fill="#d4c8bc"/>
+  <ellipse cx="100" cy="160" rx="45" ry="40" fill="#d4c8bc"/>
+</svg>
