@@ -2,7 +2,6 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
 } from 'typeorm';
 
 @Entity('reviews')
@@ -16,12 +15,6 @@ export class Review {
   @Column('text')
   text!: string;
 
-  @Column({ type: 'int', default: 5 })
-  rating!: number;
-
-  @Column({ default: true })
-  isActive!: boolean;
-
-  @CreateDateColumn()
-  date!: Date;
+  @Column({ type: 'varchar', nullable: true })
+  clientPhotoUrl!: string | null;
 }

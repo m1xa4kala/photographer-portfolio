@@ -1,8 +1,11 @@
 services:
+  # Dev PostgreSQL (default profile)
   postgres:
     image: postgres:16-alpine
     container_name: postgres_photographer
     restart: unless-stopped
+    profiles:
+      - dev
     ports:
       - '${DB_PORT:-5430}:5432'
     environment:
@@ -20,33 +23,60 @@ services:
     networks:
       - app-network
 
+  # Production PostgreSQL
+  postgres-prod:
+    image: postgres:16-alpine
+    container_name: postgres_photographer_prod
+    restart: unless-stopped
+    profiles:
+      - prod
+    ports:
+      - '${DB_PROD_PORT:-5431}:5432'
+    environment:
+      POSTGRES_USER: ${DB_PROD_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PROD_PASSWORD}
+      POSTGRES_DB: ${DB_PROD_NAME:-photographer}
+    volumes:
+      - pgdata-prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_PROD_USER:-postgres}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
     container_name: photographer_app
     restart: unless-stopped
+    profiles:
+      - prod
     ports:
       - '${PORT:-3000}:3000'
     environment:
       NODE_ENV: production
-      DB_HOST: postgres
+      DB_HOST: postgres-prod
       DB_PORT: 5432
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME:-photographer}
+      DB_USER: ${DB_PROD_USER:-postgres}
+      DB_PASSWORD: ${DB_PROD_PASSWORD}
+      DB_NAME: ${DB_PROD_NAME:-photographer}
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
     volumes:
       - uploads:/app/uploads
     depends_on:
-      postgres:
+      postgres-prod:
         condition: service_healthy
     networks:
       - app-network
 
 volumes:
   pgdata:
+  pgdata-prod:
   uploads:
 
 networks:

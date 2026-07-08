@@ -13,14 +13,11 @@ export class ReviewsService {
   ) {}
 
   async findAll(): Promise<Review[]> {
-    return this.repo.find({ order: { date: 'DESC' } });
+    return this.repo.find({ order: { id: 'DESC' } });
   }
 
   async findActive(): Promise<Review[]> {
-    return this.repo.find({
-      where: { isActive: true },
-      order: { date: 'DESC' },
-    });
+    return this.repo.find({ order: { id: 'DESC' } });
   }
 
   async findOne(id: number): Promise<Review> {

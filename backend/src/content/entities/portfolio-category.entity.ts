@@ -12,8 +12,8 @@ export class PortfolioCategory {
   @Column({ unique: true })
   slug!: string;
 
-  @Column({ nullable: true })
-  coverImageUrl?: string;
+  @Column({ type: 'varchar', nullable: true })
+  coverImageUrl!: string | null;
 
   @Column({ default: 0 })
   orderIndex!: number;
