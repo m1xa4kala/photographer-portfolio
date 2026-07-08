@@ -30,6 +30,7 @@ frontend/build/
 # Загруженные пользователем файлы (бэкенд)
 backend/uploads/
 backend/uploaded-files/
+uploads/
 
 # IDE
 .claude/settings.local.json
