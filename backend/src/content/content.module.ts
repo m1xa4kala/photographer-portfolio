@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MulterModule } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { BestPhoto } from './entities/best-photo.entity';
 import { PortfolioCategory } from './entities/portfolio-category.entity';
 import { PortfolioSession } from './entities/portfolio-session.entity';
@@ -7,6 +9,8 @@ import { PortfolioPhoto } from './entities/portfolio-photo.entity';
 import { PriceItem } from './entities/price-item.entity';
 import { Review } from './entities/review.entity';
 import { About } from './entities/about.entity';
+import { FullSession } from './entities/full-session.entity';
+import { SessionOriginalFile } from './entities/session-original-file.entity';
 
 import { BestPhotosService } from './services/best-photos.service';
 import { PortfolioCategoriesService } from './services/portfolio-categories.service';
@@ -15,6 +19,8 @@ import { PortfolioPhotosService } from './services/portfolio-photos.service';
 import { PriceItemsService } from './services/price-items.service';
 import { ReviewsService } from './services/reviews.service';
 import { AboutService } from './services/about.service';
+import { FullSessionsService } from './services/full-sessions.service';
+import { DownloadService } from './services/download.service';
 
 import { PublicContentController } from './controllers/public-content.controller';
 import { AdminBestPhotosController } from './controllers/admin-best-photos.controller';
@@ -24,6 +30,10 @@ import { AdminPortfolioPhotosController } from './controllers/admin-portfolio-ph
 import { AdminPriceItemsController } from './controllers/admin-price-items.controller';
 import { AdminReviewsController } from './controllers/admin-reviews.controller';
 import { AdminAboutController } from './controllers/admin-about.controller';
+import { AdminFullSessionsController } from './controllers/admin-full-sessions.controller';
+import { DownloadController } from './controllers/download.controller';
+
+import { S3Module } from '../s3/s3.module';
 
 @Module({
   imports: [
@@ -35,7 +45,11 @@ import { AdminAboutController } from './controllers/admin-about.controller';
       PriceItem,
       Review,
       About,
+      FullSession,
+      SessionOriginalFile,
     ]),
+    MulterModule.register({ storage: memoryStorage() }),
+    S3Module,
   ],
   providers: [
     BestPhotosService,
@@ -45,6 +59,8 @@ import { AdminAboutController } from './controllers/admin-about.controller';
     PriceItemsService,
     ReviewsService,
     AboutService,
+    FullSessionsService,
+    DownloadService,
   ],
   controllers: [
     PublicContentController,
@@ -55,6 +71,8 @@ import { AdminAboutController } from './controllers/admin-about.controller';
     AdminPriceItemsController,
     AdminReviewsController,
     AdminAboutController,
+    AdminFullSessionsController,
+    DownloadController,
   ],
   exports: [
     BestPhotosService,

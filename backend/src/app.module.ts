@@ -7,6 +7,7 @@ import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { ContentModule } from './content/content.module';
 import { UploadModule } from './upload/upload.module';
+import { S3Module } from './s3/s3.module';
 import configuration from './config/configuration';
 import { AppConfig } from './config/config.interface';
 
@@ -73,6 +74,7 @@ import { AppConfig } from './config/config.interface';
     AuthModule,
     ContentModule,
     UploadModule,
+    S3Module,
   ],
 })
 export class AppModule {}
