@@ -16,6 +16,12 @@ const PortfolioPhotosAdmin: React.FC = () => {
   const [bulkCategoryId, setBulkCategoryId] = useState<number>(0);
   const [bulkError, setBulkError] = useState<string | null>(null);
 
+  const selectedSessionPhotos = bulkSessionId
+    ? items.filter(p => p.sessionId === bulkSessionId)
+    : [];
+  const photoLimitReached = selectedSessionPhotos.length >= 15;
+  const remainingSlots = 15 - selectedSessionPhotos.length;
+
   const handleBulkUpload = async (files: UploadedFileInfo[]) => {
     if (!bulkSessionId || files.length === 0) return;
     setBulkError(null);
@@ -96,7 +102,16 @@ const PortfolioPhotosAdmin: React.FC = () => {
         </div>
         {bulkError && <div className={styles.error}>{bulkError}</div>}
         {bulkSessionId ? (
-          <DropZone onUploadComplete={handleBulkUpload} />
+          photoLimitReached ? (
+            <p className={styles.limitMessage}>
+              ❌ Достигнут лимит в 15 фото для этой сессии.
+            </p>
+          ) : (
+            <>
+              <p className={styles.limitHint}>Осталось мест: {remainingSlots} / 15</p>
+              <DropZone onUploadComplete={handleBulkUpload} />
+            </>
+          )
         ) : (
           <p className={styles.hint}>Сначала выберите категорию и фотосессию</p>
         )}

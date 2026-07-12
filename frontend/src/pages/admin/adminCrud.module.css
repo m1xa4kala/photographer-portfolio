@@ -111,6 +111,23 @@
   color: var(--accent);
 }
 
+.limitMessage {
+  padding: 1rem;
+  background: #fff3f3;
+  border: 1px solid #ffcccc;
+  border-radius: 8px;
+  color: #cc3333;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.limitHint {
+  color: var(--admin-text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .form {
     flex-direction: column;

@@ -15,11 +15,18 @@ import { PortfolioPhotosService } from '../services/portfolio-photos.service';
 import { CreatePortfolioPhotoDto } from '../dtos/create-portfolio-photo.dto';
 import { UpdatePortfolioPhotoDto } from '../dtos/update-portfolio-photo.dto';
 import { ReorderDto } from '../dto/reorder.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PortfolioPhoto } from '../entities/portfolio-photo.entity';
 
 @Controller('admin/portfolio-photos')
 @UseGuards(JwtAuthGuard)
 export class AdminPortfolioPhotosController {
-  constructor(private photosService: PortfolioPhotosService) {}
+  constructor(
+    private photosService: PortfolioPhotosService,
+    @InjectRepository(PortfolioPhoto)
+    private readonly photoRepo: Repository<PortfolioPhoto>,
+  ) {}
 
   @Get()
   async findAll(@Query('sessionId') sessionId?: string) {
@@ -44,6 +51,10 @@ export class AdminPortfolioPhotosController {
 
   @Post()
   async create(@Body() createDto: CreatePortfolioPhotoDto) {
+    const count = await this.photoRepo.count({ where: { sessionId: createDto.sessionId } });
+    if (count >= 15) {
+      throw new BadRequestException('В фотосессии не может быть больше 15 фото');
+    }
     return this.photosService.create(createDto);
   }
 
