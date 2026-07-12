@@ -13,3 +13,5 @@ export { useAdminReviews } from './admin/useAdminReviews';
 export { useUploadImage } from './admin/useUploadImage';
 export { useDashboardStats } from './admin/useDashboardStats';
 export { useAuth } from './useAuth';
+export { useAdminFullSessions } from './admin/useAdminFullSessions';
+export { useAdminFullSessionFiles } from './admin/useAdminFullSessionFiles';

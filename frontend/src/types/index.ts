@@ -13,8 +13,6 @@ export interface BestPhoto {
 export interface PortfolioCategory {
   id: number;
   name: string;
-  slug: string;
-  coverImageUrl: string | null;
   orderIndex?: number;
 }
 
@@ -57,4 +55,23 @@ export interface About {
 
 export interface LoginResponse {
   access_token: string;
+}
+
+export interface FullSession {
+  id: number;
+  title: string;
+  description: string | null;
+  downloadToken: string | null;
+  downloadsEnabled: boolean;
+  createdAt: string;
+  originalFiles?: SessionOriginalFile[];
+}
+
+export interface SessionOriginalFile {
+  id: number;
+  fullSessionId: number;
+  originalName: string;
+  s3Key: string;
+  fileSize: number;
+  uploadedAt: string;
 }
