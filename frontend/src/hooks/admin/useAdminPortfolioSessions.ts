@@ -13,6 +13,9 @@ interface UseAdminPortfolioSessionsReturn {
   reorderItems: (items: ReorderItem[]) => Promise<void>;
 }
 
-export const useAdminPortfolioSessions = (): UseAdminPortfolioSessionsReturn => {
-  return useAdminCrud<PortfolioSession>('/admin/portfolio-sessions');
+export const useAdminPortfolioSessions = (categoryId?: number): UseAdminPortfolioSessionsReturn => {
+  const url = categoryId
+    ? `/admin/portfolio-sessions?categoryId=${categoryId}`
+    : '/admin/portfolio-sessions';
+  return useAdminCrud<PortfolioSession>(url);
 };

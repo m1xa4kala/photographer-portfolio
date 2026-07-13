@@ -13,6 +13,9 @@ interface UseAdminPortfolioPhotosReturn {
   reorderItems: (items: ReorderItem[]) => Promise<void>;
 }
 
-export const useAdminPortfolioPhotos = (): UseAdminPortfolioPhotosReturn => {
-  return useAdminCrud<PortfolioPhoto>('/admin/portfolio-photos');
+export const useAdminPortfolioPhotos = (sessionId?: number): UseAdminPortfolioPhotosReturn => {
+  const url = sessionId
+    ? `/admin/portfolio-photos?sessionId=${sessionId}`
+    : '/admin/portfolio-photos';
+  return useAdminCrud<PortfolioPhoto>(url);
 };
