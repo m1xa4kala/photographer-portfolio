@@ -1,0 +1,40 @@
+/* ImageWithSkeleton — контейнер с плейсхолдером до загрузки изображения */
+.wrapper {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--bg-card, #fafafa);
+}
+
+/* Скелетон занимает всю площадь контейнера */
+.skeleton {
+  z-index: 1;
+}
+
+/* Фон для skeleton.appearance */
+@keyframes imageReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Само изображение — прозрачное, пока не загрузится */
+.img {
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+}
+
+.img.visible {
+  opacity: 1;
+  animation: imageReveal 0.3s ease forwards;
+}
+
+/* Fallback при ошибке загрузки */
+.fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -20,47 +20,75 @@ export class PublicContentController {
   ) {}
 
   @Get('best-photos')
-  async getBestPhotos() {
-    return this.bestPhotosService.findAll();
+  async getBestPhotos(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ) {
+    return this.bestPhotosService.findAll(limit ?? 100, offset ?? 0);
   }
 
   @Get('portfolio-categories')
-  async getPortfolioCategories() {
-    return this.portfolioCategoriesService.findAll();
+  async getPortfolioCategories(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ) {
+    return this.portfolioCategoriesService.findAll(limit ?? 100, offset ?? 0);
   }
 
   @Get('portfolio-sessions')
-  async getPortfolioSessions(@Query('categoryId') categoryId?: string) {
+  async getPortfolioSessions(
+    @Query('categoryId') categoryId?: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ) {
     if (categoryId) {
       const catId = parseInt(categoryId, 10);
       if (isNaN(catId)) {
         throw new BadRequestException('Invalid categoryId');
       }
-      return this.portfolioSessionsService.findByCategory(catId);
+      return this.portfolioSessionsService.findByCategory(
+        catId,
+        limit ?? 100,
+        offset ?? 0,
+      );
     }
-    return this.portfolioSessionsService.findAll();
+    return this.portfolioSessionsService.findAll(limit ?? 100, offset ?? 0);
   }
 
   @Get('portfolio-photos')
-  async getPortfolioPhotos(@Query('sessionId') sessionId?: string) {
+  async getPortfolioPhotos(
+    @Query('sessionId') sessionId?: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ) {
     if (sessionId) {
       const sId = parseInt(sessionId, 10);
       if (isNaN(sId)) {
         throw new BadRequestException('Invalid sessionId');
       }
-      return this.portfolioPhotosService.findBySession(sId);
+      return this.portfolioPhotosService.findBySession(
+        sId,
+        limit ?? 100,
+        offset ?? 0,
+      );
     }
-    return this.portfolioPhotosService.findAll();
+    return this.portfolioPhotosService.findAll(limit ?? 100, offset ?? 0);
   }
 
   @Get('price-items')
-  async getPriceItems() {
-    return this.priceItemsService.findAll();
+  async getPriceItems(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ) {
+    return this.priceItemsService.findAll(limit ?? 100, offset ?? 0);
   }
 
   @Get('reviews')
-  async getActiveReviews() {
-    return this.reviewsService.findActive();
+  async getActiveReviews(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ) {
+    return this.reviewsService.findAll(limit ?? 100, offset ?? 0);
   }
 
   @Get('about')

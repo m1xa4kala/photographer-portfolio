@@ -2,6 +2,7 @@ import React from 'react';
 import { useAbout } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
 import Skeleton from '../components/Skeleton';
+import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import styles from './About.module.css';
 
 const AboutSkeleton: React.FC = () => (
@@ -33,7 +34,7 @@ const About: React.FC = () => {
     <AnimatedSection>
       <div className={styles.about}>
         <div className={styles.photo}>
-          <img
+          <ImageWithSkeleton
             src={about.photoUrl || '/images/default-avatar.svg'}
             alt={about.fullName}
             loading="eager"

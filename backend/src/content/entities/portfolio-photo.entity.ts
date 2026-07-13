@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { PortfolioSession } from './portfolio-session.entity';
 
@@ -22,6 +23,7 @@ export class PortfolioPhoto {
   orderIndex!: number;
 
   @Column()
+  @Index()
   sessionId!: number;
 
   @ManyToOne(() => PortfolioSession, (session) => session.photos)

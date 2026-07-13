@@ -19,8 +19,15 @@ export class PortfolioCategoriesService {
     private photoRepo: Repository<PortfolioPhoto>,
   ) {}
 
-  async findAll(): Promise<PortfolioCategory[]> {
-    return this.repo.find({ order: { orderIndex: 'ASC' } });
+  async findAll(
+    limit: number = 100,
+    offset: number = 0,
+  ): Promise<PortfolioCategory[]> {
+    return this.repo.find({
+      order: { orderIndex: 'ASC' },
+      take: limit,
+      skip: offset,
+    });
   }
 
   async findOne(id: number): Promise<PortfolioCategory> {
@@ -29,10 +36,6 @@ export class PortfolioCategoriesService {
       throw new NotFoundException(`Category with id ${id} not found`);
     }
     return item;
-  }
-
-  async findBySlug(slug: string): Promise<PortfolioCategory | null> {
-    return this.repo.findOne({ where: { slug } });
   }
 
   async create(dto: CreatePortfolioCategoryDto): Promise<PortfolioCategory> {
@@ -64,8 +67,21 @@ export class PortfolioCategoriesService {
   }
 
   async reorder(dto: ReorderDto): Promise<void> {
-    for (const { id, orderIndex } of dto.items) {
-      await this.repo.update(id, { orderIndex });
+    const queryRunner = this.repo.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      for (const { id, orderIndex } of dto.items) {
+        await queryRunner.manager.update(this.repo.metadata.target, id, {
+          orderIndex,
+        });
+      }
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
   }
 }

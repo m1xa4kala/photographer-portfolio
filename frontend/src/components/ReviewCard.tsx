@@ -1,5 +1,6 @@
 import React from 'react';
 import { type Review } from '../types';
+import ImageWithSkeleton from './ImageWithSkeleton';
 import styles from './ReviewCard.module.css';
 
 interface ReviewCardProps {
@@ -14,7 +15,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
       <div className={styles.header}>
         <div className={styles.avatar}>
           {clientPhotoUrl ? (
-            <img src={clientPhotoUrl} alt={clientName} />
+            <ImageWithSkeleton src={clientPhotoUrl} alt={clientName} />
           ) : (
             <span className={styles.avatarFallback}>
               {clientName.charAt(0).toUpperCase()}

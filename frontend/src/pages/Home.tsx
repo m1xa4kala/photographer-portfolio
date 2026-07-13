@@ -4,6 +4,7 @@ import { useHome, useAbout, usePortfolio, useReviews, usePrice } from '../hooks'
 import HeroCarousel from '../components/HeroCarousel';
 import ReviewCard from '../components/ReviewCard';
 import AnimatedSection from '../components/AnimatedSection';
+import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import Skeleton from '../components/Skeleton';
 import styles from './Home.module.css';
 import aboutStyles from './About.module.css';
@@ -68,7 +69,7 @@ const Home: React.FC = () => {
               <h2 className={styles.sectionTitle}>Обо мне</h2>
               <div className={aboutStyles.about}>
                 <div className={aboutStyles.photo}>
-                  <img
+                  <ImageWithSkeleton
                     src={about.photoUrl || '/images/default-avatar.svg'}
                     alt={about.fullName}
                     loading="lazy"
@@ -109,7 +110,7 @@ const Home: React.FC = () => {
                   >
                     <div className={portfolioStyles.sessionImage}>
                       {coverUrl ? (
-                        <img src={coverUrl} alt={session.name} loading="lazy" />
+                        <ImageWithSkeleton src={coverUrl} alt={session.name} loading="lazy" />
                       ) : (
                         <div className={portfolioStyles.sessionPlaceholder}>
                           <span>{session.name.charAt(0)}</span>

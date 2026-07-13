@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../services/api';
 import { type PortfolioCategory, type PortfolioSession, type PortfolioPhoto } from '../types';
 
@@ -25,87 +25,69 @@ export const usePortfolio = (): UsePortfolioReturn => {
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const cancelledRef = useRef(false);
 
-  const refetch = useCallback(async () => {
+  useEffect(() => {
+    return () => { cancelledRef.current = true; };
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    cancelledRef.current = false;
     setLoading(true);
     setError(null);
     try {
-      const [catRes, sesRes, photoRes] = await Promise.all([
+      const [catRes, sessionsRes, photosRes] = await Promise.all([
         api.get<PortfolioCategory[]>('/content/portfolio-categories'),
         api.get<PortfolioSession[]>('/content/portfolio-sessions'),
         api.get<PortfolioPhoto[]>('/content/portfolio-photos'),
       ]);
-      setCategories(catRes.data);
-      setSessions(sesRes.data);
-      setPhotos(photoRes.data);
+      if (!cancelledRef.current) {
+        setCategories(catRes.data);
+        setSessions(sessionsRes.data);
+        setPhotos(photosRes.data);
+      }
     } catch (err) {
-      setError('Не удалось загрузить портфолио');
-      console.error(err);
+      if (!cancelledRef.current) {
+        setError('Не удалось загрузить портфолио');
+        console.error(err);
+      }
     } finally {
-      setLoading(false);
+      if (!cancelledRef.current) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const fetch = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [catRes, sesRes, photoRes] = await Promise.all([
-          api.get<PortfolioCategory[]>('/content/portfolio-categories'),
-          api.get<PortfolioSession[]>('/content/portfolio-sessions'),
-          api.get<PortfolioPhoto[]>('/content/portfolio-photos'),
-        ]);
-        if (!cancelled) {
-          setCategories(catRes.data);
-          setSessions(sesRes.data);
-          setPhotos(photoRes.data);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError('Не удалось загрузить портфолио');
-        }
-        console.error(err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    fetch();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // При смене категории сбрасываем выбранную сессию
-  const handleSetCategory = useCallback((id: number | null) => {
-    setActiveCategoryId(id);
-    setActiveSessionId(null);
-  }, []);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [fetchData]);
 
   const filteredSessions = activeCategoryId
-    ? sessions.filter(s => s.categoryId === activeCategoryId)
+    ? sessions.filter(session => session.categoryId === activeCategoryId)
     : sessions;
 
   const filteredPhotos = activeSessionId
-    ? photos.filter(p => p.sessionId === activeSessionId)
-    : [];
+    ? photos.filter(photo => photo.sessionId === activeSessionId)
+    : activeCategoryId
+      ? photos.filter(photo => {
+          const sessionIds = sessions
+            .filter(s => s.categoryId === activeCategoryId)
+            .map(s => s.id);
+          return sessionIds.includes(photo.sessionId);
+        })
+      : photos;
 
   return {
     categories,
     sessions,
     photos,
     activeCategoryId,
-    setActiveCategoryId: handleSetCategory,
+    setActiveCategoryId,
     activeSessionId,
     setActiveSessionId,
     filteredSessions,
     filteredPhotos,
     loading,
     error,
-    refetch,
+    refetch: fetchData,
   };
 };

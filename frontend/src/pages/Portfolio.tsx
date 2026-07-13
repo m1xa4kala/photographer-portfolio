@@ -3,6 +3,7 @@ import { usePortfolio } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
 import ImageLightbox from '../components/ImageLightbox';
 import Skeleton from '../components/Skeleton';
+import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import styles from './Portfolio.module.css';
 
 const PortfolioSkeleton: React.FC = () => (
@@ -68,13 +69,13 @@ const Portfolio: React.FC = () => {
 
         {/* Шаг 1: Категории */}
         <div className={styles.filters}>
-          <button onClick={() => setActiveCategoryId(null)} className={!activeCategoryId ? styles.activeFilter : ''}>
+          <button onClick={() => { setActiveCategoryId(null); setActiveSessionId(null); }} className={!activeCategoryId ? styles.activeFilter : ''}>
             Все
           </button>
           {categories.map(cat => (
             <button
               key={cat.id}
-              onClick={() => setActiveCategoryId(cat.id)}
+              onClick={() => { setActiveCategoryId(cat.id); setActiveSessionId(null); }}
               className={activeCategoryId === cat.id ? styles.activeFilter : ''}
             >
               {cat.name}
@@ -95,7 +96,11 @@ const Portfolio: React.FC = () => {
                 >
                   <div className={styles.sessionImage}>
                     {coverUrl ? (
-                      <img src={coverUrl} alt={session.name} loading="lazy" />
+                      <ImageWithSkeleton
+                        src={coverUrl}
+                        alt={session.name}
+                        loading="lazy"
+                      />
                     ) : (
                       <div className={styles.sessionPlaceholder}>
                         <span>{session.name.charAt(0)}</span>
@@ -126,7 +131,7 @@ const Portfolio: React.FC = () => {
             <div className={styles.gallery}>
               {filteredPhotos.map(photo => (
                 <div key={photo.id} className={styles.photoItem}>
-                  <img
+                  <ImageWithSkeleton
                     src={photo.imageUrl}
                     alt={selectedSession?.name || 'Фото'}
                     loading="lazy"

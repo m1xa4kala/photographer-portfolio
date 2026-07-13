@@ -12,12 +12,8 @@ export class ReviewsService {
     private repo: Repository<Review>,
   ) {}
 
-  async findAll(): Promise<Review[]> {
-    return this.repo.find({ order: { id: 'DESC' } });
-  }
-
-  async findActive(): Promise<Review[]> {
-    return this.repo.find({ order: { id: 'DESC' } });
+  async findAll(limit: number = 100, offset: number = 0): Promise<Review[]> {
+    return this.repo.find({ order: { id: 'DESC' }, take: limit, skip: offset });
   }
 
   async findOne(id: number): Promise<Review> {

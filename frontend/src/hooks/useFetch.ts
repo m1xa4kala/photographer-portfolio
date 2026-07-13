@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 
 interface UseFetchResult<T> {
@@ -16,6 +16,7 @@ export const useFetch = <T>(url: string): UseFetchResult<T> => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cancelledRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,20 +39,26 @@ export const useFetch = <T>(url: string): UseFetchResult<T> => {
 
     fetch();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      cancelledRef.current = true;
+    };
   }, [url]);
 
   const refetch = async () => {
+    cancelledRef.current = false;
     setLoading(true);
     setError(null);
     try {
       const res = await api.get<T>(url);
-      setData(res.data);
+      if (!cancelledRef.current) setData(res.data);
     } catch (err) {
-      setError('Не удалось загрузить данные');
-      console.error(err);
+      if (!cancelledRef.current) {
+        setError('Не удалось загрузить данные');
+        console.error(err);
+      }
     } finally {
-      setLoading(false);
+      if (!cancelledRef.current) setLoading(false);
     }
   };
 

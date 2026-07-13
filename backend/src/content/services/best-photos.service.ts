@@ -13,8 +13,12 @@ export class BestPhotosService {
     private repo: Repository<BestPhoto>,
   ) {}
 
-  async findAll(): Promise<BestPhoto[]> {
-    return this.repo.find({ order: { orderIndex: 'ASC' } });
+  async findAll(limit: number = 100, offset: number = 0): Promise<BestPhoto[]> {
+    return this.repo.find({
+      order: { orderIndex: 'ASC' },
+      take: limit,
+      skip: offset,
+    });
   }
 
   async findOne(id: number): Promise<BestPhoto> {
@@ -45,8 +49,21 @@ export class BestPhotosService {
   }
 
   async reorder(dto: ReorderDto): Promise<void> {
-    for (const { id, orderIndex } of dto.items) {
-      await this.repo.update(id, { orderIndex });
+    const queryRunner = this.repo.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      for (const { id, orderIndex } of dto.items) {
+        await queryRunner.manager.update(this.repo.metadata.target, id, {
+          orderIndex,
+        });
+      }
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
   }
 }

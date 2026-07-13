@@ -13,7 +13,10 @@ async function bootstrap() {
   const port = configService.get<number>('port') || 3000;
   const frontendUrl = configService.get<string>('frontendUrl');
   const nodeEnv = configService.get<string>('nodeEnv') || 'development';
-
+  const uploadsDir =
+    nodeEnv === 'development'
+      ? join(__dirname, '..', '..', 'uploads')
+      : join(process.cwd(), 'uploads');
   app.enableCors({
     origin: frontendUrl,
     credentials: true,
@@ -22,12 +25,12 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-  // Uploaded files
-  const uploadsDir = join(process.cwd(), 'uploads');
   app.useStaticAssets(uploadsDir, { prefix: '/uploads/' });
 
   await app.listen(port);
-  console.log(`Application running on port ${port} (${nodeEnv})`);
+  console.log(
+    `Application running on port ${port} (${nodeEnv}, uploadsDir - ${uploadsDir})`,
+  );
 }
 
 bootstrap().catch((error) => {

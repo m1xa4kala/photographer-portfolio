@@ -15,7 +15,8 @@ const BestPhotosAdmin: React.FC = () => {
     setBulkError(null);
     for (const { url, name } of files) {
       try {
-        await createItem({ title: name, imageUrl: url });
+        const title = name.replace(/\.[^.]+$/, '');
+        await createItem({ title, imageUrl: url });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Неизвестная ошибка';
         setBulkError(`Ошибка при сохранении "${name}": ${message}`);

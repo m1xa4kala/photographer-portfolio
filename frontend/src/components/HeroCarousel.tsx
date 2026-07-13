@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { BestPhoto } from '../types';
+import ImageWithSkeleton from './ImageWithSkeleton';
 import styles from './HeroCarousel.module.css';
 
 const VISIBLE_COUNT = 3;
@@ -35,10 +36,25 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     ];
   }, [photos, total]);
 
-  const [current, setCurrent] = useState(total <= VISIBLE_COUNT ? 0 : VISIBLE_COUNT);
+  const [current, setCurrent] = useState(0);
   const currentRef = useRef(current);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+
+  // Корректируем current после асинхронной загрузки фото:
+  // если total вырос с 0 до > VISIBLE_COUNT, переключаемся на VISIBLE_COUNT.
+  // НЕ включаем current в зависимости — иначе при навигации (current проходит
+  // через временное значение < VISIBLE_COUNT перед снэпом) эффект сбросит
+  // current обратно на VISIBLE_COUNT, и листание влево с первого элемента
+  // не сработает.
+  useEffect(() => {
+    if (total > VISIBLE_COUNT) {
+      // Отключаем transition, чтобы начальный скачок был невидимым
+      snapPending.current = true;
+      setTransitionEnabled(false);
+      setCurrent(VISIBLE_COUNT);
+    }
+  }, [total]);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -180,7 +196,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
             className={styles.slide}
             style={{ minWidth: `${SLIDE_WIDTH}%` }}
           >
-            <img src={photo.imageUrl} alt={photo.title} loading="eager" />
+            <ImageWithSkeleton src={photo.imageUrl} alt={photo.title} loading="eager" />
           </div>
         ))}
       </div>
@@ -197,10 +213,6 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
       </button>
 
       <button className={styles.goToPrice} onClick={goToPrice} aria-label="Перейти к прайсу">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="12" y1="1" x2="12" y2="23" />
-          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-        </svg>
         <span>Прайс</span>
       </button>
 

@@ -83,7 +83,7 @@ const DropZone: React.FC<DropZoneProps> = ({ onUploadComplete }) => {
       let urlIdx = 0;
       const uploadedInfo: UploadedFileInfo[] = toUpload.map((f) => {
         const url = urls[urlIdx++] || '';
-        const name = f.file.name.replace(/\.[^.]+$/, '');
+        const name = f.file.name;
         return { url, name };
       });
 

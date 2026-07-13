@@ -51,9 +51,13 @@ export class AdminPortfolioPhotosController {
 
   @Post()
   async create(@Body() createDto: CreatePortfolioPhotoDto) {
-    const count = await this.photoRepo.count({ where: { sessionId: createDto.sessionId } });
+    const count = await this.photoRepo.count({
+      where: { sessionId: createDto.sessionId },
+    });
     if (count >= 15) {
-      throw new BadRequestException('В фотосессии не может быть больше 15 фото');
+      throw new BadRequestException(
+        'В фотосессии не может быть больше 15 фото',
+      );
     }
     return this.photosService.create(createDto);
   }

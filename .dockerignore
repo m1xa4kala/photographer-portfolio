@@ -1,0 +1,35 @@
+# Dependencies — installed fresh inside Docker
+node_modules
+**/node_modules
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Host OS / IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+docker-compose.env.example
+
+# Runtime uploads (not needed at build time)
+uploads
+**/uploads
+
+# No need to send pre-built dist — Docker builds it fresh
+frontend/dist
+backend/dist
+
+# Logs
+*.log
+npm-debug.log*

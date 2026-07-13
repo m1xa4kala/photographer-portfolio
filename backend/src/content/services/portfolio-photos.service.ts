@@ -13,8 +13,15 @@ export class PortfolioPhotosService {
     private repo: Repository<PortfolioPhoto>,
   ) {}
 
-  async findAll(): Promise<PortfolioPhoto[]> {
-    return this.repo.find({ order: { orderIndex: 'ASC' } });
+  async findAll(
+    limit: number = 100,
+    offset: number = 0,
+  ): Promise<PortfolioPhoto[]> {
+    return this.repo.find({
+      order: { orderIndex: 'ASC' },
+      take: limit,
+      skip: offset,
+    });
   }
 
   async findOne(id: number): Promise<PortfolioPhoto> {
@@ -25,10 +32,16 @@ export class PortfolioPhotosService {
     return item;
   }
 
-  async findBySession(sessionId: number): Promise<PortfolioPhoto[]> {
+  async findBySession(
+    sessionId: number,
+    limit: number = 100,
+    offset: number = 0,
+  ): Promise<PortfolioPhoto[]> {
     return this.repo.find({
       where: { sessionId },
       order: { orderIndex: 'ASC' },
+      take: limit,
+      skip: offset,
     });
   }
 
@@ -55,8 +68,21 @@ export class PortfolioPhotosService {
   }
 
   async reorder(dto: ReorderDto): Promise<void> {
-    for (const { id, orderIndex } of dto.items) {
-      await this.repo.update(id, { orderIndex });
+    const queryRunner = this.repo.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      for (const { id, orderIndex } of dto.items) {
+        await queryRunner.manager.update(this.repo.metadata.target, id, {
+          orderIndex,
+        });
+      }
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
   }
 }

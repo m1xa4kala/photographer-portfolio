@@ -19,41 +19,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const init = async () => {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        if (!cancelled) setLoading(false);
-        return;
-      }
-      try {
-        const res = await api.get<User>('/auth/me');
-        if (!cancelled) setUser(res.data);
-      } catch {
-        if (!cancelled) {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      api.get<User>('/auth/me')
+        .then(res => setUser(res.data))
+        .catch(() => {
           localStorage.removeItem('access_token');
           setUser(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    init();
-
-    return () => { cancelled = true; };
+        })
+        .finally(() => setLoading(false));
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false);
+    }
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
     const res = await api.post<LoginResponse>('/auth/login', { email, password });
-    const token = res.data.access_token;
-    if (!token) {
-      throw new Error('Неверный email или пароль');
+    localStorage.setItem('access_token', res.data.access_token);
+    try {
+      const me = await api.get<User>('/auth/me');
+      setUser(me.data);
+    } catch {
+      localStorage.removeItem('access_token');
+      throw new Error('Не удалось загрузить профиль');
     }
-    localStorage.setItem('access_token', token);
-    const me = await api.get<User>('/auth/me');
-    setUser(me.data);
   };
 
   const logout = (): void => {

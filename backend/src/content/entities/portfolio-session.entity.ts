@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { PortfolioCategory } from './portfolio-category.entity';
 import { PortfolioPhoto } from './portfolio-photo.entity';
@@ -21,6 +22,7 @@ export class PortfolioSession {
   orderIndex!: number;
 
   @Column()
+  @Index()
   categoryId!: number;
 
   @ManyToOne(() => PortfolioCategory, (category) => category.sessions)
