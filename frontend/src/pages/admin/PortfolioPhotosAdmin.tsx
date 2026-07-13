@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAdminPortfolioPhotos, useAdminPortfolioCategories, useAdminPortfolioSessions } from '../../hooks';
 import { confirmDelete } from '../../utils/confirmDelete';
 import DropZone from '../../components/DropZone';
@@ -9,25 +10,60 @@ import type { PortfolioPhoto } from '../../types';
 import styles from './adminCrud.module.css';
 
 const PortfolioPhotosAdmin: React.FC = () => {
-  const { items, loading, error, createItem, deleteItem, reorderItems } = useAdminPortfolioPhotos();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterCategoryId = searchParams.get('categoryId')
+    ? Number(searchParams.get('categoryId'))
+    : undefined;
+  const filterSessionId = searchParams.get('sessionId')
+    ? Number(searchParams.get('sessionId'))
+    : undefined;
+
+  const { items, loading, error, createItem, deleteItem, reorderItems } =
+    useAdminPortfolioPhotos(filterSessionId);
   const { items: categories } = useAdminPortfolioCategories();
-  const { items: sessions } = useAdminPortfolioSessions();
-  const [bulkSessionId, setBulkSessionId] = useState<number>(0);
-  const [bulkCategoryId, setBulkCategoryId] = useState<number>(0);
+  const { items: allSessions } = useAdminPortfolioSessions();
   const [bulkError, setBulkError] = useState<string | null>(null);
 
-  const selectedSessionPhotos = bulkSessionId
-    ? items.filter(p => p.sessionId === bulkSessionId)
-    : [];
+  // Filter sessions by selected category (client-side, for the dropdown)
+  const filteredSessions = filterCategoryId
+    ? allSessions.filter(s => s.categoryId === filterCategoryId)
+    : allSessions;
+
+  const selectedSessionPhotos = filterSessionId
+    ? items.filter(p => p.sessionId === filterSessionId)
+    : items;
   const photoLimitReached = selectedSessionPhotos.length >= 15;
   const remainingSlots = 15 - selectedSessionPhotos.length;
 
+  const handleCategoryChange = (catId: number) => {
+    const next = new URLSearchParams(searchParams);
+    if (catId) {
+      next.set('categoryId', String(catId));
+    } else {
+      next.delete('categoryId');
+    }
+    // Reset session when category changes
+    next.delete('sessionId');
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleSessionChange = (sessionId: number) => {
+    const next = new URLSearchParams(searchParams);
+    if (sessionId) {
+      next.set('sessionId', String(sessionId));
+    } else {
+      next.delete('sessionId');
+    }
+    setSearchParams(next, { replace: true });
+  };
+
   const handleBulkUpload = async (files: UploadedFileInfo[]) => {
-    if (!bulkSessionId || files.length === 0) return;
+    if (!filterSessionId || files.length === 0) return;
     setBulkError(null);
     for (const { url, name } of files) {
       try {
-        await createItem({ title: name, imageUrl: url, sessionId: bulkSessionId });
+        const title = name.replace(/\.[^.]+$/, '');
+        await createItem({ title, imageUrl: url, sessionId: filterSessionId });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Неизвестная ошибка';
         setBulkError(`Ошибка при сохранении "${name}": ${message}`);
@@ -40,17 +76,13 @@ const PortfolioPhotosAdmin: React.FC = () => {
     await reorderItems(orderedIds.map((id, idx) => ({ id, orderIndex: idx })));
   };
 
-  const bulkFilteredSessions = bulkCategoryId
-    ? sessions.filter(s => s.categoryId === bulkCategoryId)
-    : sessions;
-
   const getSessionName = (sessionId: number) => {
-    const session = sessions.find(s => s.id === sessionId);
+    const session = allSessions.find(s => s.id === sessionId);
     return session ? session.name : '—';
   };
 
   const getCategoryName = (sessionId: number) => {
-    const session = sessions.find(s => s.id === sessionId);
+    const session = allSessions.find(s => s.id === sessionId);
     if (!session) return '—';
     const cat = categories.find(c => c.id === session.categoryId);
     return cat ? cat.name : '—';
@@ -74,34 +106,31 @@ const PortfolioPhotosAdmin: React.FC = () => {
 
       {error && <div className={styles.error}>Ошибка: {error}</div>}
 
-      {/* ===== МАССОВАЯ ЗАГРУЗКА ===== */}
+      {/* ===== ФИЛЬТРЫ И МАССОВАЯ ЗАГРУЗКА ===== */}
       <div className={styles.sectionCard}>
-        <h3>📸 Массовая загрузка фото</h3>
+        <h3>📸 Фильтр и массовая загрузка</h3>
         <div className={styles.formRow}>
           <select
-            value={bulkCategoryId}
-            onChange={e => {
-              setBulkCategoryId(+e.target.value);
-              setBulkSessionId(0);
-            }}
+            value={filterCategoryId ?? 0}
+            onChange={e => handleCategoryChange(+e.target.value)}
           >
-            <option value={0}>Выберите категорию</option>
+            <option value={0}>Все категории</option>
             {categories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
           <select
-            value={bulkSessionId}
-            onChange={e => setBulkSessionId(+e.target.value)}
+            value={filterSessionId ?? 0}
+            onChange={e => handleSessionChange(+e.target.value)}
           >
-            <option value={0}>Выберите фотосессию</option>
-            {bulkFilteredSessions.map(s => (
+            <option value={0}>Все фотосессии</option>
+            {filteredSessions.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
         </div>
         {bulkError && <div className={styles.error}>{bulkError}</div>}
-        {bulkSessionId ? (
+        {filterSessionId ? (
           photoLimitReached ? (
             <p className={styles.limitMessage}>
               ❌ Достигнут лимит в 15 фото для этой сессии.
@@ -113,7 +142,7 @@ const PortfolioPhotosAdmin: React.FC = () => {
             </>
           )
         ) : (
-          <p className={styles.hint}>Сначала выберите категорию и фотосессию</p>
+          <p className={styles.hint}>Выберите фотосессию для загрузки фото</p>
         )}
       </div>
 
