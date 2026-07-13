@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAdminPortfolioSessions, useAdminPortfolioCategories } from '../../hooks';
 import { confirmDelete } from '../../utils/confirmDelete';
 import DraggableTable from '../../components/DraggableTable';
@@ -7,13 +8,31 @@ import type { PortfolioSession } from '../../types';
 import styles from './adminCrud.module.css';
 
 const PortfolioSessionsAdmin: React.FC = () => {
-  const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminPortfolioSessions();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterCategoryId = searchParams.get('categoryId')
+    ? Number(searchParams.get('categoryId'))
+    : undefined;
+
+  const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } =
+    useAdminPortfolioSessions(filterCategoryId);
   const { items: categories } = useAdminPortfolioCategories();
   const [editing, setEditing] = useState<PortfolioSession | null>(null);
   const [form, setForm] = useState<Pick<PortfolioSession, 'name' | 'categoryId'>>({
     name: '',
-    categoryId: 0,
+    categoryId: filterCategoryId ?? 0,
   });
+
+  const handleCategoryFilterChange = (catId: number) => {
+    const next = new URLSearchParams(searchParams);
+    if (catId) {
+      next.set('categoryId', String(catId));
+    } else {
+      next.delete('categoryId');
+    }
+    setSearchParams(next, { replace: true });
+    // Reset form category to match the new filter
+    setForm(prev => ({ ...prev, categoryId: catId }));
+  };
 
   const handleSubmit = async () => {
     if (editing) {
@@ -22,7 +41,7 @@ const PortfolioSessionsAdmin: React.FC = () => {
       await createItem(form);
     }
     setEditing(null);
-    setForm({ name: '', categoryId: 0 });
+    setForm({ name: '', categoryId: filterCategoryId ?? 0 });
   };
 
   const handleReorder = async (orderedIds: number[]) => {
@@ -53,16 +72,16 @@ const PortfolioSessionsAdmin: React.FC = () => {
           onChange={e => setForm({ ...form, name: e.target.value })}
         />
         <select
-          value={form.categoryId}
-          onChange={e => setForm({ ...form, categoryId: +e.target.value })}
+          value={filterCategoryId ?? 0}
+          onChange={e => handleCategoryFilterChange(+e.target.value)}
         >
-          <option value={0}>Выберите категорию</option>
+          <option value={0}>Все категории</option>
           {categories.map(cat => (
             <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
         </select>
         <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
-        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', categoryId: 0 }); }}>Отмена</button>}
+        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', categoryId: filterCategoryId ?? 0 }); }}>Отмена</button>}
       </div>
 
       <DraggableTable
