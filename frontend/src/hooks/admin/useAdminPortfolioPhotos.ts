@@ -14,8 +14,6 @@ interface UseAdminPortfolioPhotosReturn {
 }
 
 export const useAdminPortfolioPhotos = (sessionId?: number): UseAdminPortfolioPhotosReturn => {
-  const url = sessionId
-    ? `/admin/portfolio-photos?sessionId=${sessionId}`
-    : '/admin/portfolio-photos';
-  return useAdminCrud<PortfolioPhoto>(url);
+  const queryParams = sessionId ? { sessionId: String(sessionId) } : undefined;
+  return useAdminCrud<PortfolioPhoto>('/admin/portfolio-photos', queryParams);
 };

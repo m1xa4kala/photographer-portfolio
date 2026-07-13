@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 
 export interface ReorderItem {
@@ -20,24 +20,41 @@ interface UseAdminCrudResult<T extends { id: number }> {
 /**
  * Generic CRUD hook for admin endpoints.
  * Expects RESTful routes: {baseUrl}, {baseUrl}/:id, {baseUrl}/reorder
+ *
+ * @param baseUrl - The base API path (e.g. '/admin/portfolio-sessions')
+ * @param queryParams - Optional query params used ONLY for GET (fetch/initial load).
+ *                      Mutations (create, update, delete, reorder) use the clean baseUrl.
  */
 export const useAdminCrud = <T extends { id: number }>(
   baseUrl: string,
+  queryParams?: Record<string, string>,
 ): UseAdminCrudResult<T> => {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cancelledRef = useRef(false);
+
+  const buildUrl = () => {
+    if (!queryParams || Object.keys(queryParams).length === 0) return baseUrl;
+    const qs = new URLSearchParams(queryParams).toString();
+    return `${baseUrl}?${qs}`;
+  };
+
+  const queryKey = queryParams ? JSON.stringify(queryParams) : '';
 
   const fetchItems = async () => {
+    cancelledRef.current = false;
     setLoading(true);
     try {
-      const res = await api.get<T[]>(baseUrl);
-      setItems(res.data);
-      setError(null);
+      const res = await api.get<T[]>(buildUrl());
+      if (!cancelledRef.current) {
+        setItems(res.data);
+        setError(null);
+      }
     } catch {
-      setError('Не удалось загрузить данные');
+      if (!cancelledRef.current) setError('Не удалось загрузить данные');
     } finally {
-      setLoading(false);
+      if (!cancelledRef.current) setLoading(false);
     }
   };
 
@@ -47,7 +64,7 @@ export const useAdminCrud = <T extends { id: number }>(
     const init = async () => {
       setLoading(true);
       try {
-        const res = await api.get<T[]>(baseUrl);
+        const res = await api.get<T[]>(buildUrl());
         if (!cancelled) {
           setItems(res.data);
           setError(null);
@@ -61,9 +78,13 @@ export const useAdminCrud = <T extends { id: number }>(
 
     init();
 
-    return () => { cancelled = true; };
-  }, [baseUrl]);
+    return () => {
+      cancelled = true;
+      cancelledRef.current = true;
+    };
+  }, [baseUrl, queryKey]);
 
+  // Mutations use baseUrl (without query params) for POST/PATCH/DELETE
   const createItem = async (data: Omit<T, 'id'>) => {
     await api.post(baseUrl, data);
     await fetchItems();

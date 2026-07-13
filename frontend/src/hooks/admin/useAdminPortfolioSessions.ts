@@ -14,8 +14,6 @@ interface UseAdminPortfolioSessionsReturn {
 }
 
 export const useAdminPortfolioSessions = (categoryId?: number): UseAdminPortfolioSessionsReturn => {
-  const url = categoryId
-    ? `/admin/portfolio-sessions?categoryId=${categoryId}`
-    : '/admin/portfolio-sessions';
-  return useAdminCrud<PortfolioSession>(url);
+  const queryParams = categoryId ? { categoryId: String(categoryId) } : undefined;
+  return useAdminCrud<PortfolioSession>('/admin/portfolio-sessions', queryParams);
 };

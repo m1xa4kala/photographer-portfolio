@@ -80,9 +80,17 @@ const PortfolioSessionsAdmin: React.FC = () => {
             <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
         </select>
-        <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
+        <button onClick={handleSubmit} disabled={!filterCategoryId && !editing}>
+          {editing ? 'Обновить' : 'Создать'}
+        </button>
         {editing && <button onClick={() => { setEditing(null); setForm({ name: '', categoryId: filterCategoryId ?? 0 }); }}>Отмена</button>}
       </div>
+
+      {!filterCategoryId && !editing && (
+        <p style={{ color: 'var(--admin-text-muted)', fontSize: '0.9rem', padding: '0.5rem 0' }}>
+          Выберите категорию для создания новой фотосессии
+        </p>
+      )}
 
       <DraggableTable
         columns={columns}

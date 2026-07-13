@@ -29,9 +29,7 @@ const PortfolioPhotosAdmin: React.FC = () => {
     ? allSessions.filter(s => s.categoryId === filterCategoryId)
     : allSessions;
 
-  const selectedSessionPhotos = filterSessionId
-    ? items.filter(p => p.sessionId === filterSessionId)
-    : items;
+  const selectedSessionPhotos = items;
   const photoLimitReached = selectedSessionPhotos.length >= 15;
   const remainingSlots = 15 - selectedSessionPhotos.length;
 
