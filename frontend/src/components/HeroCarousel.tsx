@@ -43,7 +43,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     };
   }, []);
 
-  const VISIBLE_COUNT = viewport === 'mobile' ? 1 : viewport === 'tablet' ? 2 : 3;
+  const VISIBLE_COUNT = viewport === 'mobile' ? 1 : viewport === 'tablet' ? 2 : DESKTOP_VISIBLE;
   const SLIDE_WIDTH = 100 / VISIBLE_COUNT;
 
   const total = photos.length;
