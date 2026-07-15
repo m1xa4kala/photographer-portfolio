@@ -133,7 +133,6 @@
 
 .socials a {
   margin: 0 0.5rem;
-  color: var(--accent);
 }
 
 @media (max-width: 768px) {

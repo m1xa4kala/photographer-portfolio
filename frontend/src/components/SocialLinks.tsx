@@ -65,7 +65,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ links, className, iconSize = 
             className={styles.link}
             style={brandColor ? { color: brandColor } : undefined}
           >
-            <IconComponent size={iconSize} />
+            <IconComponent size={iconSize} color={brandColor} />
           </a>
         );
       })}
