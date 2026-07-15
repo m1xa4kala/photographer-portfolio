@@ -60,9 +60,7 @@ async function bootstrap() {
   });
 
   await app.listen(port);
-  console.log(
-    `Application running on port ${port} (${nodeEnv}, uploadsDir - ${uploadsDir})`,
-  );
+  console.log(`Application running on port ${port} (${nodeEnv})`);
 }
 
 bootstrap().catch((error) => {

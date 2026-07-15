@@ -33,13 +33,13 @@ RUN cd backend && npm ci --omit=dev
 # Create uploads directory for runtime
 RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 
-# Switch to non-root user for security
-USER node
-
-# Healthcheck
+# Healthcheck (before switching to non-root — apk needs root)
 RUN apk add --no-cache curl
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Switch to non-root user for security
+USER node
 
 EXPOSE 3000
 

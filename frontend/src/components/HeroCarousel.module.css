@@ -154,7 +154,7 @@
 
 @media (max-width: 767px) {
   .carousel {
-    height: calc(100dvh + 2px);
+    height: calc(100dvh + 6px);
     margin-top: calc(-1rem - var(--header-height));
   }
 

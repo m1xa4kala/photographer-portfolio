@@ -19,7 +19,7 @@
     "migration:run": "cd backend && npm run migration:run",
     "migration:generate": "cd backend && npm run migration:generate",
     "lint": "cd backend && npm run lint && cd ../frontend && npm run lint",
-    "docker:build": "docker compose --profile prod build",
+    "docker:build": "docker compose --profile prod build --no-cache",
     "docker:up": "docker compose --profile prod up -d",
     "docker:down": "docker compose --profile dev --profile prod down"
   },
