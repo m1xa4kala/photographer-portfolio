@@ -13,6 +13,17 @@
   composes: error from '../../styles/shared-admin.module.css';
 }
 
+.successMessage {
+  background: rgba(25, 135, 84, 0.1);
+  border: 1px solid var(--admin-success, #198754);
+  color: var(--admin-success, #198754);
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .sectionCard {
   composes: card from '../../styles/shared-admin.module.css';
 }
@@ -88,8 +99,25 @@
   transition: background 0.2s;
 }
 
-.form button:hover {
+.form button:hover:not(:disabled) {
   background: var(--accent-hover);
+}
+
+.form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.inputError {
+  border-color: var(--admin-danger, #dc3545) !important;
+  outline: 1px solid var(--admin-danger, #dc3545);
+}
+
+.validationError {
+  color: var(--admin-danger, #dc3545);
+  font-size: 0.85rem;
+  width: 100%;
+  margin: -0.5rem 0 0 0;
 }
 
 .table {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import api from '../services/api';
 import { type PortfolioCategory, type PortfolioSession, type PortfolioPhoto } from '../types';
 
@@ -12,6 +12,7 @@ interface UsePortfolioReturn {
   setActiveSessionId: (id: number | null) => void;
   filteredSessions: PortfolioSession[];
   filteredPhotos: PortfolioPhoto[];
+  coverImageMap: Record<number, PortfolioPhoto | undefined>;
   loading: boolean;
   error: string | null;
   refetch: () => void;
@@ -61,20 +62,34 @@ export const usePortfolio = (): UsePortfolioReturn => {
     fetchData();
   }, [fetchData]);
 
-  const filteredSessions = activeCategoryId
-    ? sessions.filter(session => session.categoryId === activeCategoryId)
-    : sessions;
+  const filteredSessions = useMemo(
+    () =>
+      activeCategoryId
+        ? sessions.filter(session => session.categoryId === activeCategoryId)
+        : sessions,
+    [activeCategoryId, sessions],
+  );
 
-  const filteredPhotos = activeSessionId
-    ? photos.filter(photo => photo.sessionId === activeSessionId)
-    : activeCategoryId
-      ? photos.filter(photo => {
-          const sessionIds = sessions
-            .filter(s => s.categoryId === activeCategoryId)
-            .map(s => s.id);
-          return sessionIds.includes(photo.sessionId);
-        })
-      : photos;
+  const filteredPhotos = useMemo(() => {
+    if (activeSessionId) {
+      return photos.filter(photo => photo.sessionId === activeSessionId);
+    }
+    if (activeCategoryId) {
+      const sessionIds = sessions
+        .filter(s => s.categoryId === activeCategoryId)
+        .map(s => s.id);
+      return photos.filter(photo => sessionIds.includes(photo.sessionId));
+    }
+    return photos;
+  }, [activeSessionId, activeCategoryId, sessions, photos]);
+
+  const coverImageMap = useMemo(() => {
+    const map: Record<number, PortfolioPhoto | undefined> = {};
+    for (const session of sessions) {
+      map[session.id] = photos.find(photo => photo.sessionId === session.id);
+    }
+    return map;
+  }, [sessions, photos]);
 
   return {
     categories,
@@ -86,6 +101,7 @@ export const usePortfolio = (): UsePortfolioReturn => {
     setActiveSessionId,
     filteredSessions,
     filteredPhotos,
+    coverImageMap,
     loading,
     error,
     refetch: fetchData,

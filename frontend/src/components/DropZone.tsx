@@ -1,5 +1,6 @@
-import { useState, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useRef, useEffect, type DragEvent, type ChangeEvent } from 'react';
 import api from '../services/api';
+import { useUploadStatus } from '../hooks/useUploadStatus';
 import styles from './DropZone.module.css';
 
 interface FileWithPreview {
@@ -17,24 +18,73 @@ export interface UploadedFileInfo {
 
 interface DropZoneProps {
   onUploadComplete?: (files: UploadedFileInfo[]) => void;
+  /** Custom upload URL (e.g. for direct upload to a session endpoint). Defaults to /upload/multiple */
+  uploadUrl?: string;
+  /** Show preview thumbnails. Default true. Set false for large batches (e.g. full sessions) */
+  showPreviews?: boolean;
+  /** Called when an upload error occurs */
+  onUploadError?: (error: string) => void;
 }
 
-const DropZone: React.FC<DropZoneProps> = ({ onUploadComplete }) => {
+const BATCH_SIZE = 50;
+const MAX_BATCH_RETRIES = 3;
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+function isNetworkError(err: any): boolean {
+  if (!err) return false;
+  // Axios timeout (ECONNABORTED) or network error (no response received)
+  if (err.code === 'ECONNABORTED' || err.code === 'ERR_NETWORK') return true;
+  if (!err.response) return true;
+  return false;
+}
+
+const DropZone: React.FC<DropZoneProps> = ({
+  onUploadComplete,
+  uploadUrl,
+  showPreviews = true,
+  onUploadError,
+}) => {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [uploadId, setUploadId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const previewUrlsRef = useRef<string[]>([]);
+
+  // Revoke all blob URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  const { status, progress, isDone } = useUploadStatus(uploadId);
+
+  // When the server reports completion, stop the uploading state
+  useEffect(() => {
+    if (isDone) {
+      setUploading(false);
+    }
+  }, [isDone]);
 
   const addFiles = (newFiles: FileList) => {
+    setErrorMessage(null);
     const entries: FileWithPreview[] = Array.from(newFiles)
       .filter((f) => f.type.startsWith('image/'))
-      .map((file) => ({
-        file,
-        preview: URL.createObjectURL(file),
-        uploaded: false,
-        url: '',
-        error: false,
-      }));
+      .map((file) => {
+        const preview = URL.createObjectURL(file);
+        previewUrlsRef.current.push(preview);
+        return {
+          file,
+          preview,
+          uploaded: false,
+          url: '',
+          error: false,
+        };
+      });
     setFiles((prev) => [...prev, ...entries]);
   };
 
@@ -63,6 +113,7 @@ const DropZone: React.FC<DropZoneProps> = ({ onUploadComplete }) => {
   const removeFile = (index: number) => {
     const entry = files[index];
     URL.revokeObjectURL(entry.preview);
+    previewUrlsRef.current = previewUrlsRef.current.filter(url => url !== entry.preview);
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -71,44 +122,137 @@ const DropZone: React.FC<DropZoneProps> = ({ onUploadComplete }) => {
     if (toUpload.length === 0) return;
 
     setUploading(true);
-    const formData = new FormData();
-    toUpload.forEach((f) => formData.append('files', f.file));
+    setErrorMessage(null);
+    setUploadProgress(null);
+
+    // Generate a UUID for progress tracking
+    const id = crypto.randomUUID();
+    setUploadId(id);
+
+    const targetUrl = uploadUrl || '/upload/multiple';
+    const urlWithId = `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}uploadId=${id}&total=${toUpload.length}`;
+    const allUploaded: UploadedFileInfo[] = [];
+    const totalBatches = Math.ceil(toUpload.length / BATCH_SIZE);
+    let hasError = false;
 
     try {
-      // 1. Загружаем файлы на сервер
-      const res = await api.post<{ urls: string[] }>('/upload/multiple', formData);
-      const urls = res.data.urls;
+      for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
+        const start = batchIdx * BATCH_SIZE;
+        const end = Math.min(start + BATCH_SIZE, toUpload.length);
+        const batch = toUpload.slice(start, end);
 
-      // 2. Создаём записи в БД (onUploadComplete)
-      let urlIdx = 0;
-      const uploadedInfo: UploadedFileInfo[] = toUpload.map((f) => {
-        const url = urls[urlIdx++] || '';
-        const name = f.file.name;
-        return { url, name };
-      });
+        if (totalBatches > 1) {
+          setUploadProgress(
+            `Загрузка... ${start + 1}–${end} из ${toUpload.length} (пакет ${batchIdx + 1}/${totalBatches})`
+          );
+        } else {
+          setUploadProgress(`Загрузка... ${toUpload.length} файлов`);
+        }
 
-      await onUploadComplete?.(uploadedInfo);
+        const formData = new FormData();
+        batch.forEach((f) => formData.append('files', f.file));
 
-      // 3. Только после успешного сохранения в БД — помечаем как загруженные
-      setFiles((prev) => {
-        let idx = 0;
-        return prev.map((f) => {
-          if (!f.uploaded && !f.error) {
-            const info = uploadedInfo[idx++];
-            if (!info) return f;
-            return { ...f, uploaded: true, url: info.url, error: !info.url };
+        // Retry loop for this batch
+        let batchSuccess = false;
+        for (let attempt = 0; attempt <= MAX_BATCH_RETRIES; attempt++) {
+          try {
+            const res = await api.post<{ urls?: string[] } | any[]>(urlWithId, formData);
+            batchSuccess = true;
+
+            // Handle different response formats
+            if (Array.isArray(res.data)) {
+              // Direct upload response (e.g. /admin/full-sessions/:id/upload-files returns array)
+              for (let i = 0; i < batch.length; i++) {
+                allUploaded.push({ url: '', name: batch[i].file.name });
+              }
+            } else if (res.data.urls) {
+              // /upload/multiple response: { urls: string[] }
+              const urls = res.data.urls;
+              for (let i = 0; i < batch.length; i++) {
+                const url = urls[i] || '';
+                allUploaded.push({ url, name: batch[i].file.name });
+              }
+            } else {
+              // Fallback: just mark as uploaded
+              for (const f of batch) {
+                allUploaded.push({ url: '', name: f.file.name });
+              }
+            }
+
+            // Mark batch files as uploaded immediately
+            setFiles((prev) => {
+              let fileIdx = 0;
+              return prev.map((f) => {
+                if (!f.uploaded && !f.error && fileIdx < batch.length) {
+                  const info = allUploaded[allUploaded.length - batch.length + fileIdx];
+                  fileIdx++;
+                  // Upload succeeded at the HTTP level — mark as uploaded.
+                  // `url` may be empty for endpoints that don't return URLs
+                  // (e.g. /admin/full-sessions/:id/upload-files returns an array).
+                  // error=true should only mean the request itself failed.
+                  return { ...f, uploaded: true, url: info?.url || '', error: false };
+                }
+                return f;
+              });
+            });
+
+            break; // Success — exit retry loop
+          } catch (err: any) {
+            if (attempt < MAX_BATCH_RETRIES && isNetworkError(err)) {
+              const wait = 1000 * Math.pow(2, attempt); // 1s, 2s, 4s
+              setUploadProgress(
+                `Загрузка... ${start + 1}–${end} из ${toUpload.length} (попытка ${attempt + 2}/${MAX_BATCH_RETRIES + 1}, сеть нестабильна)`
+              );
+              await delay(wait);
+              continue;
+            }
+            // Non-retryable error or exhausted retries
+            throw err;
           }
-          return f;
-        });
-      });
-    } catch {
-      setFiles((prev) =>
-        prev.map((f) => (f.uploaded ? f : { ...f, error: true })),
-      );
+        }
+
+        if (!batchSuccess) {
+          throw new Error('Не удалось загрузить пакет после всех попыток');
+        }
+      }
+
+      // All batches uploaded successfully — signal completion to the server
+      // so the polling hook transitions status to 'completed' and the UX shows
+      // the progress bar reaching 100% before it disappears.
+      try {
+        await api.post(`/upload/status/${id}/complete`);
+      } catch {
+        // Non-critical — all files are already on disk.
+        // The polling hook will eventually time out if this fails.
+      }
+
+      setUploadProgress(null);
+      setUploadProgress('Все файлы успешно загружены ✓');
+
+      await onUploadComplete?.(allUploaded);
+    } catch (err: any) {
+      hasError = true;
+      const message =
+        err?.response?.status
+          ? `Ошибка ${err.response.status}: ${err.response.data?.message || err.message || 'Неизвестная ошибка'}`
+          : err?.message || 'Неизвестная ошибка при загрузке';
+      setErrorMessage(message);
+      setUploadProgress(null); // Clear any success progress so it doesn't show alongside the error
+      onUploadError?.(message);
+      // Backend already rolled back via S3 deletes — don't mark files on the client
+      // so the user can retry cleanly
     } finally {
-      setUploading(false);
+      if (hasError) {
+        setUploading(false);
+        setUploadId(null);
+      }
+      // On success, keep uploading=true until the polling hook reports completion
     }
   };
+
+  const pendingCount = files.filter((f) => !f.uploaded && !f.error).length;
+  const uploadedCount = files.filter((f) => f.uploaded).length;
+  const erroredCount = files.filter((f) => f.error).length;
 
   return (
     <div className={styles.dropZone}>
@@ -138,7 +282,60 @@ const DropZone: React.FC<DropZoneProps> = ({ onUploadComplete }) => {
         </div>
       </div>
 
-      {files.length > 0 && (
+      {/* Error message */}
+      {errorMessage && (
+        <div className={styles.errorMessage} role="alert">
+          ❌ {errorMessage}
+        </div>
+      )}
+
+      {/* Progress message */}
+      {uploadProgress && (
+        <div className={`${styles.progressMessage} ${uploadProgress.includes('успешно') ? styles.successMessage : ''}`} role="alert">
+          {uploadProgress.includes('успешно') ? '✅ ' : '⏳ '}{uploadProgress}
+        </div>
+      )}
+      {/* Progress tracking bar from server status */}
+      {uploading && uploadId && status && (
+        <div className={styles.progressSection} aria-live="polite">
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{ width: `${Math.min(progress, 100)}%` }}
+            />
+          </div>
+          <div className={styles.progressInfo}>
+            Загружено: {status.completed}/{status.total} файлов
+            {status.failed > 0 && (
+              <span className={styles.errorBadge}>  Ошибок: {status.failed}</span>
+            )}
+          </div>
+          {status.retryCount > 0 && (
+            <div className={styles.retryBadge}>
+              Повторных попыток: {status.retryCount}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* File count info (always visible when files are selected) */}
+      {files.length > 0 && !showPreviews && (
+        <div className={styles.fileCountInfo} aria-live="polite">
+          <p><strong>{files.length}</strong> файлов выбрано</p>
+          {uploadedCount > 0 && !errorMessage && (
+            <p className={styles.uploadedInfo}>✅ {uploadedCount} загружено</p>
+          )}
+          {uploadedCount > 0 && errorMessage && (
+            <p className={styles.erroredInfo}>⚠️ {uploadedCount} загружено с ошибками</p>
+          )}
+          {erroredCount > 0 && (
+            <p className={styles.erroredInfo}>❌ {erroredCount} с ошибкой</p>
+          )}
+        </div>
+      )}
+
+      {/* Preview grid (only when showPreviews is true) */}
+      {showPreviews && files.length > 0 && (
         <div className={styles.previewGrid}>
           {files.map((entry, i) => (
             <div key={i} className={`${styles.previewItem} ${entry.error ? styles.error : ''}`}>
@@ -148,6 +345,7 @@ const DropZone: React.FC<DropZoneProps> = ({ onUploadComplete }) => {
                 onClick={() => removeFile(i)}
                 disabled={uploading}
                 title="Удалить"
+                aria-label="Удалить"
               >
                 ✕
               </button>
@@ -158,14 +356,26 @@ const DropZone: React.FC<DropZoneProps> = ({ onUploadComplete }) => {
         </div>
       )}
 
-      {files.some((f) => !f.uploaded && !f.error) && (
+      {/* Upload button */}
+      {pendingCount > 0 && (
         <button className={styles.uploadBtn} onClick={uploadAll} disabled={uploading}>
-          {uploading ? 'Загрузка...' : `Загрузить ${files.filter((f) => !f.uploaded && !f.error).length} фото`}
+          {uploading
+            ? 'Загрузка...'
+            : `Загрузить ${pendingCount} ${pendingCount === 1 ? 'фото' : 'фото'}`
+          }
         </button>
       )}
 
-      {files.every((f) => f.uploaded) && files.length > 0 && (
-        <p className={styles.successText}>✓ Все фото загружены</p>
+      {/* Success message when all files are uploaded */}
+      {uploadedCount > 0 && pendingCount === 0 && erroredCount === 0 && (
+        <p className={styles.successText} aria-live="polite">✅ Все {uploadedCount} фото загружены</p>
+      )}
+
+      {erroredCount > 0 && pendingCount === 0 && (
+        <p className={styles.errorText} role="alert">
+          ❌ {erroredCount} {erroredCount === 1 ? 'фото не загружено' : 'фото не загружены'}.
+          Исправьте ошибку и попробуйте снова.
+        </p>
       )}
     </div>
   );

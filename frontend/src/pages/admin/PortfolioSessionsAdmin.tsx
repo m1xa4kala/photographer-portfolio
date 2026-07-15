@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminPortfolioSessions, useAdminPortfolioCategories } from '../../hooks';
-import { confirmDelete } from '../../utils/confirmDelete';
+import { useConfirm } from '../../hooks/useConfirm';
 import DraggableTable from '../../components/DraggableTable';
 import type { Column } from '../../components/DraggableTable';
 import type { PortfolioSession } from '../../types';
@@ -16,11 +16,15 @@ const PortfolioSessionsAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } =
     useAdminPortfolioSessions(filterCategoryId);
   const { items: categories } = useAdminPortfolioCategories();
+  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<PortfolioSession | null>(null);
   const [form, setForm] = useState<Pick<PortfolioSession, 'name' | 'categoryId'>>({
     name: '',
     categoryId: filterCategoryId ?? 0,
   });
+  const [touched, setTouched] = useState(false);
+
+  const isFormValid = form.name.trim().length > 0;
 
   const handleCategoryFilterChange = (catId: number) => {
     const next = new URLSearchParams(searchParams);
@@ -69,7 +73,8 @@ const PortfolioSessionsAdmin: React.FC = () => {
           type="text"
           placeholder="Название фотосессии"
           value={form.name}
-          onChange={e => setForm({ ...form, name: e.target.value })}
+          onChange={e => { setForm({ ...form, name: e.target.value }); setTouched(true); }}
+          className={!form.name.trim() && touched ? styles.inputError : ''}
         />
         <select
           value={filterCategoryId ?? 0}
@@ -80,10 +85,11 @@ const PortfolioSessionsAdmin: React.FC = () => {
             <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
         </select>
-        <button onClick={handleSubmit} disabled={!filterCategoryId && !editing}>
+        <button onClick={handleSubmit} disabled={!isFormValid || (!filterCategoryId && !editing)}>
           {editing ? 'Обновить' : 'Создать'}
         </button>
-        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', categoryId: filterCategoryId ?? 0 }); }}>Отмена</button>}
+        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', categoryId: filterCategoryId ?? 0 }); setTouched(false); }}>Отмена</button>}
+        {touched && !isFormValid && <p className={styles.validationError}>Заполните название фотосессии</p>}
       </div>
 
       {!filterCategoryId && !editing && (
@@ -99,18 +105,19 @@ const PortfolioSessionsAdmin: React.FC = () => {
         onReorder={handleReorder}
         actions={(item) => (
           <>
-            <button onClick={() => {
+            <button aria-label="Редактировать" onClick={() => {
               setEditing(item);
               setForm({ name: item.name, categoryId: item.categoryId });
             }}>✏️</button>
-            <button onClick={() => {
-              if (confirmDelete(`сессию "${item.name}" (все фото в ней удалятся)`)) {
-                deleteItem(item.id);
+            <button aria-label="Удалить" onClick={async () => {
+              if (await confirm(`Удалить сессию "${item.name}"? Все фото в ней тоже удалятся.`)) {
+                await deleteItem(item.id);
               }
             }}>🗑️</button>
           </>
         )}
       />
+      <ConfirmDialogComponent />
     </div>
   );
 };

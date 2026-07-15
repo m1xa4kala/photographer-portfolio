@@ -43,7 +43,6 @@ export const useAdminCrud = <T extends { id: number }>(
   const queryKey = queryParams ? JSON.stringify(queryParams) : '';
 
   const fetchItems = async () => {
-    cancelledRef.current = false;
     setLoading(true);
     try {
       const res = await api.get<T[]>(buildUrl());
@@ -61,6 +60,7 @@ export const useAdminCrud = <T extends { id: number }>(
   useEffect(() => {
     let cancelled = false;
 
+    cancelledRef.current = false;
     const init = async () => {
       setLoading(true);
       try {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAdminBestPhotos } from '../../hooks';
-import { confirmDelete } from '../../utils/confirmDelete';
+import { useConfirm } from '../../hooks/useConfirm';
 import DropZone from '../../components/DropZone';
 import type { UploadedFileInfo } from '../../components/DropZone';
 import DraggableTable from '../../components/DraggableTable';
@@ -9,6 +9,7 @@ import styles from './adminCrud.module.css';
 
 const BestPhotosAdmin: React.FC = () => {
   const { items, loading, error, createItem, deleteItem, reorderItems } = useAdminBestPhotos();
+  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [bulkError, setBulkError] = useState<string | null>(null);
 
   const handleBulkUpload = async (files: UploadedFileInfo[]) => {
@@ -20,13 +21,13 @@ const BestPhotosAdmin: React.FC = () => {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Неизвестная ошибка';
         setBulkError(`Ошибка при сохранении "${name}": ${message}`);
-        return;
+        continue;
       }
     }
   };
 
   const handleDelete = async (id: number, title: string) => {
-    if (confirmDelete(title)) {
+    if (await confirm(`Удалить "${title}"? Это действие нельзя отменить.`)) {
       await deleteItem(id);
     }
   };
@@ -41,7 +42,7 @@ const BestPhotosAdmin: React.FC = () => {
     {
       key: 'image',
       header: 'Изображение',
-      render: (item) => item.imageUrl ? <img src={item.imageUrl} width="50" /> : '—',
+      render: (item) => item.imageUrl ? <img src={item.imageUrl} alt="" width="50" /> : '—',
     },
   ];
 
@@ -63,9 +64,10 @@ const BestPhotosAdmin: React.FC = () => {
         loading={loading}
         onReorder={handleReorder}
         actions={(item) => (
-          <button onClick={() => handleDelete(item.id, item.title)}>🗑️</button>
+          <button aria-label="Удалить" onClick={() => handleDelete(item.id, item.title)}>🗑️</button>
         )}
       />
+    <ConfirmDialogComponent />
     </div>
   );
 };

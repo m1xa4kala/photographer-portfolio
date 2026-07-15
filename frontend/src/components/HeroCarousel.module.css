@@ -56,12 +56,19 @@
   z-index: 10;
 }
 
-.carousel:hover .arrow {
+.carousel:hover .arrow,
+.arrow:focus-visible {
   opacity: 1;
 }
 
 .arrow:hover {
   background: rgba(0, 0, 0, 0.8);
+}
+
+.arrow:focus-visible {
+  background: rgba(0, 0, 0, 0.8);
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .arrowLeft {

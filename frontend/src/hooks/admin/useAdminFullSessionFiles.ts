@@ -7,7 +7,6 @@ interface UseAdminFullSessionFilesReturn {
   loading: boolean;
   error: string | null;
   fetchFiles: (sessionId: number) => Promise<void>;
-  uploadFiles: (sessionId: number, fileList: File[]) => Promise<void>;
   deleteFile: (sessionId: number, fileId: number) => Promise<void>;
 }
 
@@ -29,21 +28,6 @@ export const useAdminFullSessionFiles = (): UseAdminFullSessionFilesReturn => {
     }
   }, []);
 
-  const uploadFiles = useCallback(async (sessionId: number, fileList: File[]) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-      fileList.forEach(f => formData.append('files', f));
-      await api.post(`/admin/full-sessions/${sessionId}/upload-files`, formData);
-      await fetchFiles(sessionId);
-    } catch {
-      setError('Не удалось загрузить файлы');
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchFiles]);
-
   const deleteFile = useCallback(async (sessionId: number, fileId: number) => {
     try {
       await api.delete(`/admin/full-sessions/${sessionId}/files/${fileId}`);
@@ -53,5 +37,5 @@ export const useAdminFullSessionFiles = (): UseAdminFullSessionFilesReturn => {
     }
   }, [fetchFiles]);
 
-  return { files, loading, error, fetchFiles, uploadFiles, deleteFile };
+  return { files, loading, error, fetchFiles, deleteFile };
 };

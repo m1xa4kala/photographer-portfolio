@@ -57,6 +57,14 @@ export interface LoginResponse {
   access_token: string;
 }
 
+export interface SocialLink {
+  id: number;
+  platform: string;
+  url: string;
+  iconName: string;
+  orderIndex?: number;
+}
+
 export interface FullSession {
   id: number;
   title: string;
