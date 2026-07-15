@@ -4,8 +4,9 @@ import type { BestPhoto } from '../types';
 import ImageWithSkeleton from './ImageWithSkeleton';
 import styles from './HeroCarousel.module.css';
 
-const VISIBLE_COUNT = 3;
-const SLIDE_WIDTH = 100 / VISIBLE_COUNT;
+const MOBILE_BREAKPOINT = 768;
+const TABLET_BREAKPOINT = 1024;
+const DESKTOP_VISIBLE = 3;
 const TRANSITION_DURATION = 600;
 const SAFETY_FALLOUT = TRANSITION_DURATION + 100;
 
@@ -18,6 +19,33 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
   photos,
   autoPlayInterval = 6000,
 }) => {
+  const [viewport, setViewport] = useState<'mobile' | 'tablet' | 'desktop'>(() => {
+    if (window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`).matches) return 'mobile';
+    if (window.matchMedia(`(max-width: ${TABLET_BREAKPOINT - 1}px)`).matches) return 'tablet';
+    return 'desktop';
+  });
+
+  useEffect(() => {
+    const mobileMql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const tabletMql = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT}px) and (max-width: ${TABLET_BREAKPOINT - 1}px)`);
+
+    const handleChange = () => {
+      if (mobileMql.matches) setViewport('mobile');
+      else if (tabletMql.matches) setViewport('tablet');
+      else setViewport('desktop');
+    };
+
+    mobileMql.addEventListener('change', handleChange);
+    tabletMql.addEventListener('change', handleChange);
+    return () => {
+      mobileMql.removeEventListener('change', handleChange);
+      tabletMql.removeEventListener('change', handleChange);
+    };
+  }, []);
+
+  const VISIBLE_COUNT = viewport === 'mobile' ? 1 : viewport === 'tablet' ? 2 : 3;
+  const SLIDE_WIDTH = 100 / VISIBLE_COUNT;
+
   const total = photos.length;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isAnimating = useRef(false);
@@ -34,7 +62,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
       ...photos,
       ...photos.slice(0, VISIBLE_COUNT),
     ];
-  }, [photos, total]);
+  }, [photos, total, VISIBLE_COUNT]);
 
   const [current, setCurrent] = useState(0);
   const currentRef = useRef(current);
@@ -51,10 +79,11 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     if (total > VISIBLE_COUNT) {
       // Отключаем transition, чтобы начальный скачок был невидимым
       snapPending.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTransitionEnabled(false);
       setCurrent(VISIBLE_COUNT);
     }
-  }, [total]);
+  }, [total, VISIBLE_COUNT]);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -102,7 +131,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
       // Нормальный переход — просто снимаем блокировку
       isAnimating.current = false;
     }
-  }, [total, snapTo]);
+  }, [total, snapTo, VISIBLE_COUNT]);
 
   const navigate = useCallback((direction: 1 | -1) => {
     if (isAnimating.current || total === 0) return;
@@ -122,7 +151,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     setTimeout(() => {
       isAnimating.current = false;
     }, SAFETY_FALLOUT);
-  }, [total]);
+  }, [total, VISIBLE_COUNT]);
 
   const next = useCallback(() => navigate(1), [navigate]);
   const prev = useCallback(() => navigate(-1), [navigate]);
@@ -194,7 +223,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
           <div
             key={i}
             className={styles.slide}
-            style={{ minWidth: `${SLIDE_WIDTH}%` }}
+            style={{ minWidth: `${SLIDE_WIDTH}%`, width: `${SLIDE_WIDTH}%` }}
           >
             <ImageWithSkeleton src={photo.imageUrl} alt={photo.title} loading="eager" />
           </div>
