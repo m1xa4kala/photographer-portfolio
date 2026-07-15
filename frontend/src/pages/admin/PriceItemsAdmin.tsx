@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAdminPriceItems } from '../../hooks';
-import { confirmDelete } from '../../utils/confirmDelete';
+import { useConfirm } from '../../hooks/useConfirm';
 import DraggableTable from '../../components/DraggableTable';
 import type { Column } from '../../components/DraggableTable';
 import type { PriceItem } from '../../types';
@@ -8,8 +8,12 @@ import styles from './adminCrud.module.css';
 
 const PriceItemsAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminPriceItems();
+  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<PriceItem | null>(null);
   const [form, setForm] = useState<Pick<PriceItem, 'name' | 'description' | 'price'>>({ name: '', description: '', price: '' });
+  const [touched, setTouched] = useState(false);
+
+  const isFormValid = form.name.trim().length > 0 && form.price.trim().length > 0;
 
   const handleSubmit = async () => {
     if (editing) {
@@ -43,7 +47,8 @@ const PriceItemsAdmin: React.FC = () => {
           type="text"
           placeholder="Название услуги"
           value={form.name}
-          onChange={e => setForm({ ...form, name: e.target.value })}
+          onChange={e => { setForm({ ...form, name: e.target.value }); setTouched(true); }}
+          className={!form.name.trim() && touched ? styles.inputError : ''}
         />
         <textarea
           placeholder="Описание"
@@ -54,10 +59,12 @@ const PriceItemsAdmin: React.FC = () => {
           type="text"
           placeholder="Цена (например, 8 000)"
           value={form.price}
-          onChange={e => setForm({ ...form, price: e.target.value })}
+          onChange={e => { setForm({ ...form, price: e.target.value }); setTouched(true); }}
+          className={!form.price.trim() && touched ? styles.inputError : ''}
         />
-        <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
-        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', description: '', price: '' }); }}>Отмена</button>}
+        <button onClick={handleSubmit} disabled={!isFormValid}>{editing ? 'Обновить' : 'Создать'}</button>
+        {editing && <button onClick={() => { setEditing(null); setForm({ name: '', description: '', price: '' }); setTouched(false); }}>Отмена</button>}
+        {touched && !isFormValid && <p className={styles.validationError}>Заполните обязательные поля (название и цена)</p>}
       </div>
 
       <DraggableTable
@@ -67,15 +74,16 @@ const PriceItemsAdmin: React.FC = () => {
         onReorder={handleReorder}
         actions={(item) => (
           <>
-            <button onClick={() => { setEditing(item); setForm({ name: item.name, description: item.description, price: item.price }); }}>✏️</button>
-            <button onClick={() => {
-              if (confirmDelete(`услугу "${item.name}"`)) {
-                deleteItem(item.id);
+            <button aria-label="Редактировать" onClick={() => { setEditing(item); setForm({ name: item.name, description: item.description, price: item.price }); }}>✏️</button>
+            <button aria-label="Удалить" onClick={async () => {
+              if (await confirm(`Удалить услугу "${item.name}"? Это действие нельзя отменить.`)) {
+                await deleteItem(item.id);
               }
             }}>🗑️</button>
           </>
         )}
       />
+      <ConfirmDialogComponent />
     </div>
   );
 };

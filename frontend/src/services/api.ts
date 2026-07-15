@@ -6,6 +6,7 @@ const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.DEV
     ? `${import.meta.env.VITE_BACKEND_URL}/api`
     : '/api',
+  timeout: 120_000,
 });
 
 api.interceptors.request.use((config) => {

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks';
+import { useAuth, useSocialLinks } from '../hooks';
+import SocialLinks from './SocialLinks';
 import styles from './Layout.module.css';
 
 const Layout: React.FC = () => {
   const { user } = useAuth();
+  const { socialLinks } = useSocialLinks();
   const location = useLocation();
   const isHome = location.pathname === '/';
   const [scrolled, setScrolled] = useState(false);
@@ -26,12 +28,15 @@ const Layout: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <a href="#main-content" className={styles.skipLink}>
+        Перейти к содержимому
+      </a>
       <header className={`${styles.header} ${scrolled || !isHome ? styles.scrolled : ''}`}>
         <div className={styles.logo}>
           <span className={styles.logoName}>Vlada Khaybullina</span>
           <span className={styles.logoSub}>Photographer</span>
         </div>
-        <nav className={styles.nav}>
+        <nav className={styles.nav} aria-label="Главное меню">
           <NavLink to="/" className={({ isActive }) => (isActive ? styles.active : '')}>
             Главная
           </NavLink>
@@ -54,13 +59,13 @@ const Layout: React.FC = () => {
           )}
         </nav>
       </header>
-      <main className={styles.main}>
+      <main id="main-content" className={styles.main}>
         <Outlet />
       </main>
       <footer className={styles.footer}>
         <p>© {new Date().getFullYear()} Vlada Khaybullina. Все права защищены.</p>
         <div className={styles.socials}>
-          <a href="#">Instagram</a> | <a href="#">Telegram</a>
+          <SocialLinks links={socialLinks} />
         </div>
       </footer>
     </div>

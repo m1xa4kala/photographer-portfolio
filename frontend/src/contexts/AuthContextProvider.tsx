@@ -19,19 +19,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const cancelled = { current: false };
     const token = localStorage.getItem('access_token');
     if (token) {
       api.get<User>('/auth/me')
-        .then(res => setUser(res.data))
+        .then(res => {
+          if (cancelled.current) return;
+          setUser(res.data);
+        })
         .catch(() => {
+          if (cancelled.current) return;
           localStorage.removeItem('access_token');
           setUser(null);
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          if (cancelled.current) return;
+          setLoading(false);
+        });
     } else {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
     }
+
+    return () => {
+      cancelled.current = true;
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {

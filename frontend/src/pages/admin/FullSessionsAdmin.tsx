@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminFullSessions, useAdminFullSessionFiles } from '../../hooks';
-import { confirmDelete } from '../../utils/confirmDelete';
+import { useConfirm } from '../../hooks/useConfirm';
+import api from '../../services/api';
 import DropZone from '../../components/DropZone';
 import type { UploadedFileInfo } from '../../components/DropZone';
 import type { FullSession } from '../../types';
@@ -8,14 +9,21 @@ import styles from './adminCrud.module.css';
 
 const FullSessionsAdmin: React.FC = () => {
   const { items: sessions, loading, error, createItem, updateItem, deleteItem } = useAdminFullSessions();
-  const { files, loading: filesLoading, uploadFiles, deleteFile } = useAdminFullSessionFiles();
+  const { files, loading: filesLoading, fetchFiles, deleteFile } = useAdminFullSessionFiles();
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editing, setEditing] = useState<FullSession | null>(null);
   const [form, setForm] = useState({ title: '', description: '' });
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
+  const { confirm, ConfirmDialogComponent } = useConfirm();
+
+  const isFormValid = form.title.trim().length > 0;
+  const [, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [tokenUrl, setTokenUrl] = useState<string | null>(null);
   const [downloadsEnabled, setDownloadsEnabled] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
 
   const selectedSession = sessions.find(s => s.id === selectedId);
   const filesForSession = selectedId ? files : [];
@@ -25,8 +33,10 @@ const FullSessionsAdmin: React.FC = () => {
       const s = sessions.find(x => x.id === selectedId);
       setTokenUrl(s?.downloadToken ? `/download/${s.downloadToken}` : null);
       setDownloadsEnabled(s?.downloadsEnabled ?? false);
+      // Refresh file list when a new session is selected
+      fetchFiles(selectedId).catch(() => {});
     }
-  }, [selectedId, sessions]);
+  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async () => {
     await (editing
@@ -41,52 +51,53 @@ const FullSessionsAdmin: React.FC = () => {
     setForm({ title: s.title, description: s.description || '' });
   };
 
-  const handleFileUpload = async (uploadedFiles: UploadedFileInfo[]) => {
+  const handleDropZoneUpload = async (uploadedFiles: UploadedFileInfo[]) => {
     if (!selectedId) return;
     setUploadError(null);
+    setUploadSuccess(null);
+    // Files were already uploaded by DropZone via uploadUrl.
+    // Always show success — files ARE on the server even if refresh fails.
+    setUploadSuccess(`${uploadedFiles.length} файлов успешно загружено ✓`);
     try {
-      const formData = new FormData();
-      for (const f of uploadedFiles) {
-        const resp = await fetch(f.url);
-        const blob = await resp.blob();
-        formData.append('files', blob, f.name);
-      }
-      await uploadFiles(selectedId, formData.getAll('files') as File[]);
+      // Just refresh the file list to show updated count.
+      await fetchFiles(selectedId);
     } catch {
-      setUploadError('Ошибка загрузки файлов');
+      // List refresh failed, but files are already uploaded — show a warning,
+      // not a blocking error. The user can reload manually.
+      setUploadSuccess(`${uploadedFiles.length} файлов загружено. Не удалось обновить список — перезагрузите страницу`);
     }
   };
 
   const handleGenerateToken = async () => {
     if (!selectedId) return;
-    const res = await fetch(`/api/admin/full-sessions/${selectedId}/generate-token`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-    });
-    const data = await res.json();
-    setTokenUrl(data.url);
+    const res = await api.post(`/admin/full-sessions/${selectedId}/generate-token`);
+    setTokenUrl(res.data.url);
   };
 
   const handleRevokeToken = async () => {
     if (!selectedId) return;
-    await fetch(`/api/admin/full-sessions/${selectedId}/revoke-token`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-    });
+    await api.post(`/admin/full-sessions/${selectedId}/revoke-token`);
     setTokenUrl(null);
     setDownloadsEnabled(false);
   };
 
+  const handleSync = async () => {
+    if (!await confirm('Проверить все записи в бакете и удалить из БД те, что отсутствуют?')) return;
+    setSyncLoading(true);
+    setSyncResult(null);
+    try {
+      const res = await api.post('/admin/full-sessions/sync');
+      setSyncResult(`✅ Синхронизация завершена: удалено ${res.data.deleted} из ${res.data.total} записей`);
+    } catch {
+      setSyncResult('❌ Ошибка синхронизации');
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
   const handleToggleDownloads = async (enabled: boolean) => {
     if (!selectedId) return;
-    await fetch(`/api/admin/full-sessions/${selectedId}/toggle-downloads`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-      },
-      body: JSON.stringify({ enabled }),
-    });
+    await api.patch(`/admin/full-sessions/${selectedId}/toggle-downloads`, { enabled });
     setDownloadsEnabled(enabled);
   };
 
@@ -108,7 +119,8 @@ const FullSessionsAdmin: React.FC = () => {
           type="text"
           placeholder="Название (например, Свадьба Ивана — оригиналы)"
           value={form.title}
-          onChange={e => setForm({ ...form, title: e.target.value })}
+          onChange={e => { setForm({ ...form, title: e.target.value }); setTouched(true); }}
+          className={!form.title.trim() && touched ? styles.inputError : ''}
         />
         <input
           type="text"
@@ -116,12 +128,13 @@ const FullSessionsAdmin: React.FC = () => {
           value={form.description}
           onChange={e => setForm({ ...form, description: e.target.value })}
         />
-        <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
+        <button onClick={handleSubmit} disabled={!isFormValid}>{editing ? 'Обновить' : 'Создать'}</button>
         {editing && (
-          <button onClick={() => { setEditing(null); setForm({ title: '', description: '' }); }}>
+          <button onClick={() => { setEditing(null); setForm({ title: '', description: '' }); setTouched(false); }}>
             Отмена
           </button>
         )}
+        {touched && !isFormValid && <p className={styles.validationError}>Заполните название фотосессии</p>}
       </div>
 
       <div className={styles.sectionCard}>
@@ -134,11 +147,11 @@ const FullSessionsAdmin: React.FC = () => {
           >
             <span>{s.title}</span>
             <span className={styles.badge}>{s.originalFiles?.length || 0} файлов</span>
-            <button onClick={e => { e.stopPropagation(); handleEdit(s); }}>✏️</button>
-            <button onClick={e => {
+            <button aria-label="Редактировать" onClick={e => { e.stopPropagation(); handleEdit(s); }}>✏️</button>
+            <button aria-label="Удалить" onClick={async e => {
               e.stopPropagation();
-              if (confirmDelete(`полную сессию "${s.title}"`)) {
-                deleteItem(s.id);
+              if (await confirm(`Удалить полную сессию "${s.title}"? Это действие нельзя отменить.`)) {
+                await deleteItem(s.id);
                 if (selectedId === s.id) setSelectedId(null);
               }
             }}>🗑️</button>
@@ -152,26 +165,49 @@ const FullSessionsAdmin: React.FC = () => {
           <h3>📂 {selectedSession.title}</h3>
 
           <h4>Загрузка оригиналов</h4>
-          <DropZone onUploadComplete={handleFileUpload} />
-          {uploadError && <div className={styles.error}>{uploadError}</div>}
+          <DropZone
+            onUploadComplete={handleDropZoneUpload}
+            uploadUrl={`/admin/full-sessions/${selectedId}/upload-files`}
+            showPreviews={false}
+            onUploadError={setUploadError}
+          />
+          {/* uploadError is already shown by DropZone internally — avoid duplicate display */}
+          {uploadSuccess && <div className={styles.successMessage}>{uploadSuccess}</div>}
+
+          <div className={styles.formRow}>
+            <button onClick={handleSync} disabled={syncLoading}>
+              {syncLoading ? 'Синхронизация...' : '🔄 Синхронизировать с бакетом'}
+            </button>
+            {syncResult && (
+              <span className={styles.successMessage}>
+                {syncResult}
+              </span>
+            )}
+          </div>
 
           <h4>Файлы ({filesForSession.length} шт.)</h4>
           {filesLoading ? (
             <p>Загрузка...</p>
+          ) : filesForSession.length === 0 ? (
+            <p className={styles.hint}>Файлы не загружены</p>
           ) : (
             <div className={styles.fileList}>
-              {filesForSession.map(f => (
+              {filesForSession.slice(0, 20).map(f => (
                 <div key={f.id} className={styles.fileItem}>
                   <span>{f.originalName}</span>
                   <span className={styles.fileSize}>{formatSize(f.fileSize)}</span>
-                  <button onClick={async () => {
-                    if (confirmDelete(`файл "${f.originalName}"`)) {
+                  <button aria-label="Удалить файл" onClick={async () => {
+                    if (await confirm(`Удалить файл "${f.originalName}"? Это действие нельзя отменить.`)) {
                       await deleteFile(selectedSession.id, f.id);
                     }
                   }}>🗑️</button>
                 </div>
               ))}
-              {filesForSession.length === 0 && <p className={styles.hint}>Файлы не загружены</p>}
+              {filesForSession.length > 20 && (
+                <p className={styles.hint}>
+                  и ещё {filesForSession.length - 20} файлов...
+                </p>
+              )}
             </div>
           )}
 
@@ -206,6 +242,7 @@ const FullSessionsAdmin: React.FC = () => {
           )}
         </div>
       )}
+      <ConfirmDialogComponent />
     </div>
   );
 };

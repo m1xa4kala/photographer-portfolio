@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAdminPortfolioCategories } from '../../hooks';
-import { confirmDelete } from '../../utils/confirmDelete';
+import { useConfirm } from '../../hooks/useConfirm';
 import DraggableTable from '../../components/DraggableTable';
 import type { Column } from '../../components/DraggableTable';
 import type { PortfolioCategory } from '../../types';
@@ -8,8 +8,12 @@ import styles from './adminCrud.module.css';
 
 const PortfolioCategoriesAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminPortfolioCategories();
+  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<PortfolioCategory | null>(null);
   const [form, setForm] = useState<Pick<PortfolioCategory, 'name'>>({ name: '' });
+  const [touched, setTouched] = useState(false);
+
+  const isFormValid = form.name.trim().length > 0;
 
   const handleSubmit = async () => {
     if (editing) {
@@ -41,10 +45,12 @@ const PortfolioCategoriesAdmin: React.FC = () => {
           type="text"
           placeholder="Название категории"
           value={form.name}
-          onChange={e => setForm({ ...form, name: e.target.value })}
+          onChange={e => { setForm({ ...form, name: e.target.value }); setTouched(true); }}
+          className={!form.name.trim() && touched ? styles.inputError : ''}
         />
-        <button onClick={handleSubmit}>{editing ? 'Обновить' : 'Создать'}</button>
-        {editing && <button onClick={() => { setEditing(null); setForm({ name: '' }); }}>Отмена</button>}
+        <button onClick={handleSubmit} disabled={!isFormValid}>{editing ? 'Обновить' : 'Создать'}</button>
+        {editing && <button onClick={() => { setEditing(null); setForm({ name: '' }); setTouched(false); }}>Отмена</button>}
+        {touched && !isFormValid && <p className={styles.validationError}>Заполните название категории</p>}
       </div>
 
       <DraggableTable
@@ -54,15 +60,16 @@ const PortfolioCategoriesAdmin: React.FC = () => {
         onReorder={handleReorder}
         actions={(item) => (
           <>
-            <button onClick={() => { setEditing(item); setForm({ name: item.name }); }}>✏️</button>
-            <button onClick={() => {
-              if (confirmDelete(`категорию "${item.name}" (все фото в ней тоже удалятся)`)) {
-                deleteItem(item.id);
+            <button aria-label="Редактировать" onClick={() => { setEditing(item); setForm({ name: item.name }); }}>✏️</button>
+            <button aria-label="Удалить" onClick={async () => {
+              if (await confirm(`Удалить категорию "${item.name}"? Все фото в ней тоже удалятся.`)) {
+                await deleteItem(item.id);
               }
             }}>🗑️</button>
           </>
         )}
       />
+      <ConfirmDialogComponent />
     </div>
   );
 };

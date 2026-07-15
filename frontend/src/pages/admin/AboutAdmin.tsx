@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useAdminAbout, useUploadImage } from '../../hooks';
+import React, { useState, useEffect } from 'react';
+import { useAdminAbout } from '../../hooks';
+import ImageUploadButton from '../../components/ImageUploadButton';
 import type { About } from '../../types';
 import styles from './adminAbout.module.css';
 
 const AboutAdmin: React.FC = () => {
   const { about, loading, error, updateAbout } = useAdminAbout();
-  const { uploadImage, uploading } = useUploadImage();
   const [form, setForm] = useState<Partial<About>>({});
-  const initialized = useRef(false);
+  const [touched, setTouched] = useState(false);
+  const initialized = React.useRef(false);
+
+  const isFormValid = (form.fullName?.trim().length ?? 0) > 0 && (form.bioText?.trim().length ?? 0) > 0;
 
   useEffect(() => {
     if (about && !initialized.current) {
@@ -15,14 +18,6 @@ const AboutAdmin: React.FC = () => {
       initialized.current = true;
     }
   }, [about]);
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = await uploadImage(file);
-      setForm(prev => ({ ...prev, photoUrl: url }));
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,26 +36,28 @@ const AboutAdmin: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <div>
             <label>Фото профиля</label>
-            <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading} />
-            {form.photoUrl && <img src={form.photoUrl} alt="preview" width="100" />}
+            <ImageUploadButton onUpload={(url) => setForm(prev => ({ ...prev, photoUrl: url }))} currentUrl={form.photoUrl ?? undefined} label="Фото профиля" />
           </div>
           <div>
             <label>Полное имя</label>
             <input
               type="text"
               value={form.fullName || ''}
-              onChange={e => setForm({ ...form, fullName: e.target.value })}
+              onChange={e => { setForm({ ...form, fullName: e.target.value }); setTouched(true); }}
+              className={!form.fullName?.trim() && touched ? styles.inputError : ''}
             />
           </div>
           <div>
             <label>Текст биографии</label>
             <textarea
               value={form.bioText || ''}
-              onChange={e => setForm({ ...form, bioText: e.target.value })}
+              onChange={e => { setForm({ ...form, bioText: e.target.value }); setTouched(true); }}
               rows={5}
+              className={!form.bioText?.trim() && touched ? styles.inputError : ''}
             />
           </div>
-          <button type="submit">Сохранить</button>
+          <button type="submit" disabled={!isFormValid}>Сохранить</button>
+          {touched && !isFormValid && <p style={{ color: 'var(--admin-danger, #dc3545)', fontSize: '0.85rem', margin: 0 }}>Заполните имя и текст биографии</p>}
         </form>
       )}
     </div>

@@ -24,10 +24,15 @@ const ReviewsSkeleton: React.FC = () => (
 );
 
 const Reviews: React.FC = () => {
-  const { reviews, loading, error } = useReviews();
+  const { reviews, loading, error, refetch } = useReviews();
 
   if (loading) return <ReviewsSkeleton />;
-  if (error) return <div className={styles.error}>Ошибка: {error}</div>;
+  if (error) return (
+    <div className={styles.error}>
+      <p>Ошибка: {error}</p>
+      <button onClick={refetch} className={styles.retryButton}>Повторить</button>
+    </div>
+  );
 
   return (
     <AnimatedSection>

@@ -1,6 +1,7 @@
 import React from 'react';
-import { useAbout } from '../hooks';
+import { useAbout, useSocialLinks } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
+import SocialLinks from '../components/SocialLinks';
 import Skeleton from '../components/Skeleton';
 import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import styles from './About.module.css';
@@ -25,6 +26,7 @@ const AboutSkeleton: React.FC = () => (
 
 const About: React.FC = () => {
   const { about, loading, error, refetch } = useAbout();
+  const { socialLinks } = useSocialLinks();
 
   if (loading) return <AboutSkeleton />;
   if (error) return <div>Ошибка: {error} <button onClick={refetch}>Повторить</button></div>;
@@ -43,6 +45,7 @@ const About: React.FC = () => {
         <div className={styles.bio}>
           <h1>{about.fullName}</h1>
           <p>{about.bioText}</p>
+          <SocialLinks links={socialLinks} />
         </div>
       </div>
     </AnimatedSection>

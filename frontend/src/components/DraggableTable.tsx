@@ -24,7 +24,25 @@ function DraggableTable<T extends { id: number }>({
 }: DraggableTableProps<T>) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
+  const [announcement, setAnnouncement] = useState<string>('');
   const dragNode = useRef<HTMLElement | null>(null);
+  const announceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const announce = useCallback((msg: string) => {
+    setAnnouncement(msg);
+    if (announceTimer.current) clearTimeout(announceTimer.current);
+    announceTimer.current = setTimeout(() => setAnnouncement(''), 3000);
+  }, []);
+
+  const moveItem = useCallback((fromIdx: number, toIdx: number) => {
+    if (fromIdx === toIdx) return;
+    const reordered = [...items];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    const orderedIds = reordered.map(item => item.id);
+    onReorder(orderedIds);
+    announce(`Элемент перемещён на позицию ${toIdx + 1}`);
+  }, [items, onReorder, announce]);
 
   const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
     dragNode.current = e.target as HTMLElement;
@@ -66,16 +84,27 @@ function DraggableTable<T extends { id: number }>({
     // Map to IDs in new order
     const orderedIds = reordered.map(item => item.id);
     onReorder(orderedIds);
+    announce(`Элемент перемещён на позицию ${dropIdx + 1}`);
 
     setDragIndex(null);
     setOverIndex(null);
-  }, [dragIndex, items, onReorder]);
+  }, [dragIndex, items, onReorder, announce]);
 
   const handleDragEnd = useCallback(() => {
     document.querySelectorAll(`.${styles.dragging}`).forEach(el => el.classList.remove(styles.dragging));
     setDragIndex(null);
     setOverIndex(null);
   }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, idx: number) => {
+    if (e.key === 'ArrowUp' && idx > 0) {
+      e.preventDefault();
+      moveItem(idx, idx - 1);
+    } else if (e.key === 'ArrowDown' && idx < items.length - 1) {
+      e.preventDefault();
+      moveItem(idx, idx + 1);
+    }
+  }, [items.length, moveItem]);
 
   if (loading) {
     return <div>Загрузка...</div>;
@@ -87,6 +116,14 @@ function DraggableTable<T extends { id: number }>({
 
   return (
     <div className={styles.wrapper}>
+      {/* Screen reader announcement for reorder operations */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className={styles.srOnly}
+      >
+        {announcement}
+      </div>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -109,7 +146,13 @@ function DraggableTable<T extends { id: number }>({
               onDrop={(e) => handleDrop(e, idx)}
               onDragEnd={handleDragEnd}
             >
-              <td className={styles.dragHandle}>
+              <td
+                className={styles.dragHandle}
+                tabIndex={0}
+                onKeyDown={(e) => handleKeyDown(e, idx)}
+                role="button"
+                aria-label={`Переместить элемент ${idx + 1} из ${items.length}. Используйте стрелки вверх и вниз для изменения порядка`}
+              >
                 <span className={styles.grip} title="Перетащите для изменения порядка">⠿</span>
               </td>
               {columns.map(col => (

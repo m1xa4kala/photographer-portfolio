@@ -15,7 +15,11 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
       <div className={styles.header}>
         <div className={styles.avatar}>
           {clientPhotoUrl ? (
-            <ImageWithSkeleton src={clientPhotoUrl} alt={clientName} />
+            <ImageWithSkeleton
+              src={clientPhotoUrl}
+              alt={clientName}
+              wrapperStyle={{ width: '100%', height: '100%' }}
+            />
           ) : (
             <span className={styles.avatarFallback}>
               {clientName.charAt(0).toUpperCase()}

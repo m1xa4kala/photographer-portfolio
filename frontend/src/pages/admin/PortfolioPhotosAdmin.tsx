@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminPortfolioPhotos, useAdminPortfolioCategories, useAdminPortfolioSessions } from '../../hooks';
-import { confirmDelete } from '../../utils/confirmDelete';
+import { useConfirm } from '../../hooks/useConfirm';
 import DropZone from '../../components/DropZone';
 import type { UploadedFileInfo } from '../../components/DropZone';
 import DraggableTable from '../../components/DraggableTable';
@@ -22,6 +22,7 @@ const PortfolioPhotosAdmin: React.FC = () => {
     useAdminPortfolioPhotos(filterSessionId);
   const { items: categories } = useAdminPortfolioCategories();
   const { items: allSessions } = useAdminPortfolioSessions();
+  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [bulkError, setBulkError] = useState<string | null>(null);
 
   // Filter sessions by selected category (client-side, for the dropdown)
@@ -65,7 +66,7 @@ const PortfolioPhotosAdmin: React.FC = () => {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Неизвестная ошибка';
         setBulkError(`Ошибка при сохранении "${name}": ${message}`);
-        return;
+        continue;
       }
     }
   };
@@ -94,7 +95,7 @@ const PortfolioPhotosAdmin: React.FC = () => {
     {
       key: 'image',
       header: 'Изображение',
-      render: (item) => <img src={item.imageUrl} width="50" />,
+      render: (item) => <img src={item.imageUrl} alt="" width="50" />,
     },
   ];
 
@@ -151,13 +152,14 @@ const PortfolioPhotosAdmin: React.FC = () => {
         loading={loading}
         onReorder={handleReorder}
         actions={(item) => (
-          <button onClick={() => {
-            if (confirmDelete(`фото "${item.title}"`)) {
-              deleteItem(item.id);
+          <button aria-label="Удалить" onClick={async () => {
+            if (await confirm(`Удалить фото "${item.title}"? Это действие нельзя отменить.`)) {
+              await deleteItem(item.id);
             }
           }}>🗑️</button>
         )}
       />
+      <ConfirmDialogComponent />
     </div>
   );
 };

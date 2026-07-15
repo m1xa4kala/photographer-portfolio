@@ -8,8 +8,8 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div>Загрузка...</div>;
-  if (!user) return <Navigate to="/admin/login" replace />;
+  if (loading) return <div aria-live="polite">Загрузка...</div>;
+  if (!user) return <Navigate to="/admin/login?redirect=admin" replace />;
   return children;
 };
 
