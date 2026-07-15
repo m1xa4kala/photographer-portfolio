@@ -5,6 +5,26 @@
   min-height: 100vh;
 }
 
+.skipLink {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 1000;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 0.5rem 0;
+  transition: top 0.1s;
+}
+
+.skipLink:focus {
+  top: 0;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
