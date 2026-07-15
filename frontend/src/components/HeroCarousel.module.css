@@ -11,6 +11,7 @@
 .track {
   display: flex;
   height: 100%;
+  width: 100%;
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
 }
@@ -20,6 +21,8 @@
   position: relative;
   flex-shrink: 0;
   display: flex;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .slide > div {
@@ -149,7 +152,7 @@
   font-size: 1.2rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .carousel {
     height: calc(100dvh + 2px);
     margin-top: calc(-1rem - var(--header-height));

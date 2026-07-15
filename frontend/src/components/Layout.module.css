@@ -163,7 +163,7 @@
   margin: 0 0.5rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .header {
     padding: 0.6rem 1rem;
   }
