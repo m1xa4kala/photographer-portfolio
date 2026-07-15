@@ -67,16 +67,95 @@ Workflows run via the `Workflow` tool. Pass args like:
 Workflow({scriptPath: ".claude/workflows/feature.js", args: {feature: "Add testimonial highlights"}})
 ```
 
-### Agent dispatching
+### Task routing: Workflow vs Agent vs Direct (critical)
 
-| Task type | Default pattern |
-|---|---|
-| New feature | Invoke feature.js workflow |
-| Bug report | Invoke bugfix.js workflow |
-| Code review | Invoke code-review.js workflow |
-| DB migration | Invoke migration.js workflow |
-| Quick fix | Direct edit + verify (no workflow overhead) |
-| Complex task | Plan first via Plan agent, then feature.js
+**Always use Workflow tool for bugs and features.** Reserve Agent tool for isolated single-file changes, and direct Edit for truly trivial 1-3 line fixes.
+
+| Task type | Tool | Why |
+|-----------|------|-----|
+| **Bug report / found bug** (multi-file, needs investigation) | `Workflow({scriptPath: ".claude/workflows/bugfix.js", args: {description, repro}})` | Debug → Investigate → Fix → Verify — systematic, isolates changes in worktree, verifies after fix |
+| **New feature / component / page** (multi-file, 2+ files changed) | `Workflow({scriptPath: ".claude/workflows/feature.js", args: {feature, description}})` | Plan → Backend → Frontend → Migration → Verify — full lifecycle, parallel where possible |
+| **Code review** (all changes) | `Workflow({scriptPath: ".claude/workflows/code-review.js", args: {scope}})` | Parallel dimension review → adversarial verification → synthesis |
+| **DB migration** (entity changes) | `Workflow({scriptPath: ".claude/workflows/migration.js", args: {migration}})` | Analyze → Generate → Run → Verify |
+| **Single-file isolated change** (e.g. add CSS class, fix one import) | `Agent({subagent_type: "..."})` with specialized agent | No overhead needed, one focused agent |
+| **Trivial 1-3 line fix** (typo, aria-label, literal string) | Direct `Edit` tool | No overhead, skip the agent entirely |
+
+Workflow > Agent for any task that touches 2+ files or needs investigation. The workflows are designed to be comprehensive: bugfix.js isolates in a worktree, feature.js covers the full stack, code-review.js adversarially verifies. Don't skip them.
+
+### Agent dispatching (for isolated single-file work)
+
+Use custom project agents from `.claude/agents/` for focused single-file changes. They delegate to plugin agents:
+
+| Task type | Default pattern | Custom agent |
+|---|---|---|
+| Backend API / entity | `backend-dev` | Delegates to `backend-development:backend-development-backend-architect` |
+| Frontend UI / page | `frontend-dev` | Delegates to `frontend-mobile-development:frontend-mobile-development-frontend-developer` |
+| Full-stack feature | `feature-dev` | Orchestrates `backend-dev` + `frontend-dev` + `db-migration` + `project-reviewer` |
+| Code review | `project-reviewer` | Delegates to `ecc:code-reviewer`, `ecc:security-reviewer` |
+| DB migration | `db-migration` | Delegates to `ecc:database-reviewer` |
+
+### Specialized agents
+
+Each task type dispatches to a dedicated specialist agent for maximum efficiency:
+
+| Task | Agent | Purpose |
+|------|-------|---------|
+| New API / backend service | `backend-development` | NestJS, TypeORM, REST API design |
+| UI component / page | `frontend-mobile-development` | React, CSS Modules, responsive design |
+| Architecture design | `ecc:architect` | System design, scalability, patterns |
+| Code review | `ecc:code-reviewer` | Multi-dimension review (correctness, security, quality) |
+| Code simplification | `ecc:code-simplifier` | Refactor for clarity, remove duplication |
+| Bug fix | `ecc:bugfix` or `ecc:systematic-debugging` | Systematic root-cause analysis |
+| Database review | `ecc:database-reviewer` | Query optimization, schema design, Supabase |
+| Security audit | `ecc:security-reviewer` | OWASP, injection, auth flaws |
+| Performance | `ecc:performance-optimizer` | Bundle size, render optimization, profiling |
+| Build errors | `ecc:build-error-resolver` | TypeScript, build, dependency fixes |
+| Test automation | `ecc:tdd-guide` + `ecc:e2e-runner` | TDD, E2E tests |
+| Documentation | `ecc:doc-updater` | Codemaps, READMEs, guides |
+| Accessibility | `ecc:a11y-architect` | WCAG 2.2 compliance |
+| Deep research | `deep-research` | Multi-source fact-checked reports |
+| Brainstorming | `superpowers:brainstorming` | Creative work, requirement exploration |
+
+### Custom Project Agents (`.claude/agents/`)
+
+These agents are specialized for this project's codebase and patterns. They delegate to plugin agents for specialized work:
+
+| Agent | Color | Purpose | Delegates to |
+|-------|-------|---------|-------------|
+| `backend-dev` | 🟦 Blue | NestJS backend: entities, services, controllers, DTOs, migrations | `backend-development:backend-development-backend-architect`, `ecc:database-reviewer`, `ecc:security-reviewer` |
+| `frontend-dev` | 🟩 Green | React frontend: pages, components, hooks, admin CRUD, CSS Modules | `frontend-mobile-development:frontend-mobile-development-frontend-developer`, `ecc:react-reviewer`, `ecc:a11y-architect` |
+| `db-migration` | 🟨 Yellow | TypeORM migrations: analyze, generate, run, verify, revert | `ecc:database-reviewer`, `backend-development:backend-development-backend-architect` |
+| `project-reviewer` | 🟥 Red | Code review: correctness, security, quality, API contracts | `ecc:code-reviewer`, `ecc:security-reviewer`, `ecc:react-reviewer`, `ecc:typescript-reviewer` |
+| `feature-dev` | 🟪 Magenta | Full-stack feature dev: plan → backend → frontend → migration → verify | `ecc:planner`, `ecc:code-architect`, `backend-dev`, `frontend-dev`, `db-migration`, `project-reviewer` |
+
+**Usage**: Dispatch via `Agent({subagent_type: "agent-name", ...})` from the Agent tool. Each agent delegates to the appropriate plugin agents for specialized work.
+
+### MCP Plugins / Tools
+
+Project uses MCP plugins for extended capabilities:
+
+- **Context7** (`context7`) — Live documentation lookup for libraries, frameworks, APIs. Use instead of web search for library-specific questions.
+- **Chrome DevTools** (`chrome-devtools`) — Browser automation for E2E testing, performance traces (Lighthouse, Core Web Vitals), screenshots, and debugging.
+
+### Hooks System
+
+Git hooks are configured in `.claude/hooks/` and triggered via `settings.local.json`:
+
+| Hook | Trigger | Purpose |
+|------|---------|---------|
+| `pre-commit-check.sh` | Before `git commit` | Runs lint + TypeScript check |
+| `git-push-safeguard.sh` | Before `git push` | Warns about force push / main branch |
+| `post-install-check.sh` | After `npm install` | Runs npm audit for vulnerabilities |
+
+Hooks run automatically via the Claude Code harness — no manual installation needed.
+
+### Memory System
+
+Persistent cross-session memory is stored in `.claude/projects/<project-hash>/memory/`. Key files:
+- `MEMORY.md` — Index of all memory facts, loaded into context each session
+- Individual `.md` files with frontmatter (name, description, metadata type)
+
+The system learns from corrections and confirmed approaches, saving them as memory for future sessions.
 
 Monorepo with a NestJS backend and React + Vite frontend. PostgreSQL runs in Docker; the backend and frontend communicate via Vite proxy in dev, or the backend serves the built frontend as static in production.
 

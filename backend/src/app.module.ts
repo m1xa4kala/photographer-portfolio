@@ -5,6 +5,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
+import { HealthModule } from './health/health.module';
 import { ContentModule } from './content/content.module';
 import { UploadModule } from './upload/upload.module';
 import { S3Module } from './s3/s3.module';
@@ -72,6 +73,7 @@ import { AppConfig } from './config/config.interface';
       },
     }),
     AuthModule,
+    HealthModule,
     ContentModule,
     UploadModule,
     S3Module,

@@ -4,9 +4,13 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  HeadObjectCommand,
 } from '@aws-sdk/client-s3';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { ConfigService } from '@nestjs/config';
 import { Readable } from 'stream';
+import { Agent as HttpAgent } from 'http';
+import { Agent as HttpsAgent } from 'https';
 
 @Injectable()
 export class S3Service {
@@ -24,6 +28,16 @@ export class S3Service {
         )!,
       },
       forcePathStyle: true,
+      // Retry up to 3 times with exponential backoff + jitter.
+      // The manual retry loop in FullSessionsService handles the rest.
+      maxAttempts: 3,
+      // Keep-alive connection pool + increased timeouts for TLS stability
+      requestHandler: new NodeHttpHandler({
+        requestTimeout: 30_000,
+        connectionTimeout: 15_000,
+        httpAgent: new HttpAgent({ keepAlive: true, maxSockets: 50 }),
+        httpsAgent: new HttpsAgent({ keepAlive: true, maxSockets: 50 }),
+      }),
     });
     this.bucket = this.configService.get<string>('S3_BUCKET')!;
   }
@@ -36,6 +50,23 @@ export class S3Service {
         Body: buffer,
       }),
     );
+  }
+
+  async exists(key: string): Promise<boolean> {
+    try {
+      await this.client.send(
+        new HeadObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
+      return true;
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'NotFound') {
+        return false;
+      }
+      throw err;
+    }
   }
 
   async getStream(key: string): Promise<Readable> {

@@ -8,5 +8,6 @@ export class UpdateFullSessionDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(5000)
   description?: string;
 }

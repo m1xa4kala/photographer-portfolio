@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PortfolioSessionsService } from '../services/portfolio-sessions.service';
 import { CreatePortfolioSessionDto } from '../dtos/create-portfolio-session.dto';
 import { UpdatePortfolioSessionDto } from '../dtos/update-portfolio-session.dto';
-import { ReorderDto } from '../dto/reorder.dto';
+import { ReorderDto } from '../dtos/reorder.dto';
 
 @Controller('admin/portfolio-sessions')
 @UseGuards(JwtAuthGuard)

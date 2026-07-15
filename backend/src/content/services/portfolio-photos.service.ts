@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { PortfolioPhoto } from '../entities/portfolio-photo.entity';
 import { CreatePortfolioPhotoDto } from '../dtos/create-portfolio-photo.dto';
 import { UpdatePortfolioPhotoDto } from '../dtos/update-portfolio-photo.dto';
-import { ReorderDto } from '../dto/reorder.dto';
+import { ReorderDto } from '../dtos/reorder.dto';
 
 @Injectable()
 export class PortfolioPhotosService {

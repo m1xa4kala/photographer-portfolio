@@ -76,6 +76,7 @@ services:
     depends_on:
       postgres-prod:
         condition: service_healthy
+    init: true
     networks:
       - app-network
 

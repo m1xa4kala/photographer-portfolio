@@ -9,12 +9,12 @@ export const meta = {
   ],
 }
 
-var args = globalThis.args || {}
-var BUG_DESC = args.description || 'unnamed bug'
-var BUG_REPRO = args.repro || args.reproduction || ''
+const args = globalThis.args || {}
+const BUG_DESC = args.description || 'unnamed bug'
+const BUG_REPRO = args.repro || args.reproduction || ''
 
 // Schema for structured findings output
-var FINDINGS_SCHEMA = {
+const FINDINGS_SCHEMA = {
   type: 'object',
   properties: {
     findings: {
@@ -32,18 +32,19 @@ var FINDINGS_SCHEMA = {
 }
 
 // Schema for verification verdict
-var VERDICT_SCHEMA = {
+const VERDICT_SCHEMA = {
   type: 'object',
   properties: {
-    isReal: { type: 'boolean' },
-    reason: { type: 'string' }
+    isFixed: { type: 'boolean' },
+    reason: { type: 'string' },
+    sideEffects: { type: 'string' }
   }
 }
 
 phase('Debug')
 log('Starting debug for: ' + BUG_DESC)
 
-var debugInfo = await agent(
+const debugInfo = await agent(
   'Debug the following issue:\n\n' +
   'Description: ' + BUG_DESC + '\n' +
   (BUG_REPRO ? 'Reproduction: ' + BUG_REPRO + '\n' : '') +
@@ -61,7 +62,7 @@ var debugInfo = await agent(
 phase('Investigate')
 log('Investigating root cause.')
 
-var rootCause = await agent(
+const rootCause = await agent(
   'Investigate the root cause of this bug:\n\n' +
   'Bug: ' + BUG_DESC + '\n' +
   'Debug findings: ' + debugInfo + '\n\n' +
@@ -96,7 +97,7 @@ await agent(
 phase('Verify')
 log('Verifying the fix works.')
 
-var verifyResult = await agent(
+const verifyResult = await agent(
   'Verify the bug fix:\n\n' +
   'Bug: ' + BUG_DESC + '\n' +
   'Root cause: ' + JSON.stringify(rootCause) + '\n\n' +
@@ -105,11 +106,15 @@ var verifyResult = await agent(
   '2. Check lint: npm run lint\n' +
   '3. Trace the same data flow that had the bug - confirm it is now correct\n' +
   '4. Report: Is the bug 100% fixed? Any side effects?',
-  { label: 'Verify fix', phase: 'Verify' }
+  { label: 'Verify fix', phase: 'Verify', schema: VERDICT_SCHEMA }
 )
 
-log('Bugfix complete for: ' + BUG_DESC)
+const isFixed = verifyResult && verifyResult.isFixed
+log('Bugfix ' + (isFixed ? 'SUCCESS' : 'NEEDS REVIEW') + ' for: ' + BUG_DESC)
+
 return {
   bug: BUG_DESC,
-  verified: verifyResult.indexOf('fixed') >= 0 || verifyResult.indexOf('Fixed') >= 0
+  verified: isFixed,
+  details: verifyResult ? verifyResult.reason : 'Verification failed',
+  sideEffects: verifyResult ? verifyResult.sideEffects : 'Unknown'
 }

@@ -1,25 +1,28 @@
 import {
   IsString,
   IsNotEmpty,
-  IsInt,
   IsOptional,
+  IsInt,
   Min,
+  IsUrl,
   MaxLength,
 } from 'class-validator';
 
-export class CreatePortfolioPhotoDto {
+export class CreateSocialLinkDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  title!: string;
+  platform!: string;
+
+  @IsUrl({ protocols: ['https', 'http'], require_protocol: true })
+  @IsNotEmpty()
+  @MaxLength(2048)
+  url!: string;
 
   @IsString()
   @IsNotEmpty()
-  @MaxLength(2048)
-  imageUrl!: string;
-
-  @IsInt()
-  sessionId!: number;
+  @MaxLength(100)
+  iconName!: string;
 
   @IsOptional()
   @IsInt()

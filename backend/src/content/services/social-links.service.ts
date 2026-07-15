@@ -1,25 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PortfolioSession } from '../entities/portfolio-session.entity';
-import { PortfolioPhoto } from '../entities/portfolio-photo.entity';
-import { CreatePortfolioSessionDto } from '../dtos/create-portfolio-session.dto';
-import { UpdatePortfolioSessionDto } from '../dtos/update-portfolio-session.dto';
+import { SocialLink } from '../entities/social-link.entity';
+import { CreateSocialLinkDto } from '../dtos/create-social-link.dto';
+import { UpdateSocialLinkDto } from '../dtos/update-social-link.dto';
 import { ReorderDto } from '../dtos/reorder.dto';
 
 @Injectable()
-export class PortfolioSessionsService {
+export class SocialLinksService {
   constructor(
-    @InjectRepository(PortfolioSession)
-    private repo: Repository<PortfolioSession>,
-    @InjectRepository(PortfolioPhoto)
-    private photoRepo: Repository<PortfolioPhoto>,
+    @InjectRepository(SocialLink)
+    private repo: Repository<SocialLink>,
   ) {}
 
   async findAll(
     limit: number = 100,
     offset: number = 0,
-  ): Promise<PortfolioSession[]> {
+  ): Promise<SocialLink[]> {
     return this.repo.find({
       order: { orderIndex: 'ASC' },
       take: limit,
@@ -27,48 +24,30 @@ export class PortfolioSessionsService {
     });
   }
 
-  async findOne(id: number): Promise<PortfolioSession> {
+  async findOne(id: number): Promise<SocialLink> {
     const item = await this.repo.findOne({ where: { id } });
     if (!item) {
-      throw new NotFoundException(`Session with id ${id} not found`);
+      throw new NotFoundException(`Social link with id ${id} not found`);
     }
     return item;
   }
 
-  async findByCategory(
-    categoryId: number,
-    limit: number = 100,
-    offset: number = 0,
-  ): Promise<PortfolioSession[]> {
-    return this.repo.find({
-      where: { categoryId },
-      order: { orderIndex: 'ASC' },
-      take: limit,
-      skip: offset,
-    });
-  }
-
-  async create(dto: CreatePortfolioSessionDto): Promise<PortfolioSession> {
+  async create(dto: CreateSocialLinkDto): Promise<SocialLink> {
     const max = await this.repo.maximum('orderIndex');
     const newItem = this.repo.create({ ...dto, orderIndex: (max ?? -1) + 1 });
     return this.repo.save(newItem);
   }
 
-  async update(
-    id: number,
-    dto: UpdatePortfolioSessionDto,
-  ): Promise<PortfolioSession> {
+  async update(id: number, dto: UpdateSocialLinkDto): Promise<SocialLink> {
     const item = await this.findOne(id);
     Object.assign(item, dto);
     return this.repo.save(item);
   }
 
   async delete(id: number): Promise<void> {
-    // Удаляем все фото, принадлежащие этой сессии
-    await this.photoRepo.delete({ sessionId: id });
     const result = await this.repo.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Session with id ${id} not found`);
+      throw new NotFoundException(`Social link with id ${id} not found`);
     }
   }
 

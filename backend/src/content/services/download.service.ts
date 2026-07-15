@@ -21,7 +21,7 @@ export class DownloadService {
   async getSessionByToken(token: string) {
     const session = await this.fullSessionRepo.findOne({
       where: { downloadToken: token },
-      relations: ['originalFiles'],
+      relations: { originalFiles: true },
     });
     if (!session) throw new NotFoundException('Сессия не найдена');
     if (!session.downloadsEnabled)
@@ -42,7 +42,7 @@ export class DownloadService {
   async streamZip(token: string, res: Response): Promise<void> {
     const session = await this.fullSessionRepo.findOne({
       where: { downloadToken: token },
-      relations: ['originalFiles'],
+      relations: { originalFiles: true },
     });
     if (!session) throw new NotFoundException('Сессия не найдена');
     if (!session.downloadsEnabled)

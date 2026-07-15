@@ -9,13 +9,13 @@ export const meta = {
   ],
 }
 
-var args = globalThis.args || {}
-var MIGRATION_DESC = args.description || 'Apply pending entity changes'
+const args = globalThis.args || {}
+const MIGRATION_DESC = args.description || 'Apply pending entity changes'
 
 phase('Analyze')
 log('Analyzing entity changes for: ' + MIGRATION_DESC)
 
-var analysis = await agent(
+const analysis = await agent(
   'Analyze database entity changes needed.\n\n' +
   'Project: NestJS + TypeORM + PostgreSQL\n' +
   'Entities in: backend/src/content/entities/\n\n' +
@@ -32,35 +32,39 @@ var analysis = await agent(
 phase('Generate')
 log('Generating migration based on analysis.')
 
-var generationResult = await agent(
+const generationResult = await agent(
   'Generate TypeORM migration.\n\n' +
   'Analysis: ' + analysis + '\n\n' +
   'Steps:\n' +
   '1. First check if Docker PostgreSQL is running: docker compose --profile dev ps\n' +
   '   - If not running, start it: npm run db:start\n' +
-  '   - Wait for it to be ready\n' +
+  '   - Wait for it to be ready (check with docker compose ps)\n' +
   '2. Make sure backend/.env exists with proper config\n' +
   '3. Run: cd backend && npm run migration:generate\n' +
   '   - This creates a new migration file in src/migrations/\n' +
   '4. Read the generated migration file to verify it is correct\n' +
   '5. Report: was migration generated successfully? What does it do?\n\n' +
-  'If npm run migration:generate fails, read the error and try to fix it.',
+  'If npm run migration:generate fails, read the error and try to fix it:\n' +
+  '  - Check if data-source.ts is correct\n' +
+  '  - Check if entities are properly registered\n' +
+  '  - Check if synchronize is disabled',
   { label: 'Generate migration', phase: 'Generate' }
 )
 
 phase('Run')
 log('Running migration against database.')
 
-var runResult = await agent(
+const runResult = await agent(
   'Run the generated migration.\n\n' +
   'Context: ' + generationResult + '\n\n' +
   'Steps:\n' +
-  '1. Ensure Docker PostgreSQL is running\n' +
+  '1. Ensure Docker PostgreSQL is running (docker compose --profile dev ps)\n' +
   '2. Run: cd backend && npm run migration:run\n' +
   '3. Report output and any errors\n\n' +
   'If it fails, diagnose and fix:\n' +
   '- Check data-source.ts config\n' +
   '- Check if there is a conflict with synchronize\n' +
+  '- Check if migration table exists\n' +
   '- Report what went wrong',
   { label: 'Run migration', phase: 'Run' }
 )
@@ -68,13 +72,13 @@ var runResult = await agent(
 phase('Verify')
 log('Verifying migration.')
 
-var verifyResult = await agent(
+const verifyResult = await agent(
   'Verify the migration was applied correctly.\n\n' +
   'Context: ' + MIGRATION_DESC + '\n\n' +
   'Steps:\n' +
   '1. Run: cd backend && npx typeorm migration:show -d src/data-source.ts\n' +
   '   (This shows pending vs run migrations)\n' +
-  '2. Verify the new migration shows as applied\n' +
+  '2. Verify the new migration shows as applied (up)\n' +
   '3. Check the table structure via a quick query\n' +
   '4. Report: Migration status - SUCCESS or FAILED\n\n' +
   'Also check:\n' +

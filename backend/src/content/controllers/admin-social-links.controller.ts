@@ -10,19 +10,19 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { PortfolioCategoriesService } from '../services/portfolio-categories.service';
-import { CreatePortfolioCategoryDto } from '../dtos/create-portfolio-category.dto';
-import { UpdatePortfolioCategoryDto } from '../dtos/update-portfolio-category.dto';
+import { SocialLinksService } from '../services/social-links.service';
+import { CreateSocialLinkDto } from '../dtos/create-social-link.dto';
+import { UpdateSocialLinkDto } from '../dtos/update-social-link.dto';
 import { ReorderDto } from '../dtos/reorder.dto';
 
-@Controller('admin/portfolio-categories')
+@Controller('admin/social-links')
 @UseGuards(JwtAuthGuard)
-export class AdminPortfolioCategoriesController {
-  constructor(private categoriesService: PortfolioCategoriesService) {}
+export class AdminSocialLinksController {
+  constructor(private socialLinksService: SocialLinksService) {}
 
   @Get()
   async findAll() {
-    return this.categoriesService.findAll();
+    return this.socialLinksService.findAll();
   }
 
   @Get(':id')
@@ -31,29 +31,29 @@ export class AdminPortfolioCategoriesController {
     if (isNaN(numericId)) {
       throw new BadRequestException('Invalid id');
     }
-    return this.categoriesService.findOne(numericId);
+    return this.socialLinksService.findOne(numericId);
   }
 
   @Post()
-  async create(@Body() createDto: CreatePortfolioCategoryDto) {
-    return this.categoriesService.create(createDto);
+  async create(@Body() createDto: CreateSocialLinkDto) {
+    return this.socialLinksService.create(createDto);
   }
 
   @Patch('reorder')
   async reorder(@Body() reorderDto: ReorderDto) {
-    return this.categoriesService.reorder(reorderDto);
+    return this.socialLinksService.reorder(reorderDto);
   }
 
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateDto: UpdatePortfolioCategoryDto,
+    @Body() updateDto: UpdateSocialLinkDto,
   ) {
     const numericId = parseInt(id, 10);
     if (isNaN(numericId)) {
       throw new BadRequestException('Invalid id');
     }
-    return this.categoriesService.update(numericId, updateDto);
+    return this.socialLinksService.update(numericId, updateDto);
   }
 
   @Delete(':id')
@@ -62,6 +62,6 @@ export class AdminPortfolioCategoriesController {
     if (isNaN(numericId)) {
       throw new BadRequestException('Invalid id');
     }
-    return this.categoriesService.delete(numericId);
+    return this.socialLinksService.delete(numericId);
   }
 }

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { BestPhoto } from '../entities/best-photo.entity';
 import { CreateBestPhotoDto } from '../dtos/create-best-photo.dto';
 import { UpdateBestPhotoDto } from '../dtos/update-best-photo.dto';
-import { ReorderDto } from '../dto/reorder.dto';
+import { ReorderDto } from '../dtos/reorder.dto';
 
 @Injectable()
 export class BestPhotosService {

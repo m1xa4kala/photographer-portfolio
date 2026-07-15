@@ -23,16 +23,23 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Copy built backend
 COPY --from=backend-builder /app/backend/dist ./backend/dist
-COPY --from=backend-builder /app/backend/node_modules ./backend/node_modules
 COPY --from=backend-builder /app/backend/package.json ./backend/
+COPY --from=backend-builder /app/backend/package-lock.json ./backend/
+
+# Install only production dependencies (no devDependencies like Jest, ESLint, etc.)
+# This avoids shipping deprecated glob@7, inflight, and other dev-only packages
+RUN cd backend && npm ci --omit=dev
 
 # Create uploads directory for runtime
-RUN mkdir -p /app/uploads
+RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
+
+# Switch to non-root user for security
+USER node
 
 # Healthcheck
 RUN apk add --no-cache curl
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 EXPOSE 3000
 

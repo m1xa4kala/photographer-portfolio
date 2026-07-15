@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { PriceItem } from '../entities/price-item.entity';
 import { CreatePriceItemDto } from '../dtos/create-price-item.dto';
 import { UpdatePriceItemDto } from '../dtos/update-price-item.dto';
-import { ReorderDto } from '../dto/reorder.dto';
+import { ReorderDto } from '../dtos/reorder.dto';
 
 @Injectable()
 export class PriceItemsService {

@@ -13,7 +13,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { BestPhotosService } from '../services/best-photos.service';
 import { CreateBestPhotoDto } from '../dtos/create-best-photo.dto';
 import { UpdateBestPhotoDto } from '../dtos/update-best-photo.dto';
-import { ReorderDto } from '../dto/reorder.dto';
+import { ReorderDto } from '../dtos/reorder.dto';
 
 @Controller('admin/best-photos')
 @UseGuards(JwtAuthGuard)

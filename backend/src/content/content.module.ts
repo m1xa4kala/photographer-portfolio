@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MulterModule } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
 import { BestPhoto } from './entities/best-photo.entity';
 import { PortfolioCategory } from './entities/portfolio-category.entity';
 import { PortfolioSession } from './entities/portfolio-session.entity';
@@ -11,6 +9,7 @@ import { Review } from './entities/review.entity';
 import { About } from './entities/about.entity';
 import { FullSession } from './entities/full-session.entity';
 import { SessionOriginalFile } from './entities/session-original-file.entity';
+import { SocialLink } from './entities/social-link.entity';
 
 import { BestPhotosService } from './services/best-photos.service';
 import { PortfolioCategoriesService } from './services/portfolio-categories.service';
@@ -21,6 +20,7 @@ import { ReviewsService } from './services/reviews.service';
 import { AboutService } from './services/about.service';
 import { FullSessionsService } from './services/full-sessions.service';
 import { DownloadService } from './services/download.service';
+import { SocialLinksService } from './services/social-links.service';
 
 import { PublicContentController } from './controllers/public-content.controller';
 import { AdminBestPhotosController } from './controllers/admin-best-photos.controller';
@@ -32,8 +32,10 @@ import { AdminReviewsController } from './controllers/admin-reviews.controller';
 import { AdminAboutController } from './controllers/admin-about.controller';
 import { AdminFullSessionsController } from './controllers/admin-full-sessions.controller';
 import { DownloadController } from './controllers/download.controller';
+import { AdminSocialLinksController } from './controllers/admin-social-links.controller';
 
 import { S3Module } from '../s3/s3.module';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
   imports: [
@@ -47,9 +49,10 @@ import { S3Module } from '../s3/s3.module';
       About,
       FullSession,
       SessionOriginalFile,
+      SocialLink,
     ]),
-    MulterModule.register({ storage: memoryStorage() }),
     S3Module,
+    UploadModule,
   ],
   providers: [
     BestPhotosService,
@@ -61,6 +64,7 @@ import { S3Module } from '../s3/s3.module';
     AboutService,
     FullSessionsService,
     DownloadService,
+    SocialLinksService,
   ],
   controllers: [
     PublicContentController,
@@ -73,6 +77,7 @@ import { S3Module } from '../s3/s3.module';
     AdminAboutController,
     AdminFullSessionsController,
     DownloadController,
+    AdminSocialLinksController,
   ],
   exports: [
     BestPhotosService,
@@ -82,6 +87,7 @@ import { S3Module } from '../s3/s3.module';
     PriceItemsService,
     ReviewsService,
     AboutService,
+    SocialLinksService,
   ],
 })
 export class ContentModule {}

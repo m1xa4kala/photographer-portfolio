@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PortfolioPhotosService } from '../services/portfolio-photos.service';
 import { CreatePortfolioPhotoDto } from '../dtos/create-portfolio-photo.dto';
 import { UpdatePortfolioPhotoDto } from '../dtos/update-portfolio-photo.dto';
-import { ReorderDto } from '../dto/reorder.dto';
+import { ReorderDto } from '../dtos/reorder.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PortfolioPhoto } from '../entities/portfolio-photo.entity';

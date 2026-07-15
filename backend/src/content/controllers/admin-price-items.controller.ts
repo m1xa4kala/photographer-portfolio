@@ -13,7 +13,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PriceItemsService } from '../services/price-items.service';
 import { CreatePriceItemDto } from '../dtos/create-price-item.dto';
 import { UpdatePriceItemDto } from '../dtos/update-price-item.dto';
-import { ReorderDto } from '../dto/reorder.dto';
+import { ReorderDto } from '../dtos/reorder.dto';
 
 @Controller('admin/price-items')
 @UseGuards(JwtAuthGuard)

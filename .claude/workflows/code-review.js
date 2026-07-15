@@ -8,11 +8,11 @@ export const meta = {
   ],
 }
 
-var args = globalThis.args || {}
-var SCOPE = args.scope || ''
+const args = globalThis.args || {}
+const SCOPE = args.scope || ''
 
 // Schema for findings
-var FINDING_SCHEMA = {
+const FINDING_SCHEMA = {
   type: 'object',
   properties: {
     findings: {
@@ -31,7 +31,7 @@ var FINDING_SCHEMA = {
 }
 
 // Schema for verification
-var VERIFY_SCHEMA = {
+const VERIFY_SCHEMA = {
   type: 'object',
   properties: {
     isReal: { type: 'boolean' },
@@ -40,7 +40,7 @@ var VERIFY_SCHEMA = {
 }
 
 // Schema for quick verification
-var QUICK_VERIFY_SCHEMA = {
+const QUICK_VERIFY_SCHEMA = {
   type: 'object',
   properties: {
     isReal: { type: 'boolean' }
@@ -51,7 +51,7 @@ phase('Review')
 log('Starting code review' + (SCOPE ? ' for scope: ' + SCOPE : '') + '.')
 
 // Get the current diff
-var diffInfo = await agent(
+const diffInfo = await agent(
   'Get code review scope.\n\n' +
   'Project: photographer-project monorepo (NestJS backend + React frontend)\n\n' +
   (SCOPE ? 'Focus on scope: ' + SCOPE + '\n\n' : 'Review ALL changed files.\n\n') +
@@ -61,8 +61,8 @@ var diffInfo = await agent(
   { label: 'Get diff', phase: 'Review' }
 )
 
-// Run 3 parallel reviews
-var results = await parallel([
+// Run 5 parallel reviews across different dimensions
+const results = await parallel([
   function() {
     return agent(
       'Review for CORRECTNESS bugs in these files:\n\n' + diffInfo + '\n\n' +
@@ -105,14 +105,42 @@ var results = await parallel([
       'For each issue found, report: FILE:LINENUM - Description - Severity (HIGH/MEDIUM/LOW)',
       { label: 'Review: code quality', phase: 'Review', schema: FINDING_SCHEMA }
     )
+  },
+  function() {
+    return agent(
+      'Review for API & DATA concerns in these files:\n\n' + diffInfo + '\n\n' +
+      'Check for:\n' +
+      '1. API contract mismatches (backend response vs frontend expectations)\n' +
+      '2. Missing or incorrect DTO validation\n' +
+      '3. Inconsistent API patterns (naming, status codes, error format)\n' +
+      '4. Missing pagination or filtering\n' +
+      '5. Data migration issues, column type mismatches\n' +
+      '6. Improper error response formatting\n\n' +
+      'For each issue found, report: FILE:LINENUM - Description - Severity (HIGH/MEDIUM/LOW)',
+      { label: 'Review: API/data', phase: 'Review', schema: FINDING_SCHEMA }
+    )
+  },
+  function() {
+    return agent(
+      'Review for UX & ACCESSIBILITY in these files:\n\n' + diffInfo + '\n\n' +
+      'Check for:\n' +
+      '1. Missing loading/error/empty states in UI components\n' +
+      '2. Broken responsive layout or overflow\n' +
+      '3. Missing focus management, keyboard navigation\n' +
+      '4. Color contrast issues, missing aria attributes\n' +
+      '5. Form validation UX (error messages, disabled states)\n' +
+      '6. Confusing navigation or missing feedback\n\n' +
+      'For each issue found, report: FILE:LINENUM - Description - Severity (HIGH/MEDIUM/LOW)',
+      { label: 'Review: UX/a11y', phase: 'Review', schema: FINDING_SCHEMA }
+    )
   }
 ])
 
 // Process results
-var allFindings = []
-for (var i = 0; i < results.length; i++) {
+const allFindings = []
+for (let i = 0; i < results.length; i++) {
   if (results[i] && results[i].findings) {
-    allFindings = allFindings.concat(results[i].findings)
+    allFindings.push(...results[i].findings)
   }
 }
 log('Found ' + allFindings.length + ' total findings from all dimensions.')
@@ -121,17 +149,17 @@ phase('Verify')
 log('Adversarially verifying ' + allFindings.length + ' findings.')
 
 // Separate by severity
-var highFindings = []
-var mediumFindings = []
-var lowFindings = []
-for (var i = 0; i < allFindings.length; i++) {
+const highFindings = []
+const mediumFindings = []
+const lowFindings = []
+for (let i = 0; i < allFindings.length; i++) {
   if (allFindings[i].severity === 'HIGH') highFindings.push(allFindings[i])
   else if (allFindings[i].severity === 'MEDIUM') mediumFindings.push(allFindings[i])
   else lowFindings.push(allFindings[i])
 }
 
-// Verify HIGH findings
-var verifiedHigh = await parallel(
+// Verify HIGH findings with full adversarial verification
+const verifiedHigh = await parallel(
   highFindings.map(function(f) {
     return function() {
       return agent(
@@ -146,31 +174,32 @@ var verifiedHigh = await parallel(
   })
 )
 
-var confirmedFindings = []
-for (var i = 0; i < verifiedHigh.length; i++) {
+const confirmedFindings = []
+for (let i = 0; i < verifiedHigh.length; i++) {
   if (verifiedHigh[i] && verifiedHigh[i].verdict && verifiedHigh[i].verdict.isReal) {
     confirmedFindings.push(verifiedHigh[i].finding)
   }
 }
 
-// Verify MEDIUM findings (lighter check)
-var mediumLimit = mediumFindings.slice(0, 10)
-var verifiedMedium = await parallel(
+// Verify MEDIUM findings with adversarial verification (up to 10)
+const mediumLimit = mediumFindings.slice(0, 10)
+const verifiedMedium = await parallel(
   mediumLimit.map(function(f) {
     return function() {
       return agent(
-        'Quick check: Is this issue real?\n\n' +
+        'Adversarially verify this issue. Try to REFUTE it.\n\n' +
         'File: ' + (f.file || '?') + '\n' +
         'Issue: ' + f.description + '\n\n' +
-        'Read the actual file content. Return { isReal: boolean }.',
-        { label: 'Quick verify: ' + (f.file || '?'), phase: 'Verify', schema: QUICK_VERIFY_SCHEMA }
+        'Read the actual file content. Return { isReal: boolean, reason: string }.\n' +
+        'Default to isReal=false if uncertain.',
+        { label: 'Verify medium: ' + (f.file || '?'), phase: 'Verify', schema: VERIFY_SCHEMA }
       ).then(function(v) { return { finding: f, verdict: v } })
     }
   })
 )
 
-var confirmedMedium = []
-for (var i = 0; i < verifiedMedium.length; i++) {
+const confirmedMedium = []
+for (let i = 0; i < verifiedMedium.length; i++) {
   if (verifiedMedium[i] && verifiedMedium[i].verdict && verifiedMedium[i].verdict.isReal) {
     confirmedMedium.push(verifiedMedium[i].finding)
   }
@@ -179,11 +208,9 @@ for (var i = 0; i < verifiedMedium.length; i++) {
 phase('Synthesize')
 log('Synthesizing final report.')
 
-var allConfirmed = confirmedFindings.concat(confirmedMedium)
-var confirmedHigh = confirmedFindings // all verified HIGH that survived
-var confirmedMed = confirmedMedium
+const allConfirmed = confirmedFindings.concat(confirmedMedium)
 
-var report = await agent(
+const report = await agent(
   'Compile the final code review report.\n\n' +
   'Confirmed findings (' + allConfirmed.length + '):\n' +
   JSON.stringify(allConfirmed, null, 2) + '\n\n' +
@@ -201,8 +228,8 @@ var report = await agent(
 
 return {
   totalFindings: allFindings.length,
-  highCount: confirmedHigh.length,
-  mediumCount: confirmedMed.length,
+  highCount: confirmedFindings.length,
+  mediumCount: confirmedMedium.length,
   lowCount: lowFindings.length,
   report: report
 }

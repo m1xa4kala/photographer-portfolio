@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { PortfolioCategory } from '../entities/portfolio-category.entity';
 import { PortfolioSession } from '../entities/portfolio-session.entity';
 import { PortfolioPhoto } from '../entities/portfolio-photo.entity';
 import { CreatePortfolioCategoryDto } from '../dtos/create-portfolio-category.dto';
 import { UpdatePortfolioCategoryDto } from '../dtos/update-portfolio-category.dto';
-import { ReorderDto } from '../dto/reorder.dto';
+import { ReorderDto } from '../dtos/reorder.dto';
 
 @Injectable()
 export class PortfolioCategoriesService {
@@ -55,11 +55,21 @@ export class PortfolioCategoriesService {
 
   async delete(id: number): Promise<void> {
     // Удаляем все сессии и их фото, принадлежащие этой категории
-    const sessions = await this.sessionRepo.find({ where: { categoryId: id } });
-    for (const session of sessions) {
-      await this.photoRepo.delete({ sessionId: session.id });
+    const sessions = await this.sessionRepo.find({
+      where: { categoryId: id },
+      select: { id: true },
+    });
+    const sessionIds = sessions.map((s) => s.id);
+
+    // Bulk delete photos for all sessions
+    if (sessionIds.length > 0) {
+      await this.photoRepo.delete({ sessionId: In(sessionIds) });
     }
+
+    // Bulk delete all sessions
     await this.sessionRepo.delete({ categoryId: id });
+
+    // Delete the category
     const result = await this.repo.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Category with id ${id} not found`);
