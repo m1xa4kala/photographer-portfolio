@@ -65,6 +65,7 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 h1, h2, h3 {
