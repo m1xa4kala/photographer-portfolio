@@ -19,3 +19,4 @@ export { useAdminFullSessions } from './admin/useAdminFullSessions';
 export { useAdminFullSessionFiles } from './admin/useAdminFullSessionFiles';
 export { useUploadStatus } from './useUploadStatus';
 export { useConfirm } from './useConfirm';
+export { useDocumentTitle } from './useDocumentTitle';

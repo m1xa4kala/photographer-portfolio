@@ -1,9 +1,11 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks';
+import { useAuth, useDocumentTitle } from '../../hooks';
 import styles from './AdminLayout.module.css';
 
 const AdminLayout: React.FC = () => {
+  useDocumentTitle('Влада | Админ');
+
   const { logout } = useAuth();
   const navigate = useNavigate();
 

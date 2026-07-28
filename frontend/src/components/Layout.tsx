@@ -1,13 +1,25 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { useAuth, useSocialLinks } from '../hooks';
+import { useAuth, useSocialLinks, useDocumentTitle } from '../hooks';
 import SocialLinks from './SocialLinks';
 import styles from './Layout.module.css';
+
+const TITLE_MAP: Record<string, string> = {
+  '/': 'Влада | Фотограф',
+  '/portfolio': 'Влада | Портфолио',
+  '/price': 'Влада | Прайс',
+  '/reviews': 'Влада | Отзывы',
+  '/about': 'Влада | Обо мне',
+};
 
 const Layout: React.FC = () => {
   const { user } = useAuth();
   const { socialLinks } = useSocialLinks();
   const location = useLocation();
+
+  // Adaptive document title
+  const title = TITLE_MAP[location.pathname] ?? 'Влада | Фотограф';
+  useDocumentTitle(title);
   const isHome = location.pathname === '/';
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
