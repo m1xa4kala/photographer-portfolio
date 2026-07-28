@@ -1,7 +1,7 @@
 .carousel {
   position: relative;
   width: 100vw;
-  height: calc(100dvh + 6px);
+  height: calc(100svh + 6px);
   margin-left: calc(-50vw + 50%);
   margin-top: calc(-2rem - var(--header-height));
   overflow: hidden;
@@ -154,7 +154,7 @@
 
 @media (max-width: 767px) {
   .carousel {
-    height: calc(100dvh + 6px);
+    height: calc(100svh + 6px);
     margin-top: calc(-1rem - var(--header-height));
   }
 
