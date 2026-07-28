@@ -17,4 +17,6 @@ export interface AppConfig {
   jwt: JwtConfig;
   frontendUrl: string;
   nodeEnv: string;
+  adminEmail: string;
+  adminPassword: string;
 }

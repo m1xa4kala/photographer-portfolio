@@ -18,4 +18,6 @@ export default (): AppConfig => ({
   },
   frontendUrl: process.env.FRONTEND_URL || '',
   nodeEnv: process.env.NODE_ENV || 'development',
+  adminEmail: process.env.ADMIN_EMAIL || 'admin@example.com',
+  adminPassword: process.env.ADMIN_PASSWORD || 'admin123',
 });

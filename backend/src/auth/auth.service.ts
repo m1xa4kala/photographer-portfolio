@@ -2,8 +2,10 @@ import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
+import { AppConfig } from '../config/config.interface';
 
 export type UserWithoutPassword = { id: number; email: string };
 
@@ -13,6 +15,7 @@ export class AuthService implements OnApplicationBootstrap {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private configService: ConfigService<AppConfig>,
   ) {}
 
   async onApplicationBootstrap() {
@@ -22,12 +25,17 @@ export class AuthService implements OnApplicationBootstrap {
   private async seedAdmin() {
     const count = await this.userRepository.count();
     if (count === 0) {
+      const adminEmail = this.configService.get(
+        'adminEmail',
+        'admin@example.com',
+      );
+      const adminPassword = this.configService.get('adminPassword', 'admin123');
       const admin = this.userRepository.create({
-        email: 'admin@example.com',
-        passwordHash: 'admin123', // will be hashed by @BeforeInsert
+        email: adminEmail,
+        passwordHash: adminPassword, // will be hashed by @BeforeInsert
       });
       await this.userRepository.save(admin);
-      console.log('✅ Администратор создан: admin@example.com / admin123');
+      console.log(`✅ Администратор создан: ${adminEmail} / ${adminPassword}`);
     }
   }
 

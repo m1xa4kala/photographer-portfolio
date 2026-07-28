@@ -15,7 +15,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-postgres}']
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-photographer}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,8 +30,10 @@ services:
     restart: unless-stopped
     profiles:
       - prod
-    ports:
-      - '${DB_PROD_PORT:-5431}:5432'
+    # ports не нужны — бэкенд подключается через Docker internal network
+    # Открытие порта наружу привлекает ботов (miklDBAdmin и т.д.)
+    # ports:
+    #   - '${DB_PROD_PORT:-5431}:5432'
     environment:
       POSTGRES_USER: ${DB_PROD_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PROD_PASSWORD}
@@ -39,7 +41,7 @@ services:
     volumes:
       - pgdata-prod:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_PROD_USER:-postgres}']
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_PROD_USER:-postgres} -d ${DB_PROD_NAME:-photographer}']
       interval: 10s
       timeout: 5s
       retries: 5
