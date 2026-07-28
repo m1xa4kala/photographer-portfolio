@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsInt,
   Min,
-  IsUrl,
   MaxLength,
 } from 'class-validator';
 
@@ -14,7 +13,7 @@ export class CreateBestPhotoDto {
   @MaxLength(255)
   title!: string;
 
-  @IsUrl({ protocols: ['https', 'http'], require_protocol: true })
+  @IsString()
   @IsNotEmpty()
   @MaxLength(2048)
   imageUrl!: string;
