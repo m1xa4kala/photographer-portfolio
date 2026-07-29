@@ -262,7 +262,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
 
     touchDeltaX.current = 0;
     setIsPaused(false);
-  }, [total, next, prev, setIsPaused, setTransitionEnabled]);
+  }, [total, current, next, prev, setIsPaused, setTransitionEnabled]);
 
   if (total === 0) {
     return (
