@@ -104,5 +104,8 @@ if [ "$MIGRATE" = true ]; then
   " || echo "⚠️  Migration command failed (non-fatal)"
 fi
 
+# Cleanup — remove dangling images and old build cache
+echo "🧹 Cleaning up old Docker images..."
+docker image prune -f -a
 echo "✅ Done! Container status:"
 docker compose --profile prod ps
