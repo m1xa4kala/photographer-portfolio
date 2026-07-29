@@ -55,6 +55,9 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
   const touchDeltaX = useRef(0);
   const isDragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const touchStartTime = useRef(0);
+  const lastTouchTime = useRef(0);
 
   // Расширенный список для бесконечного цикла:
   // [последние 3, все фото, первые 3]
@@ -204,6 +207,8 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     touchStartY.current = e.touches[0].clientY;
     touchDeltaX.current = 0;
     isDragging.current = true;
+    touchStartTime.current = Date.now();
+    lastTouchTime.current = Date.now();
     setIsPaused(true);
     // Отключаем transition, чтобы трек двигался за пальцем без задержки
     setTransitionEnabled(false);
@@ -226,11 +231,11 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
 
     e.preventDefault();
     touchDeltaX.current = deltaX;
+    lastTouchTime.current = Date.now();
 
     // Двигаем трек в реальном времени за пальцем
-    const track = containerRef.current?.querySelector('[class*="track"]') as HTMLElement | null;
-    if (track) {
-      track.style.transform = `translateX(calc(-${current * SLIDE_WIDTH}% + ${deltaX}px))`;
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(calc(-${current * SLIDE_WIDTH}% + ${deltaX}px))`;
     }
   }, [total, current, SLIDE_WIDTH]);
 
@@ -246,23 +251,27 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
 
     // Сначала устанавливаем трек в базовую позицию (без дельты),
     // чтобы браузер мог анимировать snap back от текущей offset-позиции
-    const track = containerRef.current?.querySelector('[class*="track"]') as HTMLElement | null;
-    if (track) {
-      track.style.transform = `translateX(-${current * SLIDE_WIDTH}%)`;
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(-${current * SLIDE_WIDTH}%)`;
     }
 
     // Включаем transition — браузер анимирует от offset до base
     setTransitionEnabled(true);
 
-    if (touchDeltaX.current < -threshold) {
+    // Velocity-based swipe: быстрый флик (малое расстояние, высокая скорость)
+    const dt = lastTouchTime.current - touchStartTime.current;
+    const velocity = dt > 0 ? Math.abs(touchDeltaX.current) / dt : 0;
+    const isFastFlick = velocity > 0.5 && Math.abs(touchDeltaX.current) > 10;
+
+    if (touchDeltaX.current < -threshold || (isFastFlick && touchDeltaX.current < -10)) {
       next();
-    } else if (touchDeltaX.current > threshold) {
+    } else if (touchDeltaX.current > threshold || (isFastFlick && touchDeltaX.current > 10)) {
       prev();
     }
 
     touchDeltaX.current = 0;
     setIsPaused(false);
-  }, [total, current, next, prev, setIsPaused, setTransitionEnabled]);
+  }, [total, current, next, prev, setIsPaused, setTransitionEnabled, containerRef]);
 
   if (total === 0) {
     return (
@@ -285,6 +294,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
       onTouchEnd={handleTouchEnd}
     >
       <div
+        ref={trackRef}
         className={styles.track}
         onTransitionEnd={handleTransitionEnd}
         style={{

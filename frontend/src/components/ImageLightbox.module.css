@@ -10,6 +10,7 @@
   cursor: zoom-out;
   animation: fadeIn 0.2s ease;
   padding: 2rem;
+  touch-action: pan-y;
 }
 
 .image {
