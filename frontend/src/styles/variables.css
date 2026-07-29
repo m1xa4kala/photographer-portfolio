@@ -59,13 +59,38 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+  /* Firefox: тонкий скроллбар */
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 transparent;
+}
+
 body {
   font-family: var(--font-body);
   background-color: #ffffff;
   color: var(--text-primary);
   line-height: 1.6;
   scroll-behavior: smooth;
-  scrollbar-gutter: stable;
+}
+
+/* Chrome/Safari/Edge: тонкий скроллбар */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
 }
 
 h1, h2, h3 {
