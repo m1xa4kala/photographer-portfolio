@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import styles from './ImageLightbox.module.css';
 
 interface ImageLightboxProps {
@@ -14,6 +14,10 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const prevBtnRef = useRef<HTMLButtonElement>(null);
   const nextBtnRef = useRef<HTMLButtonElement>(null);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const lastTouchX = useRef(0);
+  const isSwiping = useRef(false);
 
   const hasPrev = index > 0;
   const hasNext = index < images.length - 1;
@@ -86,6 +90,39 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     };
   }, [onClose, hasPrev, hasNext]);
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    lastTouchX.current = e.touches[0].clientX;
+    isSwiping.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+    const deltaY = e.touches[0].clientY - touchStartY.current;
+
+    // If vertical movement dominates — don't interfere (tap-to-close on overlay)
+    if (Math.abs(deltaY) > Math.abs(deltaX) * 2) return;
+
+    isSwiping.current = true;
+    lastTouchX.current = e.touches[0].clientX;
+    e.preventDefault();
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isSwiping.current) return;
+    isSwiping.current = false;
+
+    const deltaX = lastTouchX.current - touchStartX.current;
+
+    if (deltaX < -50 && hasNext) {
+      goNext();
+    } else if (deltaX > 50 && hasPrev) {
+      goPrev();
+    }
+  }, [hasNext, hasPrev, goNext, goPrev]);
+
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -96,6 +133,9 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     <div
       className={styles.overlay}
       onClick={handleOverlayClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       role="dialog"
       aria-modal="true"
       aria-label="Просмотр изображения"
