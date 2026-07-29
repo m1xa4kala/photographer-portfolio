@@ -21,6 +21,7 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
     const el = ref.current;
     if (!el) return;
 
+    const isMobile = window.innerWidth < 768;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -28,7 +29,10 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
           observer.unobserve(el);
         }
       },
-      { threshold: 0.1 }
+      {
+        threshold: isMobile ? 0 : 0.1,
+        rootMargin: isMobile ? '0px 0px -30px 0px' : '0px 0px -50px 0px',
+      }
     );
 
     observer.observe(el);

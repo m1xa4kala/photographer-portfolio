@@ -153,6 +153,12 @@
   font-size: 1.2rem;
 }
 
+@media (max-width: 1024px){
+  .carousel { 
+    height: calc(100svh + 10px);
+  }
+}
+
 @media (max-width: 767px) {
   .carousel {
     height: calc(100svh + 10px);

@@ -50,6 +50,11 @@ const Layout: React.FC = () => {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  // Scroll to top on navigation
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, [location.pathname]);
+
   useEffect(() => {
     if (!isHome) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
