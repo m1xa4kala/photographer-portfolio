@@ -81,10 +81,12 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
 
     document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
       // Restore focus to the previously focused element
       previouslyFocused?.focus();
     };
