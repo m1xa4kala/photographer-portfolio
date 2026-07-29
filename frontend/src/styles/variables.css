@@ -60,6 +60,8 @@
 }
 
 html {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
   background-color: #00000000;
 }
 
