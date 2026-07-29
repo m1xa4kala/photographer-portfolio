@@ -50,6 +50,14 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isAnimating = useRef(false);
   const snapPending = useRef(false);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchDeltaX = useRef(0);
+  const isDragging = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const touchStartTime = useRef(0);
+  const lastTouchTime = useRef(0);
 
   // Расширенный список для бесконечного цикла:
   // [последние 3, все фото, первые 3]
@@ -193,6 +201,78 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     routerNavigate('/price');
   };
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (total === 0) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchDeltaX.current = 0;
+    isDragging.current = true;
+    touchStartTime.current = Date.now();
+    lastTouchTime.current = Date.now();
+    setIsPaused(true);
+    // Отключаем transition, чтобы трек двигался за пальцем без задержки
+    setTransitionEnabled(false);
+  }, [total, setIsPaused, setTransitionEnabled]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging.current || total === 0) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const deltaX = currentX - touchStartX.current;
+    const deltaY = currentY - touchStartY.current;
+
+    // Если движение больше по вертикали — не мешаем скроллу
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      isDragging.current = false;
+      setTransitionEnabled(true);
+      setIsPaused(false);
+      return;
+    }
+
+    e.preventDefault();
+    touchDeltaX.current = deltaX;
+    lastTouchTime.current = Date.now();
+
+    // Двигаем трек в реальном времени за пальцем
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(calc(-${current * SLIDE_WIDTH}% + ${deltaX}px))`;
+    }
+  }, [total, current, SLIDE_WIDTH]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDragging.current || total === 0) {
+      isDragging.current = false;
+      return;
+    }
+    isDragging.current = false;
+
+    const container = containerRef.current;
+    const threshold = container ? container.clientWidth * 0.3 : 50;
+
+    // Сначала устанавливаем трек в базовую позицию (без дельты),
+    // чтобы браузер мог анимировать snap back от текущей offset-позиции
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(-${current * SLIDE_WIDTH}%)`;
+    }
+
+    // Включаем transition — браузер анимирует от offset до base
+    setTransitionEnabled(true);
+
+    // Velocity-based swipe: быстрый флик (малое расстояние, высокая скорость)
+    const dt = lastTouchTime.current - touchStartTime.current;
+    const velocity = dt > 0 ? Math.abs(touchDeltaX.current) / dt : 0;
+    const isFastFlick = velocity > 0.5 && Math.abs(touchDeltaX.current) > 10;
+
+    if (touchDeltaX.current < -threshold || (isFastFlick && touchDeltaX.current < -10)) {
+      next();
+    } else if (touchDeltaX.current > threshold || (isFastFlick && touchDeltaX.current > 10)) {
+      prev();
+    }
+
+    touchDeltaX.current = 0;
+    setIsPaused(false);
+  }, [total, current, next, prev, setIsPaused, setTransitionEnabled, containerRef]);
+
   if (total === 0) {
     return (
       <div className={styles.carousel}>
@@ -206,10 +286,15 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
   return (
     <div
       className={styles.carousel}
+      ref={containerRef}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div
+        ref={trackRef}
         className={styles.track}
         onTransitionEnd={handleTransitionEnd}
         style={{

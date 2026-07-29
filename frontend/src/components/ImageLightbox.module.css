@@ -10,6 +10,8 @@
   cursor: zoom-out;
   animation: fadeIn 0.2s ease;
   padding: 2rem;
+  touch-action: pan-y;
+  overflow: hidden;
 }
 
 .image {
@@ -20,6 +22,7 @@
   border-radius: 4px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   animation: scaleIn 0.25s ease;
+  min-width: 0;
 }
 
 .closeBtn {
@@ -98,5 +101,12 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* На телефонах/планшетах скрываем стрелки — навигация через swipe */
+@media (hover: none) {
+  .navBtn {
+    display: none;
   }
 }
