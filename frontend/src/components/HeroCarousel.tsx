@@ -220,6 +220,7 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
       isDragging.current = false;
       setTransitionEnabled(true);
+      setIsPaused(false);
       return;
     }
 
@@ -243,7 +244,14 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     const container = containerRef.current;
     const threshold = container ? container.clientWidth * 0.3 : 50;
 
-    // Включаем transition для анимации snap back или перехода
+    // Сначала устанавливаем трек в базовую позицию (без дельты),
+    // чтобы браузер мог анимировать snap back от текущей offset-позиции
+    const track = containerRef.current?.querySelector('[class*="track"]') as HTMLElement | null;
+    if (track) {
+      track.style.transform = `translateX(-${current * SLIDE_WIDTH}%)`;
+    }
+
+    // Включаем transition — браузер анимирует от offset до base
     setTransitionEnabled(true);
 
     if (touchDeltaX.current < -threshold) {
@@ -251,10 +259,6 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     } else if (touchDeltaX.current > threshold) {
       prev();
     }
-    // Иначе: snap back — transition включён, трек анимированно вернётся
-    // на текущую позицию, потому что мы не меняли current.
-    // Inline transform очистится автоматически при React re-render —
-    // не удаляем его здесь, чтобы избежать скачка до обновления состояния.
 
     touchDeltaX.current = 0;
     setIsPaused(false);
