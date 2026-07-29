@@ -6,6 +6,7 @@
   margin-top: calc(-2rem - var(--header-height));
   overflow: hidden;
   background: #1a1a1a;
+  touch-action: pan-y;
 }
 
 .track {

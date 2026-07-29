@@ -50,6 +50,11 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isAnimating = useRef(false);
   const snapPending = useRef(false);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchDeltaX = useRef(0);
+  const isDragging = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Расширенный список для бесконечного цикла:
   // [последние 3, все фото, первые 3]
@@ -193,6 +198,68 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     routerNavigate('/price');
   };
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (total === 0) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchDeltaX.current = 0;
+    isDragging.current = true;
+    setIsPaused(true);
+    // Отключаем transition, чтобы трек двигался за пальцем без задержки
+    setTransitionEnabled(false);
+  }, [total, setIsPaused, setTransitionEnabled]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging.current || total === 0) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const deltaX = currentX - touchStartX.current;
+    const deltaY = currentY - touchStartY.current;
+
+    // Если движение больше по вертикали — не мешаем скроллу
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      isDragging.current = false;
+      setTransitionEnabled(true);
+      return;
+    }
+
+    e.preventDefault();
+    touchDeltaX.current = deltaX;
+
+    // Двигаем трек в реальном времени за пальцем
+    const track = containerRef.current?.querySelector('[class*="track"]') as HTMLElement | null;
+    if (track) {
+      track.style.transform = `translateX(calc(-${current * SLIDE_WIDTH}% + ${deltaX}px))`;
+    }
+  }, [total, current, SLIDE_WIDTH]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDragging.current || total === 0) {
+      isDragging.current = false;
+      return;
+    }
+    isDragging.current = false;
+
+    const container = containerRef.current;
+    const threshold = container ? container.clientWidth * 0.3 : 50;
+
+    // Включаем transition для анимации snap back или перехода
+    setTransitionEnabled(true);
+
+    if (touchDeltaX.current < -threshold) {
+      next();
+    } else if (touchDeltaX.current > threshold) {
+      prev();
+    }
+    // Иначе: snap back — transition включён, трек анимированно вернётся
+    // на текущую позицию, потому что мы не меняли current.
+    // Inline transform очистится автоматически при React re-render —
+    // не удаляем его здесь, чтобы избежать скачка до обновления состояния.
+
+    touchDeltaX.current = 0;
+    setIsPaused(false);
+  }, [total, next, prev, setIsPaused, setTransitionEnabled]);
+
   if (total === 0) {
     return (
       <div className={styles.carousel}>
@@ -206,8 +273,12 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
   return (
     <div
       className={styles.carousel}
+      ref={containerRef}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div
         className={styles.track}
