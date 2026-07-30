@@ -60,9 +60,10 @@ export class PublicContentController {
     if (catId !== undefined && isNaN(catId)) {
       throw new BadRequestException('Invalid categoryId');
     }
-    const sessions = catId !== undefined
-      ? await this.portfolioSessionsService.findByCategory(catId, 100, 0)
-      : await this.portfolioSessionsService.findAll(100, 0);
+    const sessions =
+      catId !== undefined
+        ? await this.portfolioSessionsService.findByCategory(catId, 100, 0)
+        : await this.portfolioSessionsService.findAll(100, 0);
     const sessionsWithCover = await Promise.all(
       sessions.map(async (session) => {
         const [photo] = await this.portfolioPhotosService.findBySession(
