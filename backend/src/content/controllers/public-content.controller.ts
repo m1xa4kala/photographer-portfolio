@@ -29,6 +29,59 @@ export class PublicContentController {
     return this.bestPhotosService.findAll(limit ?? 100, offset ?? 0);
   }
 
+  @Get('portfolio-home')
+  async getHomePortfolio(@Query('limit') limit?: number) {
+    const take = limit ?? 6;
+    const sessions = await this.portfolioSessionsService.findAll(take, 0);
+    const sessionsWithCover = await Promise.all(
+      sessions.map(async (session) => {
+        const [photo] = await this.portfolioPhotosService.findBySession(
+          session.id,
+          1,
+          0,
+        );
+        return {
+          id: session.id,
+          name: session.name,
+          orderIndex: session.orderIndex,
+          categoryId: session.categoryId,
+          coverImageUrl: photo?.imageUrl ?? null,
+        };
+      }),
+    );
+    return sessionsWithCover;
+  }
+
+  @Get('portfolio-sessions-with-covers')
+  async getPortfolioSessionsWithCovers(
+    @Query('categoryId') categoryId?: string,
+  ) {
+    const catId = categoryId ? parseInt(categoryId, 10) : undefined;
+    if (catId !== undefined && isNaN(catId)) {
+      throw new BadRequestException('Invalid categoryId');
+    }
+    const sessions = catId !== undefined
+      ? await this.portfolioSessionsService.findByCategory(catId, 100, 0)
+      : await this.portfolioSessionsService.findAll(100, 0);
+    const sessionsWithCover = await Promise.all(
+      sessions.map(async (session) => {
+        const [photo] = await this.portfolioPhotosService.findBySession(
+          session.id,
+          1,
+          0,
+        );
+        return {
+          id: session.id,
+          name: session.name,
+          orderIndex: session.orderIndex,
+          categoryId: session.categoryId,
+          coverImageUrl: photo?.imageUrl ?? null,
+        };
+      }),
+    );
+    return sessionsWithCover;
+  }
+
   @Get('portfolio-categories')
   async getPortfolioCategories(
     @Query('limit') limit?: number,

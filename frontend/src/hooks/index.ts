@@ -1,5 +1,8 @@
 export { useHome } from './useHome';
-export { usePortfolio } from './usePortfolio';
+export { useHomePortfolio } from './useHomePortfolio';
+export { usePortfolioCategories } from './usePortfolioCategories';
+export { usePortfolioSessions } from './usePortfolioSessions';
+export { usePortfolioPhotos } from './usePortfolioPhotos';
 export { usePrice } from './usePrice';
 export { useReviews } from './useReviews';
 export { useAbout } from './useAbout';
