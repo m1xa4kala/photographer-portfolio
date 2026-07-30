@@ -23,6 +23,10 @@ export interface PortfolioSession {
   categoryId: number;
 }
 
+export interface HomeSession extends PortfolioSession {
+  coverImageUrl: string | null;
+}
+
 export interface PortfolioPhoto {
   id: number;
   title: string;

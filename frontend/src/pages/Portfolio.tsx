@@ -1,65 +1,110 @@
-import React, { useState } from 'react';
-import { usePortfolio } from '../hooks';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { usePortfolioCategories, usePortfolioSessions, usePortfolioPhotos } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
 import ImageLightbox from '../components/ImageLightbox';
 import Skeleton from '../components/Skeleton';
 import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import styles from './Portfolio.module.css';
 
-const PortfolioSkeleton: React.FC = () => (
-  <AnimatedSection>
-    <div className={styles.portfolio}>
-      <Skeleton variant="text" width="250px" height="2.5rem" style={{ margin: '0 auto 2rem' }} />
-      <div className={styles.filters}>
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} variant="text" width="80px" height="36px" borderRadius="2rem" />
-        ))}
+const CategoriesSkeleton: React.FC = () => (
+  <div className={styles.filters}>
+    {Array.from({ length: 4 }).map((_, i) => (
+      <Skeleton key={i} variant="text" width="80px" height="36px" borderRadius="2rem" />
+    ))}
+  </div>
+);
+
+const SessionsSkeleton: React.FC = () => (
+  <div className={styles.sessionGrid}>
+    {Array.from({ length: 6 }).map((_, i) => (
+      <div key={i} className={styles.sessionCard}>
+        <Skeleton variant="rect" width="100%" height="220px" />
+        <div style={{ padding: '1rem' }}>
+          <Skeleton variant="text" width="60%" height="1.2rem" />
+        </div>
       </div>
-      <div className={styles.sessionGrid}>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className={styles.sessionCard}>
-            <Skeleton variant="rect" width="100%" height="220px" />
-            <div style={{ padding: '1rem' }}>
-              <Skeleton variant="text" width="60%" height="1.2rem" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </AnimatedSection>
+    ))}
+  </div>
 );
 
 const Portfolio: React.FC = () => {
-  const {
-    categories,
-    activeCategoryId,
-    setActiveCategoryId,
-    activeSessionId,
-    setActiveSessionId,
-    filteredSessions,
-    filteredPhotos,
-    photos,
-    loading,
-    error,
-    refetch,
-  } = usePortfolio();
+  const { catId, sessionId } = useParams<{ catId?: string; sessionId?: string }>();
+  const navigate = useNavigate();
+
+  const { categories, loading: categoriesLoading, error: categoriesError, refetch: refetchCategories } = usePortfolioCategories();
+
+  const categoryId = catId ? Number(catId) : null;
+  const activeSessionId = sessionId ? Number(sessionId) : null;
+
+  const validCategoryIds = useMemo(() => categories.map(c => c.id), [categories]);
+
+  // Redirect /portfolio (no params) to first category
+  useEffect(() => {
+    if (!categoriesLoading && categories.length > 0 && !catId) {
+      navigate(`/portfolio/category/${categories[0].id}`, { replace: true });
+    }
+  }, [categoriesLoading, categories, catId, navigate]);
+
+  // Redirect invalid category ID to first category
+  useEffect(() => {
+    if (!categoriesLoading && categories.length > 0 && categoryId !== null && !validCategoryIds.includes(categoryId)) {
+      navigate(`/portfolio/category/${categories[0].id}`, { replace: true });
+    }
+  }, [categoriesLoading, categories, categoryId, validCategoryIds, navigate]);
+
+  const { sessions, loading: sessionsLoading, error: sessionsError, refetch: refetchSessions } = usePortfolioSessions(categoryId);
+
+  const validSessionIds = useMemo(() => sessions.map(s => s.id), [sessions]);
+
+  // Redirect invalid session ID to category
+  useEffect(() => {
+    if (!sessionsLoading && sessions.length > 0 && activeSessionId !== null && !validSessionIds.includes(activeSessionId)) {
+      navigate(`/portfolio/category/${categoryId}`, { replace: true });
+    }
+  }, [sessionsLoading, sessions, activeSessionId, categoryId, validSessionIds, navigate]);
+
+  const { photos, loading: photosLoading, error: photosError, refetch: refetchPhotos } = usePortfolioPhotos(activeSessionId);
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const lightboxImages = activeSessionId ? filteredPhotos.map(p => p.imageUrl) : [];
+  const lightboxImages = photos.map(p => p.imageUrl);
 
-  if (loading) return <PortfolioSkeleton />;
-  if (error) return <div className={styles.error}>Ошибка: {error} <button onClick={refetch}>Повторить</button></div>;
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, path: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigate(path);
+    }
+  }, [navigate]);
 
-  const selectedCategory = categories.find(c => c.id === activeCategoryId);
-  const selectedSession = filteredSessions.find(s => s.id === activeSessionId);
+  // Show full-page skeleton only while categories load
+  if (categoriesLoading) {
+    return (
+      <AnimatedSection>
+        <div className={styles.portfolio}>
+          <h1>Портфолио</h1>
+          <CategoriesSkeleton />
+          <SessionsSkeleton />
+        </div>
+      </AnimatedSection>
+    );
+  }
 
-  // Берём первое по порядку фото как обложку для сессии
-  const getSessionCover = (sessionId: number) => {
-    const firstPhoto = photos
-      .filter(p => p.sessionId === sessionId)
-      .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))[0];
-    return firstPhoto?.imageUrl || null;
-  };
+  if (categoriesError) {
+    return (
+      <AnimatedSection>
+        <div className={styles.portfolio}>
+          <h1>Портфолио</h1>
+          <div className={styles.error}>
+            Ошибка: {categoriesError}
+            <button onClick={refetchCategories}>Повторить</button>
+          </div>
+        </div>
+      </AnimatedSection>
+    );
+  }
+
+  const selectedCategory = categories.find(c => c.id === categoryId);
+  const selectedSession = sessions.find(s => s.id === activeSessionId);
 
   return (
     <>
@@ -67,82 +112,105 @@ const Portfolio: React.FC = () => {
       <div className={styles.portfolio}>
         <h1>Портфолио</h1>
 
-        {/* Шаг 1: Категории */}
+        {/* Категории */}
         <div className={styles.filters}>
-          <button onClick={() => { setActiveCategoryId(null); setActiveSessionId(null); }} className={!activeCategoryId ? styles.activeFilter : ''}>
-            Все
-          </button>
           {categories.map(cat => (
             <button
               key={cat.id}
-              onClick={() => { setActiveCategoryId(cat.id); setActiveSessionId(null); }}
-              className={activeCategoryId === cat.id ? styles.activeFilter : ''}
+              onClick={() => navigate(`/portfolio/category/${cat.id}`)}
+              className={categoryId === cat.id ? styles.activeFilter : ''}
             >
               {cat.name}
             </button>
           ))}
         </div>
 
-        {/* Шаг 2: Сетка сессий (если не выбрана конкретная сессия) */}
+        {/* Сетка сессий (если не выбрана конкретная сессия) */}
         {!activeSessionId && (
-          <div className={styles.sessionGrid}>
-            {filteredSessions.map(session => {
-              const coverUrl = getSessionCover(session.id);
-              return (
-                <div
-                  key={session.id}
-                  className={styles.sessionCard}
-                  onClick={() => setActiveSessionId(session.id)}
-                >
-                  <div className={styles.sessionImage}>
-                    {coverUrl ? (
-                      <ImageWithSkeleton
-                        src={coverUrl}
-                        alt={session.name}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className={styles.sessionPlaceholder}>
-                        <span>{session.name.charAt(0)}</span>
-                      </div>
-                    )}
+          <>
+            {sessionsLoading ? (
+              <SessionsSkeleton />
+            ) : sessionsError ? (
+              <div className={styles.error}>
+                Ошибка: {sessionsError}
+                <button onClick={refetchSessions}>Повторить</button>
+              </div>
+            ) : (
+              <div className={styles.sessionGrid}>
+                {sessions.map(session => (
+                  <div
+                    key={session.id}
+                    className={styles.sessionCard}
+                    onClick={() => navigate(`/portfolio/category/${categoryId}/session/${session.id}`)}
+                    role="link"
+                    tabIndex={0}
+                    onKeyDown={(e) => handleKeyDown(e, `/portfolio/category/${categoryId}/session/${session.id}`)}
+                  >
+                    <div className={styles.sessionImage}>
+                      {session.coverImageUrl ? (
+                        <ImageWithSkeleton
+                          src={session.coverImageUrl}
+                          alt={session.name}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className={styles.sessionPlaceholder}>
+                          <span>{session.name.charAt(0)}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.sessionInfo}>
+                      <h3>{session.name}</h3>
+                    </div>
                   </div>
-                  <div className={styles.sessionInfo}>
-                    <h3>{session.name}</h3>
-                  </div>
-                </div>
-              );
-            })}
-            {filteredSessions.length === 0 && (
-              <p className={styles.empty}>В этой категории пока нет фотосессий</p>
+                ))}
+                {sessions.length === 0 && (
+                  <p className={styles.empty}>В этой категории пока нет фотосессий</p>
+                )}
+              </div>
             )}
-          </div>
+          </>
         )}
 
-        {/* Шаг 3: Галерея фото (когда выбрана сессия) */}
+        {/* Галерея фото (когда выбрана сессия) */}
         {activeSessionId && (
           <>
             <div className={styles.backRow}>
-              <button className={styles.backBtn} onClick={() => setActiveSessionId(null)}>
-                ← Назад к {selectedCategory ? selectedCategory.name : 'всем сессиям'}
+              <button className={styles.backBtn} onClick={() => navigate(`/portfolio/category/${categoryId}`)}>
+                ← Назад к {selectedCategory ? selectedCategory.name : 'категории'}
               </button>
               {selectedSession && <h3 className={styles.sessionTitle}>{selectedSession.name}</h3>}
             </div>
-            <div className={styles.gallery}>
-              {filteredPhotos.map(photo => (
-                <div key={photo.id} className={styles.photoItem}>
-                  <ImageWithSkeleton
-                    src={photo.imageUrl}
-                    alt={selectedSession?.name || 'Фото'}
-                    loading="lazy"
-                    onClick={() => setLightboxIndex(filteredPhotos.indexOf(photo))}
-                  />
-                </div>
-              ))}
-              {filteredPhotos.length === 0 && (
-                <p className={styles.empty}>В этой фотосессии пока нет фотографий</p>
-              )}
-            </div>
+            {photosLoading ? (
+              <div className={styles.gallery}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className={styles.photoItem}>
+                    <Skeleton variant="rect" width="100%" height="100%" style={{ aspectRatio: '9/16', maxHeight: 350 }} />
+                  </div>
+                ))}
+              </div>
+            ) : photosError ? (
+              <div className={styles.error}>
+                Ошибка: {photosError}
+                <button onClick={refetchPhotos}>Повторить</button>
+              </div>
+            ) : (
+              <div className={styles.gallery}>
+                {photos.map(photo => (
+                  <div key={photo.id} className={styles.photoItem}>
+                    <ImageWithSkeleton
+                      src={photo.imageUrl}
+                      alt={selectedSession?.name || 'Фото'}
+                      loading="lazy"
+                      onClick={() => setLightboxIndex(photos.indexOf(photo))}
+                    />
+                  </div>
+                ))}
+                {photos.length === 0 && (
+                  <p className={styles.empty}>В этой фотосессии пока нет фотографий</p>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>

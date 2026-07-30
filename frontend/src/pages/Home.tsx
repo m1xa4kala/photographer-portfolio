@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useHome, useAbout, usePortfolio, useReviews, usePrice } from '../hooks';
+import { Link, useNavigate } from 'react-router-dom';
+import { useHome, useAbout, useHomePortfolio, useReviews, usePrice } from '../hooks';
 import HeroCarousel from '../components/HeroCarousel';
 import ReviewCard from '../components/ReviewCard';
 import AnimatedSection from '../components/AnimatedSection';
@@ -27,21 +27,21 @@ const HomeSkeleton: React.FC = () => (
 );
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const { photos, loading, error, refetch } = useHome();
   const { about, loading: aboutLoading } = useAbout();
   const {
-    filteredSessions: sessions,
-    photos: allPhotos,
+    sessions: portfolioSessions,
     loading: portfolioLoading,
-  } = usePortfolio();
+  } = useHomePortfolio(6);
   const { reviews, loading: reviewsLoading } = useReviews();
   const { items: priceItems, loading: priceLoading } = usePrice();
 
-  const getSessionCover = (sessionId: number) => {
-    const firstPhoto = allPhotos
-      .filter(p => p.sessionId === sessionId)
-      .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))[0];
-    return firstPhoto?.imageUrl || null;
+  const handleKeyDown = (e: React.KeyboardEvent, path: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigate(path);
+    }
   };
 
   if (loading && aboutLoading) {
@@ -100,29 +100,29 @@ const Home: React.FC = () => {
             </div>
           ) : (
             <div className={portfolioStyles.sessionGrid}>
-              {sessions.slice(0, 6).map(session => {
-                const coverUrl = getSessionCover(session.id);
-                return (
-                  <Link
-                    key={session.id}
-                    to="/portfolio"
-                    className={portfolioStyles.sessionCard}
-                  >
-                    <div className={portfolioStyles.sessionImage}>
-                      {coverUrl ? (
-                        <ImageWithSkeleton src={coverUrl} alt={session.name} loading="lazy" />
-                      ) : (
-                        <div className={portfolioStyles.sessionPlaceholder}>
-                          <span>{session.name.charAt(0)}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className={portfolioStyles.sessionInfo}>
-                      <h3>{session.name}</h3>
-                    </div>
-                  </Link>
-                );
-              })}
+              {portfolioSessions.map(session => (
+                <div
+                  key={session.id}
+                  className={portfolioStyles.sessionCard}
+                  onClick={() => navigate(`/portfolio/category/${session.categoryId}/session/${session.id}`)}
+                  role="link"
+                  tabIndex={0}
+                  onKeyDown={(e) => handleKeyDown(e, `/portfolio/category/${session.categoryId}/session/${session.id}`)}
+                >
+                  <div className={portfolioStyles.sessionImage}>
+                    {session.coverImageUrl ? (
+                      <ImageWithSkeleton src={session.coverImageUrl} alt={session.name} loading="lazy" />
+                    ) : (
+                      <div className={portfolioStyles.sessionPlaceholder}>
+                        <span>{session.name.charAt(0)}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={portfolioStyles.sessionInfo}>
+                    <h3>{session.name}</h3>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
           <div className={styles.viewAll}>
