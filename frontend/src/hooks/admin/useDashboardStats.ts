@@ -24,14 +24,18 @@ export const useDashboardStats = () => {
         const results = await Promise.allSettled([
           api.get('/admin/best-photos'),
           api.get('/admin/portfolio-categories'),
-          api.get('/admin/portfolio-photos'),
+          api.get('/admin/portfolio-photos/count'),
           api.get('/admin/price-items'),
           api.get('/admin/reviews'),
         ]);
 
         if (cancelled) return;
 
-        const counts = results.map(r => (r.status === 'fulfilled' ? r.value.data.length : 0));
+        const counts = results.map((r, i) => {
+          if (r.status !== 'fulfilled') return 0;
+          // The count endpoint returns { count: number }, others return arrays
+          return i === 2 ? r.value.data.count : r.value.data.length;
+        });
         const hasError = results.some(r => r.status === 'rejected');
 
         setStats({

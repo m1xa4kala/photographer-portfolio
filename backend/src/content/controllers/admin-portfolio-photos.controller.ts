@@ -40,6 +40,12 @@ export class AdminPortfolioPhotosController {
     return this.photosService.findAll();
   }
 
+  @Get('count')
+  async getCount() {
+    const count = await this.photoRepo.count();
+    return { count };
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const numericId = parseInt(id, 10);

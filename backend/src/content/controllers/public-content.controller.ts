@@ -70,11 +70,11 @@ export class PublicContentController {
       }
       return this.portfolioPhotosService.findBySession(
         sId,
-        limit ?? 100,
+        limit ?? 10000,
         offset ?? 0,
       );
     }
-    return this.portfolioPhotosService.findAll(limit ?? 100, offset ?? 0);
+    return this.portfolioPhotosService.findAll(limit ?? 10000, offset ?? 0);
   }
 
   @Get('price-items')
