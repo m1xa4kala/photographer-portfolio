@@ -6,19 +6,22 @@ import styles from './Price.module.css';
 
 const PriceSkeleton: React.FC = () => (
   <AnimatedSection>
-    <div className={styles.price}>
+    <section className={styles.price}>
       <Skeleton variant="text" width="250px" height="2.5rem" style={{ margin: '0 auto 2rem' }} />
-      <div className={styles.cards}>
+      <div className={styles.grid}>
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className={styles.card}>
-            <Skeleton variant="text" width="60%" height="1.5rem" style={{ margin: '0 auto 0.5rem' }} />
-            <Skeleton variant="text" width="100%" height="1rem" />
-            <Skeleton variant="text" width="80%" height="1rem" style={{ margin: '0 auto 1rem' }} />
-            <Skeleton variant="text" width="100px" height="1.8rem" style={{ margin: '0 auto' }} />
+            <Skeleton variant="rect" width="100%" height="220px" style={{ borderRadius: '1rem 1rem 0 0' }} />
+            <div className={styles.cardBody}>
+              <Skeleton variant="text" width="60%" height="1.5rem" style={{ marginBottom: '0.5rem' }} />
+              <Skeleton variant="text" width="100%" height="0.85rem" />
+              <Skeleton variant="text" width="80%" height="0.85rem" />
+              <Skeleton variant="text" width="100px" height="1.5rem" style={{ marginTop: '1rem' }} />
+            </div>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   </AnimatedSection>
 );
 
@@ -40,19 +43,42 @@ const Price: React.FC = () => {
 
   return (
     <AnimatedSection>
-      <div className={styles.price}>
+      <section className={styles.price}>
         <h1>Прайс-лист</h1>
-        <div className={styles.cards}>
+        <div className={styles.grid}>
           {items.map((item) => (
-            <div key={item.id} className={styles.card}>
-              <h3>{item.name}</h3>
-              <p>{item.description}</p>
-              <span className={styles.price}>{item.price} ₽</span>
-            </div>
+            <article key={item.id} className={styles.card}>
+              <div className={styles.photoWrapper}>
+                {item.imageUrl ? (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className={styles.photo}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className={styles.photoPlaceholder} />
+                )}
+                <div className={styles.overlay}>
+                  <h3 className={styles.overlayTitle}>{item.name}</h3>
+                  <span className={styles.overlayPrice}>{item.price} ₽</span>
+                </div>
+              </div>
+
+              {item.description && (
+                <ul className={styles.descriptionList}>
+                  {item.description.split('\n').filter(Boolean).map((line, i) => (
+                    <li key={i} className={styles.descriptionItem}>
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
           ))}
         </div>
         <p className={styles.note}>* Точная стоимость обсуждается индивидуально в зависимости от ваших пожеланий</p>
-      </div>
+      </section>
     </AnimatedSection>
   );
 };
