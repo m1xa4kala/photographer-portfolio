@@ -1,17 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useAdminPriceItems } from '../../hooks';
-import { useUploadImage } from '../../hooks/admin/useUploadImage';
 import { useConfirm } from '../../hooks/useConfirm';
+import ImageUploadButton from '../../components/ImageUploadButton';
 import DraggableTable from '../../components/DraggableTable';
 import type { Column } from '../../components/DraggableTable';
 import type { PriceItem } from '../../types';
 import styles from './adminCrud.module.css';
 
-const IMAGE_BASE = import.meta.env.PROD ? '' : 'http://localhost:3000';
-
 const PriceItemsAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminPriceItems();
-  const { uploadImage, uploading: imageUploading } = useUploadImage();
   const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<PriceItem | null>(null);
   const [form, setForm] = useState<Pick<PriceItem, 'name' | 'description' | 'price'> & { imageUrl: string | null }>({
@@ -21,7 +18,6 @@ const PriceItemsAdmin: React.FC = () => {
     imageUrl: null,
   });
   const [touched, setTouched] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isFormValid = form.name.trim().length > 0 && form.price.trim().length > 0;
 
@@ -42,20 +38,8 @@ const PriceItemsAdmin: React.FC = () => {
     setTouched(false);
   };
 
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const url = await uploadImage(file);
-      setForm(prev => ({ ...prev, imageUrl: url }));
-    } catch {
-      // Ошибка уже обрабатывается хуком
-    }
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleRemoveImage = () => {
-    setForm(prev => ({ ...prev, imageUrl: null }));
+  const handleImageUpload = (url: string) => {
+    setForm(prev => ({ ...prev, imageUrl: url || null }));
   };
 
   const handleReorder = async (orderedIds: number[]) => {
@@ -70,7 +54,7 @@ const PriceItemsAdmin: React.FC = () => {
       render: (item) =>
         item.imageUrl ? (
           <img
-            src={`${IMAGE_BASE}${item.imageUrl}`}
+            src={item.imageUrl}
             alt={item.name}
             style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4 }}
           />
@@ -110,45 +94,14 @@ const PriceItemsAdmin: React.FC = () => {
           className={!form.price.trim() && touched ? styles.inputError : ''}
         />
 
-        {/* Image upload */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            style={{ display: 'none' }}
-            onChange={handleImageSelect}
-          />
-          <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading}>
-            {imageUploading ? 'Загрузка...' : form.imageUrl ? 'Изменить фото' : 'Загрузить фото'}
-          </button>
-          {form.imageUrl && (
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              <img
-                src={`${IMAGE_BASE}${form.imageUrl}`}
-                alt="preview"
-                style={{ width: 80, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' }}
-              />
-              <button
-                type="button"
-                onClick={handleRemoveImage}
-                style={{
-                  position: 'absolute', top: -8, right: -8, width: 22, height: 22,
-                  borderRadius: '50%', border: 'none', background: '#e74c3c', color: '#fff',
-                  fontSize: 12, lineHeight: '22px', textAlign: 'center', cursor: 'pointer', padding: 0,
-                }}
-                title="Удалить фото"
-              >
-                ✕
-              </button>
-            </div>
-          )}
-        </div>
+        <ImageUploadButton
+          onUpload={handleImageUpload}
+          currentUrl={form.imageUrl ?? undefined}
+          label="Фото услуги"
+        />
 
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-          <button onClick={handleSubmit} disabled={!isFormValid || imageUploading}>
-            {editing ? 'Обновить' : 'Создать'}
-          </button>
+          <button onClick={handleSubmit} disabled={!isFormValid}>{editing ? 'Обновить' : 'Создать'}</button>
           {editing && <button onClick={handleCancel}>Отмена</button>}
         </div>
         {touched && !isFormValid && <p className={styles.validationError}>Заполните обязательные поля (название и цена)</p>}
