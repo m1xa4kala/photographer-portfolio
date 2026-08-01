@@ -4,8 +4,6 @@ import AnimatedSection from '../components/AnimatedSection';
 import Skeleton from '../components/Skeleton';
 import styles from './Price.module.css';
 
-const IMAGE_BASE = import.meta.env.PROD ? '' : 'http://localhost:3000';
-
 const PriceSkeleton: React.FC = () => (
   <AnimatedSection>
     <section className={styles.price}>
@@ -53,7 +51,7 @@ const Price: React.FC = () => {
               <div className={styles.photoWrapper}>
                 {item.imageUrl ? (
                   <img
-                    src={`${IMAGE_BASE}${item.imageUrl}`}
+                    src={item.imageUrl}
                     alt={item.name}
                     className={styles.photo}
                     loading="lazy"
