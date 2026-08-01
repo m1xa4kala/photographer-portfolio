@@ -5,7 +5,6 @@ import {
   IsInt,
   Min,
   MaxLength,
-  Matches,
 } from 'class-validator';
 
 export class CreatePriceItemDto {
@@ -22,8 +21,12 @@ export class CreatePriceItemDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  @Matches(/^[\d\s]+$/)
-  price!: string; // можно хранить как строку с пробелами, например "8 000"
+  price!: string; // строка — возможны любые форматы
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  imageUrl?: string;
 
   @IsOptional()
   @IsInt()

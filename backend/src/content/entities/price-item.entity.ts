@@ -14,6 +14,9 @@ export class PriceItem {
   @Column()
   price!: string; // e.g. "8 000"
 
+  @Column({ nullable: true })
+  imageUrl!: string;
+
   @Column({ default: 0 })
   orderIndex!: number;
 }

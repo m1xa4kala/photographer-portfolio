@@ -1,7 +1,7 @@
+/* src/pages/Price.module.css */
 .price {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 3rem 1rem;
 }
 
 .price h1 {
@@ -32,7 +32,7 @@
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   box-shadow: 0 12px 24px var(--shadow);
 }
 
@@ -116,11 +116,6 @@
   left: 0;
   color: var(--accent);
   font-weight: 700;
-}
-
-/* ── Card body (skeleton) ── */
-.cardBody {
-  padding: 1rem 1.25rem;
 }
 
 /* ── Note ── */

@@ -41,6 +41,7 @@ export interface PriceItem {
   description: string;
   price: string;
   orderIndex?: number;
+  imageUrl: string | null;
 }
 
 export interface Review {
