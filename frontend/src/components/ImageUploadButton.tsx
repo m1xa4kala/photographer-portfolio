@@ -40,19 +40,29 @@ const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
   return (
     <div className={styles.container}>
       {currentUrl ? (
-        <div className={styles.previewContainer}>
-          <img
-            src={currentUrl}
-            alt="preview"
-            className={styles.previewImage}
-          />
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
+          <button
+            type="button"
+            className={styles.uploadButton}
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <span>⏳ Загрузка...</span>
+            ) : (
+              <>
+                <span className={styles.icon}>📷</span>
+                <span>{label}</span>
+              </>
+            )}
+          </button>
           <button
             type="button"
             className={styles.removeButton}
             onClick={handleRemove}
             title="Удалить фото"
           >
-            ✕
+            ✕ Удалить
           </button>
         </div>
       ) : (
@@ -66,7 +76,7 @@ const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({
             <span>⏳ Загрузка...</span>
           ) : (
             <>
-              <span style={{ fontSize: '1.5rem' }}>📷</span>
+              <span className={styles.icon}>📷</span>
               <span>{label}</span>
             </>
           )}
