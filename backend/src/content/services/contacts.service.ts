@@ -54,7 +54,9 @@ export class ContactsService {
     await queryRunner.startTransaction();
     try {
       for (const { id, orderIndex } of dto.items) {
-        await queryRunner.manager.update(this.repo.metadata.target, id, { orderIndex });
+        await queryRunner.manager.update(this.repo.metadata.target, id, {
+          orderIndex,
+        });
       }
       await queryRunner.commitTransaction();
     } catch (err) {

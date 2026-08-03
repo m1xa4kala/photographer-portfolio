@@ -25,7 +25,7 @@ const ContactsAdmin: React.FC = () => {
   }>({ type: 'social', value: '', platform: '', iconName: '', label: '' });
   const [touched, setTouched] = useState(false);
 
-  const isFormValid = form.value.trim().length > 0;
+  const isFormValid = form.value.trim().length > 0 && (form.type !== 'social' || form.platform.trim().length > 0);
 
   const handlePlatformChange = (platform: string) => {
     const iconName = PLATFORM_ICONS[platform] ?? '';
@@ -33,12 +33,12 @@ const ContactsAdmin: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    const payload: any = { type: form.type, value: form.value };
-    if (form.type === 'social') {
-      payload.platform = form.platform;
-      payload.iconName = form.iconName;
-    }
-    if (form.label) payload.label = form.label;
+    const payload: Omit<Contact, 'id'> = {
+      type: form.type,
+      value: form.value,
+      ...(form.type === 'social' ? { platform: form.platform, iconName: form.iconName } : {}),
+      ...(form.label ? { label: form.label } : {}),
+    };
 
     if (editing) {
       await updateItem(editing.id, payload);

@@ -1,5 +1,11 @@
 import {
-  IsString, IsNotEmpty, IsOptional, IsInt, IsEnum, Min, MaxLength,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsInt,
+  IsEnum,
+  Min,
+  MaxLength,
 } from 'class-validator';
 
 export class CreateContactDto {

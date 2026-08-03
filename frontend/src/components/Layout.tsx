@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
-import { useAuth, useSocialLinks, useDocumentTitle } from '../hooks';
-import SocialLinks from './SocialLinks';
+import { useAuth, useContacts, useDocumentTitle } from '../hooks';
+import Contacts from './Contacts';
 import styles from './Layout.module.css';
 
 const TITLE_MAP: Record<string, string> = {
@@ -14,7 +14,7 @@ const TITLE_MAP: Record<string, string> = {
 
 const Layout: React.FC = () => {
   const { user } = useAuth();
-  const { socialLinks } = useSocialLinks();
+  const { contacts } = useContacts();
   const location = useLocation();
 
   // Adaptive document title
@@ -142,7 +142,7 @@ const Layout: React.FC = () => {
       <footer className={styles.footer}>
         <p>© {new Date().getFullYear()} Vlada Khaybullina. Все права защищены.</p>
         <div className={styles.socials}>
-          <SocialLinks links={socialLinks} />
+          <Contacts contacts={contacts} />
         </div>
       </footer>
     </div>
