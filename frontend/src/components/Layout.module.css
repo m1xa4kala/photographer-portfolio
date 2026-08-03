@@ -176,15 +176,20 @@
     top: 0;
     right: 0;
     width: min(300px, 80vw);
+    height: fit-content;
     height: 100dvh;
     background: var(--bg-primary);
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
-    padding: 5rem 2rem 2rem;
+    padding: 2rem 2rem 0.5rem;
     gap: 0.5rem;
     transform: translateX(100%);
     transition: transform 0.3s ease;
     z-index: 105;
     overflow-y: auto;
+  }
+
+  .navContacts {
+    margin-top: 2rem;
   }
 
   .nav.navOpen {

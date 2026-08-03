@@ -1,5 +1,5 @@
 // frontend/src/components/Contacts.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { type Contact } from '../types';
 import { ICON_COMPONENTS, ICON_COLORS } from '../utils/socialIconMap';
 import styles from './Contacts.module.css';
@@ -12,20 +12,39 @@ interface ContactsProps {
 }
 
 const Contacts: React.FC<ContactsProps> = ({ contacts, className, iconSize = 24, vertical = false }) => {
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+
   if (contacts.length === 0) return null;
+
+  const handleCopy = (id: number, value: string) => {
+    navigator.clipboard.writeText(value).catch(() => {
+      const input = document.createElement('input');
+      input.value = value;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+    });
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
+  };
 
   return (
     <div className={`${vertical ? styles.contactsVertical : styles.contacts} ${className ?? ''}`}>
       {contacts.map((contact) => {
         if (contact.type === 'phone') {
-          const telHref = `tel:${contact.value.replace(/[^\d+]/g, '')}`;
           return (
             <div key={contact.id} className={styles.contactItem}>
-              <a href={telHref} className={styles.phoneLink} aria-label={contact.label ?? contact.value}>
+              <button
+                type="button"
+                onClick={() => handleCopy(contact.id, contact.value)}
+                className={`${styles.phoneLink} ${copiedId === contact.id ? styles.copied : ''}`}
+                aria-label={contact.label ?? contact.value}
+              >
                 <span className={styles.phoneIcon}>📞</span>
-                <span>{contact.value}</span>
+                <span className={styles.phoneValue}>{copiedId === contact.id ? 'Скопировано!' : contact.value}</span>
                 {contact.label && <span className={styles.label}>{contact.label}</span>}
-              </a>
+              </button>
             </div>
           );
         }
@@ -46,8 +65,8 @@ const Contacts: React.FC<ContactsProps> = ({ contacts, className, iconSize = 24,
               style={brandColor ? { color: brandColor } : undefined}
             >
               <IconComponent size={iconSize} color={brandColor} />
+              {contact.label && <span className={styles.label}>{contact.label}</span>}
             </a>
-            {contact.label && <span className={styles.label}>{contact.label}</span>}
           </div>
         );
       })}

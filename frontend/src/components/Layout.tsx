@@ -37,15 +37,26 @@ const Layout: React.FC = () => {
     setMenuOpen(false);
   }, []);
 
-  // Lock body scroll when menu is open
+  // Lock body scroll when menu is open (works on iOS Safari too)
   useEffect(() => {
+    const scrollY = window.scrollY;
     if (menuOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
     } else {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollY);
     }
     return () => {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
     };
   }, [menuOpen]);
 

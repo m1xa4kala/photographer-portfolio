@@ -17,14 +17,14 @@ const Footer: React.FC<FooterProps> = ({ contacts }) => {
       <div className={styles.inner}>
         <div className={styles.info}>
           <Logo className={styles.footerLogo} />
-          <p className={styles.copyright}>
-            &copy; {currentYear} Vlada Khaybullina. Все права защищены.
-          </p>
         </div>
         <div className={styles.contactsSection}>
           <h4 className={styles.contactsHeading}>Контакты</h4>
           <Contacts contacts={contacts} className={styles.footerContacts} />
         </div>
+        <p className={styles.copyright}>
+          &copy; {currentYear} Vlada Khaybullina. Все права защищены.
+        </p>
       </div>
     </footer>
   );
