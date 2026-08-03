@@ -267,6 +267,10 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
       isPinching.current = true;
       isSwiping.current = false;
       lastPinchDist.current = getTouchDist(e.touches);
+      // Disable CSS transition during pinch for smooth response
+      if (imageRef.current) {
+        imageRef.current.style.transition = 'none';
+      }
       return;
     }
 
@@ -326,6 +330,10 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (isPinching.current) {
+      // Restore CSS transition after pinch
+      if (imageRef.current) {
+        imageRef.current.style.transition = '';
+      }
       isPinching.current = false;
       return;
     }
