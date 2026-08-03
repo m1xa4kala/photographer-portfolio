@@ -6,7 +6,7 @@ import { PortfolioPhotosService } from '../services/portfolio-photos.service';
 import { PriceItemsService } from '../services/price-items.service';
 import { ReviewsService } from '../services/reviews.service';
 import { AboutService } from '../services/about.service';
-import { SocialLinksService } from '../services/social-links.service';
+import { ContactsService } from '../services/contacts.service';
 
 @Controller('content')
 export class PublicContentController {
@@ -18,7 +18,7 @@ export class PublicContentController {
     private priceItemsService: PriceItemsService,
     private reviewsService: ReviewsService,
     private aboutService: AboutService,
-    private socialLinksService: SocialLinksService,
+    private contactsService: ContactsService,
   ) {}
 
   @Get('best-photos')
@@ -152,11 +152,11 @@ export class PublicContentController {
     return this.aboutService.get();
   }
 
-  @Get('social-links')
-  async getSocialLinks(
+  @Get('contacts')
+  async getContacts(
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
   ) {
-    return this.socialLinksService.findAll(limit ?? 100, offset ?? 0);
+    return this.contactsService.findAll(limit ?? 100, offset ?? 0);
   }
 }

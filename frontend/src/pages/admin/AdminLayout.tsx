@@ -29,7 +29,7 @@ const AdminLayout: React.FC = () => {
             <li><NavLink to="/admin/price-items" className={({ isActive }) => isActive ? styles.active : ''}>Прайс-лист</NavLink></li>
             <li><NavLink to="/admin/reviews" className={({ isActive }) => isActive ? styles.active : ''}>Отзывы</NavLink></li>
             <li><NavLink to="/admin/about" className={({ isActive }) => isActive ? styles.active : ''}>Обо мне</NavLink></li>
-            <li><NavLink to="/admin/social-links" className={({ isActive }) => isActive ? styles.active : ''}>Социальные сети</NavLink></li>
+            <li><NavLink to="/admin/contacts" className={({ isActive }) => isActive ? styles.active : ''}>Контакты</NavLink></li>
           </ul>
         </nav>
         <div className={styles.bottomLinks}>

@@ -9,7 +9,7 @@ import { Review } from './entities/review.entity';
 import { About } from './entities/about.entity';
 import { FullSession } from './entities/full-session.entity';
 import { SessionOriginalFile } from './entities/session-original-file.entity';
-import { SocialLink } from './entities/social-link.entity';
+import { Contact } from './entities/contact.entity';
 
 import { BestPhotosService } from './services/best-photos.service';
 import { PortfolioCategoriesService } from './services/portfolio-categories.service';
@@ -20,7 +20,7 @@ import { ReviewsService } from './services/reviews.service';
 import { AboutService } from './services/about.service';
 import { FullSessionsService } from './services/full-sessions.service';
 import { DownloadService } from './services/download.service';
-import { SocialLinksService } from './services/social-links.service';
+import { ContactsService } from './services/contacts.service';
 
 import { PublicContentController } from './controllers/public-content.controller';
 import { AdminBestPhotosController } from './controllers/admin-best-photos.controller';
@@ -32,7 +32,7 @@ import { AdminReviewsController } from './controllers/admin-reviews.controller';
 import { AdminAboutController } from './controllers/admin-about.controller';
 import { AdminFullSessionsController } from './controllers/admin-full-sessions.controller';
 import { DownloadController } from './controllers/download.controller';
-import { AdminSocialLinksController } from './controllers/admin-social-links.controller';
+import { AdminContactsController } from './controllers/admin-contacts.controller';
 
 import { S3Module } from '../s3/s3.module';
 import { UploadModule } from '../upload/upload.module';
@@ -49,7 +49,7 @@ import { UploadModule } from '../upload/upload.module';
       About,
       FullSession,
       SessionOriginalFile,
-      SocialLink,
+      Contact,
     ]),
     S3Module,
     UploadModule,
@@ -64,7 +64,7 @@ import { UploadModule } from '../upload/upload.module';
     AboutService,
     FullSessionsService,
     DownloadService,
-    SocialLinksService,
+    ContactsService,
   ],
   controllers: [
     PublicContentController,
@@ -77,7 +77,7 @@ import { UploadModule } from '../upload/upload.module';
     AdminAboutController,
     AdminFullSessionsController,
     DownloadController,
-    AdminSocialLinksController,
+    AdminContactsController,
   ],
   exports: [
     BestPhotosService,
@@ -87,7 +87,7 @@ import { UploadModule } from '../upload/upload.module';
     PriceItemsService,
     ReviewsService,
     AboutService,
-    SocialLinksService,
+    ContactsService,
   ],
 })
 export class ContentModule {}
