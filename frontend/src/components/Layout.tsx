@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
 import { useAuth, useSocialLinks, useDocumentTitle } from '../hooks';
 import SocialLinks from './SocialLinks';
 import styles from './Layout.module.css';
@@ -79,10 +79,13 @@ const Layout: React.FC = () => {
       <header
         className={`${styles.header} ${scrolled || !isHome ? styles.scrolled : ''} ${menuOpen ? styles.headerMenuOpen : ''}`}
       >
-        <div className={styles.logo}>
+        <Link to='/'>
+          <div className={styles.logo}>
           <span className={styles.logoName}>Vlada Khaybullina</span>
-          <span className={styles.logoSub}>Photographer</span>
+          <span className={styles.logoSub}>Фотограф</span>
         </div>
+        </Link>
+        
         <button
           className={styles.hamburger}
           onClick={toggleMenu}

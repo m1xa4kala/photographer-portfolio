@@ -1,65 +1,15 @@
 import React, { useState } from 'react';
 import { useAdminSocialLinks } from '../../hooks';
-import { useConfirm } from '../../hooks/useConfirm';
+import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import DraggableTable from '../../components/DraggableTable';
+import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
 import type { Column } from '../../components/DraggableTable';
 import type { SocialLink } from '../../types';
-import {
-  SiInstagram,
-  SiVk,
-  SiTelegram,
-  SiWhatsapp,
-  SiYoutube,
-  SiTiktok,
-  SiX,
-  SiPinterest,
-  SiViber,
-  SiVimeo,
-} from 'react-icons/si';
+import { PLATFORMS, PLATFORM_ICONS, ICON_COMPONENTS } from '../../utils/socialIconMap';
 import styles from './adminCrud.module.css';
-
-const PLATFORMS = [
-  'Instagram',
-  'VK',
-  'Telegram',
-  'WhatsApp',
-  'YouTube',
-  'TikTok',
-  'Twitter',
-  'Pinterest',
-  'Viber',
-  'Vimeo',
-];
-
-const PLATFORM_ICONS: Record<string, string> = {
-  Instagram: 'SiInstagram',
-  VK: 'SiVk',
-  Telegram: 'SiTelegram',
-  WhatsApp: 'SiWhatsapp',
-  YouTube: 'SiYoutube',
-  TikTok: 'SiTiktok',
-  Twitter: 'SiX',
-  Pinterest: 'SiPinterest',
-  Viber: 'SiViber',
-  Vimeo: 'SiVimeo',
-};
-
-const ICON_COMPONENTS: Record<string, React.ComponentType<{ size?: number }>> = {
-  SiInstagram,
-  SiVk,
-  SiTelegram,
-  SiWhatsapp,
-  SiYoutube,
-  SiTiktok,
-  SiX,
-  SiPinterest,
-  SiViber,
-  SiVimeo,
-};
 
 const SocialLinksAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminSocialLinks();
-  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<SocialLink | null>(null);
   const [form, setForm] = useState<{
     platform: string;
@@ -105,11 +55,7 @@ const SocialLinksAdmin: React.FC = () => {
   ];
 
   return (
-    <div className={styles.crudPage}>
-      <h2>Социальные сети</h2>
-
-      {error && <div className={styles.error}>Ошибка: {error}</div>}
-
+    <AdminPageLayout title="Социальные сети" error={error}>
       <div className={styles.form}>
         <h3>{editing ? 'Редактировать' : 'Добавить'} социальную сеть</h3>
         <select
@@ -168,21 +114,11 @@ const SocialLinksAdmin: React.FC = () => {
             >
               ✏️
             </button>
-            <button
-              aria-label="Удалить"
-              onClick={async () => {
-                if (await confirm(`Удалить ссылку на ${item.platform}? Это действие нельзя отменить.`)) {
-                  await deleteItem(item.id);
-                }
-              }}
-            >
-              🗑️
-            </button>
+            <DeleteButton itemName={`ссылку на ${item.platform}`} onDelete={() => deleteItem(item.id)} />
           </>
         )}
       />
-      <ConfirmDialogComponent />
-    </div>
+    </AdminPageLayout>
   );
 };
 

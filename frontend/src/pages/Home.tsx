@@ -4,12 +4,14 @@ import { useHome, useAbout, useHomePortfolio, useReviews, usePrice } from '../ho
 import HeroCarousel from '../components/HeroCarousel';
 import ReviewCard from '../components/ReviewCard';
 import AnimatedSection from '../components/AnimatedSection';
+import ErrorState from '../components/ErrorState/ErrorState';
 import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import Skeleton from '../components/Skeleton';
+import PriceCard from '../components/PriceCard/PriceCard';
+import SessionCard from '../components/SessionCard/SessionCard';
 import styles from './Home.module.css';
 import aboutStyles from './About.module.css';
 import portfolioStyles from './Portfolio.module.css';
-import priceStyles from './Price.module.css';
 import reviewsStyles from './Reviews.module.css';
 
 const HomeSkeleton: React.FC = () => (
@@ -49,12 +51,7 @@ const Home: React.FC = () => {
   }
 
   if (error) {
-    return (
-      <div className={styles.error}>
-        <p>{error}</p>
-        <button onClick={refetch}>Повторить</button>
-      </div>
-    );
+    return <ErrorState message={error} onRetry={refetch} />;
   }
 
   return (
@@ -101,27 +98,11 @@ const Home: React.FC = () => {
           ) : (
             <div className={portfolioStyles.sessionGrid}>
               {portfolioSessions.map(session => (
-                <div
+                <SessionCard
                   key={session.id}
-                  className={portfolioStyles.sessionCard}
+                  session={session}
                   onClick={() => navigate(`/portfolio/category/${session.categoryId}/session/${session.id}`)}
-                  role="link"
-                  tabIndex={0}
-                  onKeyDown={(e) => handleKeyDown(e, `/portfolio/category/${session.categoryId}/session/${session.id}`)}
-                >
-                  <div className={portfolioStyles.sessionImage}>
-                    {session.coverImageUrl ? (
-                      <ImageWithSkeleton src={session.coverImageUrl} alt={session.name} loading="lazy" />
-                    ) : (
-                      <div className={portfolioStyles.sessionPlaceholder}>
-                        <span>{session.name.charAt(0)}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className={portfolioStyles.sessionInfo}>
-                    <h3>{session.name}</h3>
-                  </div>
-                </div>
+                />
               ))}
             </div>
           )}
@@ -160,24 +141,23 @@ const Home: React.FC = () => {
         <AnimatedSection delay={0.5} className={styles.section}>
           <h2 className={styles.sectionTitle}>Прайс-лист</h2>
           {priceLoading ? (
-            <div className={priceStyles.cards}>
+            <div className={styles.priceCards}>
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className={priceStyles.card}>
-                  <Skeleton variant="text" width="60%" height="1.5rem" style={{ margin: '0 auto 0.5rem' }} />
-                  <Skeleton variant="text" width="100%" height="1rem" />
-                  <Skeleton variant="text" width="80%" height="1rem" style={{ margin: '0 auto 1rem' }} />
-                  <Skeleton variant="text" width="100px" height="1.8rem" style={{ margin: '0 auto' }} />
+                <div key={i} className={styles.priceSkeleton}>
+                  <Skeleton variant="rect" width="100%" height="220px" style={{ borderRadius: '1rem 1rem 0 0' }} />
+                  <div style={{ padding: '1rem' }}>
+                    <Skeleton variant="text" width="60%" height="1.5rem" style={{ marginBottom: '0.5rem' }} />
+                    <Skeleton variant="text" width="100%" height="0.85rem" style={{ marginBottom: '0.25rem' }} />
+                    <Skeleton variant="text" width="80%" height="0.85rem" style={{ marginBottom: '1rem' }} />
+                    <Skeleton variant="text" width="100px" height="1.5rem" />
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className={priceStyles.cards}>
+            <div className={styles.priceCards}>
               {priceItems.map(item => (
-                <div key={item.id} className={priceStyles.card}>
-                  <h3>{item.name}</h3>
-                  <p>{item.description}</p>
-                  <span className={priceStyles.priceValue}>{item.price} ₽</span>
-                </div>
+                <PriceCard key={item.id} item={item} />
               ))}
             </div>
           )}

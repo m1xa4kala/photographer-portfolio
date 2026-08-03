@@ -78,10 +78,11 @@
 .logoSub {
   font-family: var(--font-body);
   font-size: 0.65rem;
-  font-weight: 300;
-  letter-spacing: 0.15em;
+  font-weight: 400;
+  letter-spacing: 0.55em;
   text-transform: uppercase;
   opacity: 0.8;
+  align-self: center;
 }
 
 .nav {

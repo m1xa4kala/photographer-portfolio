@@ -83,3 +83,9 @@
   object-fit: cover;
   border-radius: 0.25rem;
 }
+
+/* Input validation error highlight — shared between admin pages */
+.inputError {
+  border-color: var(--admin-danger, #dc3545) !important;
+  outline: 1px solid var(--admin-danger, #dc3545);
+}

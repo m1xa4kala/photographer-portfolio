@@ -1,0 +1,117 @@
+/* src/components/PriceCard/PriceCard.module.css */
+
+.card {
+  break-inside: avoid;
+  margin-bottom: 2rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 8px var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px var(--shadow);
+}
+
+/* ── Photo area ── */
+.photoWrapper {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photoPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--border) 0%, #f0f0f0 100%);
+}
+
+/* ── Gradient overlay ── */
+.overlay {
+  position: absolute;
+  align-items: center;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2.5rem 1rem 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  line-height: normal;
+}
+
+.overlayTitle {
+  font-family: var(--font-heading-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.overlayPrice {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Description list ── */
+.descriptionList {
+  list-style: none;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.descriptionItem {
+  position: relative;
+  padding: 0.6rem 0 0.6rem 1.2rem;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  border-bottom: 1px dashed var(--border);
+}
+
+.descriptionItem:last-child {
+  border-bottom: none;
+}
+
+.descriptionItem::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .photoWrapper {
+    height: 260px;
+  }
+
+  .overlayTitle {
+    font-size: 1.2rem;
+  }
+
+  .overlayPrice {
+    font-size: 1.35rem;
+  }
+}

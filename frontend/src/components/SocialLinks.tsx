@@ -1,44 +1,7 @@
 import React from 'react';
 import { type SocialLink } from '../types';
-import {
-  SiInstagram,
-  SiVk,
-  SiTelegram,
-  SiWhatsapp,
-  SiYoutube,
-  SiTiktok,
-  SiX,
-  SiPinterest,
-  SiViber,
-  SiVimeo,
-} from 'react-icons/si';
+import { ICON_COMPONENTS, ICON_COLORS } from '../utils/socialIconMap';
 import styles from './SocialLinks.module.css';
-
-const ICON_MAP: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
-  SiInstagram,
-  SiVk,
-  SiTelegram,
-  SiWhatsapp,
-  SiYoutube,
-  SiTiktok,
-  SiX,
-  SiPinterest,
-  SiViber,
-  SiVimeo,
-};
-
-const ICON_COLORS: Record<string, string> = {
-  SiInstagram: '#E4405F',
-  SiVk: '#0077FF',
-  SiTelegram: '#0088CC',
-  SiWhatsapp: '#25D366',
-  SiYoutube: '#FF0000',
-  SiTiktok: '#000000',
-  SiX: '#000000',
-  SiPinterest: '#BD081C',
-  SiViber: '#7360F2',
-  SiVimeo: '#1AB7EA',
-};
 
 interface SocialLinksProps {
   links: SocialLink[];
@@ -52,7 +15,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ links, className, iconSize = 
   return (
     <div className={`${styles.socialLinks} ${className ?? ''}`}>
       {links.map((link) => {
-        const IconComponent = ICON_MAP[link.iconName];
+        const IconComponent = ICON_COMPONENTS[link.iconName] as React.ComponentType<{ size?: number; color?: string }> | undefined;
         const brandColor = ICON_COLORS[link.iconName] ?? undefined;
         if (!IconComponent) return null;
         return (

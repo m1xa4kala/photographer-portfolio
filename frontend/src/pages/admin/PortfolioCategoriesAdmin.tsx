@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useAdminPortfolioCategories } from '../../hooks';
-import { useConfirm } from '../../hooks/useConfirm';
+import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import DraggableTable from '../../components/DraggableTable';
+import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
 import type { Column } from '../../components/DraggableTable';
 import type { PortfolioCategory } from '../../types';
 import styles from './adminCrud.module.css';
 
 const PortfolioCategoriesAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminPortfolioCategories();
-  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<PortfolioCategory | null>(null);
   const [form, setForm] = useState<Pick<PortfolioCategory, 'name'>>({ name: '' });
   const [touched, setTouched] = useState(false);
@@ -35,11 +35,7 @@ const PortfolioCategoriesAdmin: React.FC = () => {
   ];
 
   return (
-    <div className={styles.crudPage}>
-      <h2>Категории портфолио</h2>
-
-      {error && <div className={styles.error}>Ошибка: {error}</div>}
-
+    <AdminPageLayout title="Категории портфолио" error={error}>
       <div className={styles.form}>
         <input
           type="text"
@@ -61,16 +57,11 @@ const PortfolioCategoriesAdmin: React.FC = () => {
         actions={(item) => (
           <>
             <button aria-label="Редактировать" onClick={() => { setEditing(item); setForm({ name: item.name }); }}>✏️</button>
-            <button aria-label="Удалить" onClick={async () => {
-              if (await confirm(`Удалить категорию "${item.name}"? Все фото в ней тоже удалятся.`)) {
-                await deleteItem(item.id);
-              }
-            }}>🗑️</button>
+            <DeleteButton itemName={`категорию "${item.name}"`} onDelete={() => deleteItem(item.id)} />
           </>
         )}
       />
-      <ConfirmDialogComponent />
-    </div>
+    </AdminPageLayout>
   );
 };
 

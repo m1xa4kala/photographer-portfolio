@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminPortfolioPhotos, useAdminPortfolioCategories, useAdminPortfolioSessions } from '../../hooks';
-import { useConfirm } from '../../hooks/useConfirm';
+import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import DropZone from '../../components/DropZone';
 import type { UploadedFileInfo } from '../../components/DropZone';
 import DraggableTable from '../../components/DraggableTable';
+import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
 import type { Column } from '../../components/DraggableTable';
 import type { PortfolioPhoto } from '../../types';
 import styles from './adminCrud.module.css';
@@ -22,7 +23,6 @@ const PortfolioPhotosAdmin: React.FC = () => {
     useAdminPortfolioPhotos(filterSessionId);
   const { items: categories } = useAdminPortfolioCategories();
   const { items: allSessions } = useAdminPortfolioSessions();
-  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [bulkError, setBulkError] = useState<string | null>(null);
 
   // Filter sessions by selected category (client-side, for the dropdown)
@@ -100,10 +100,7 @@ const PortfolioPhotosAdmin: React.FC = () => {
   ];
 
   return (
-    <div className={styles.crudPage}>
-      <h2>Фото портфолио</h2>
-
-      {error && <div className={styles.error}>Ошибка: {error}</div>}
+    <AdminPageLayout title="Фото портфолио" error={error}>
 
       {/* ===== ФИЛЬТРЫ И МАССОВАЯ ЗАГРУЗКА ===== */}
       <div className={styles.sectionCard}>
@@ -152,15 +149,10 @@ const PortfolioPhotosAdmin: React.FC = () => {
         loading={loading}
         onReorder={handleReorder}
         actions={(item) => (
-          <button aria-label="Удалить" onClick={async () => {
-            if (await confirm(`Удалить фото "${item.title}"? Это действие нельзя отменить.`)) {
-              await deleteItem(item.id);
-            }
-          }}>🗑️</button>
+          <DeleteButton itemName={`фото "${item.title}"`} onDelete={() => deleteItem(item.id)} />
         )}
       />
-      <ConfirmDialogComponent />
-    </div>
+    </AdminPageLayout>
   );
 };
 

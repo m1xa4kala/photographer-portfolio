@@ -2,6 +2,7 @@ import React from 'react';
 import { useAbout, useSocialLinks } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
 import SocialLinks from '../components/SocialLinks';
+import ErrorState from '../components/ErrorState/ErrorState';
 import Skeleton from '../components/Skeleton';
 import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import styles from './About.module.css';
@@ -29,7 +30,7 @@ const About: React.FC = () => {
   const { socialLinks } = useSocialLinks();
 
   if (loading) return <AboutSkeleton />;
-  if (error) return <div>Ошибка: {error} <button onClick={refetch}>Повторить</button></div>;
+  if (error) return <ErrorState message={`Ошибка: ${error}`} onRetry={refetch} />;
   if (!about) return null;
 
   return (

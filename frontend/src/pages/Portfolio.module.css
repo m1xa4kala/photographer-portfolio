@@ -165,12 +165,6 @@
   transform: scale(1.05);
 }
 
-/* ===== Состояния ===== */
-.loader, .error {
-  text-align: center;
-  padding: 3rem;
-}
-
 .empty {
   grid-column: 1 / -1;
   text-align: center;

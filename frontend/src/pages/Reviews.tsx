@@ -2,6 +2,7 @@ import React from 'react';
 import { useReviews } from '../hooks';
 import ReviewCard from '../components/ReviewCard';
 import AnimatedSection from '../components/AnimatedSection';
+import ErrorState from '../components/ErrorState/ErrorState';
 import Skeleton from '../components/Skeleton';
 import styles from './Reviews.module.css';
 
@@ -27,12 +28,7 @@ const Reviews: React.FC = () => {
   const { reviews, loading, error, refetch } = useReviews();
 
   if (loading) return <ReviewsSkeleton />;
-  if (error) return (
-    <div className={styles.error}>
-      <p>Ошибка: {error}</p>
-      <button onClick={refetch} className={styles.retryButton}>Повторить</button>
-    </div>
-  );
+  if (error) return <ErrorState message={`Ошибка: ${error}`} onRetry={refetch} />;
 
   return (
     <AnimatedSection>

@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { usePortfolioCategories, usePortfolioSessions, usePortfolioPhotos } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
 import ImageLightbox from '../components/ImageLightbox';
+import ErrorState from '../components/ErrorState/ErrorState';
 import Skeleton from '../components/Skeleton';
 import ImageWithSkeleton from '../components/ImageWithSkeleton';
+import SessionCard from '../components/SessionCard/SessionCard';
 import styles from './Portfolio.module.css';
 
 const CategoriesSkeleton: React.FC = () => (
@@ -94,10 +96,7 @@ const Portfolio: React.FC = () => {
       <AnimatedSection>
         <div className={styles.portfolio}>
           <h1>Портфолио</h1>
-          <div className={styles.error}>
-            Ошибка: {categoriesError}
-            <button onClick={refetchCategories}>Повторить</button>
-          </div>
+          <ErrorState message={`Ошибка: ${categoriesError}`} onRetry={refetchCategories} />
         </div>
       </AnimatedSection>
     );
@@ -131,38 +130,15 @@ const Portfolio: React.FC = () => {
             {sessionsLoading ? (
               <SessionsSkeleton />
             ) : sessionsError ? (
-              <div className={styles.error}>
-                Ошибка: {sessionsError}
-                <button onClick={refetchSessions}>Повторить</button>
-              </div>
+              <ErrorState message={`Ошибка: ${sessionsError}`} onRetry={refetchSessions} />
             ) : (
               <div className={styles.sessionGrid}>
                 {sessions.map(session => (
-                  <div
+                  <SessionCard
                     key={session.id}
-                    className={styles.sessionCard}
+                    session={session}
                     onClick={() => navigate(`/portfolio/category/${categoryId}/session/${session.id}`)}
-                    role="link"
-                    tabIndex={0}
-                    onKeyDown={(e) => handleKeyDown(e, `/portfolio/category/${categoryId}/session/${session.id}`)}
-                  >
-                    <div className={styles.sessionImage}>
-                      {session.coverImageUrl ? (
-                        <ImageWithSkeleton
-                          src={session.coverImageUrl}
-                          alt={session.name}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className={styles.sessionPlaceholder}>
-                          <span>{session.name.charAt(0)}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className={styles.sessionInfo}>
-                      <h3>{session.name}</h3>
-                    </div>
-                  </div>
+                  />
                 ))}
                 {sessions.length === 0 && (
                   <p className={styles.empty}>В этой категории пока нет фотосессий</p>
@@ -190,10 +166,7 @@ const Portfolio: React.FC = () => {
                 ))}
               </div>
             ) : photosError ? (
-              <div className={styles.error}>
-                Ошибка: {photosError}
-                <button onClick={refetchPhotos}>Повторить</button>
-              </div>
+              <ErrorState message={`Ошибка: ${photosError}`} onRetry={refetchPhotos} />
             ) : (
               <div className={styles.gallery}>
                 {photos.map(photo => (

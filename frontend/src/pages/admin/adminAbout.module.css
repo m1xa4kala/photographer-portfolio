@@ -67,8 +67,7 @@
 }
 
 .inputError {
-  border-color: var(--admin-danger, #dc3545) !important;
-  outline: 1px solid var(--admin-danger, #dc3545);
+  composes: inputError from '../../styles/shared-admin.module.css';
 }
 
 .aboutAdmin img {

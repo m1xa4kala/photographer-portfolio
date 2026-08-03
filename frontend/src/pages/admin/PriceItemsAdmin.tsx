@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useAdminPriceItems } from '../../hooks';
-import { useConfirm } from '../../hooks/useConfirm';
 import ImageUploadButton from '../../components/ImageUploadButton';
+import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import DraggableTable from '../../components/DraggableTable';
+import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
 import type { Column } from '../../components/DraggableTable';
 import type { PriceItem } from '../../types';
 import styles from './adminCrud.module.css';
 
 const PriceItemsAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem, reorderItems } = useAdminPriceItems();
-  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<PriceItem | null>(null);
   const [form, setForm] = useState<Pick<PriceItem, 'name' | 'description' | 'price'> & { imageUrl: string | null }>({
     name: '',
@@ -68,11 +68,7 @@ const PriceItemsAdmin: React.FC = () => {
   ];
 
   return (
-    <div className={styles.crudPage}>
-      <h2>Прайс-лист</h2>
-
-      {error && <div className={styles.error}>Ошибка: {error}</div>}
-
+    <AdminPageLayout title="Прайс-лист" error={error}>
       <div className={styles.form}>
         <input
           type="text"
@@ -115,16 +111,11 @@ const PriceItemsAdmin: React.FC = () => {
         actions={(item) => (
           <>
             <button aria-label="Редактировать" onClick={() => { setEditing(item); setForm({ name: item.name, description: item.description, price: item.price, imageUrl: item.imageUrl }); }}>✏️</button>
-            <button aria-label="Удалить" onClick={async () => {
-              if (await confirm(`Удалить услугу "${item.name}"? Это действие нельзя отменить.`)) {
-                await deleteItem(item.id);
-              }
-            }}>🗑️</button>
+            <DeleteButton itemName={`услугу "${item.name}"`} onDelete={() => deleteItem(item.id)} />
           </>
         )}
       />
-      <ConfirmDialogComponent />
-    </div>
+    </AdminPageLayout>
   );
 };
 

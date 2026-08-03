@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useAdminReviews } from '../../hooks';
-import { useConfirm } from '../../hooks/useConfirm';
+import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import ImageUploadButton from '../../components/ImageUploadButton';
+import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
 import type { Review } from '../../types';
 import styles from './adminCrud.module.css';
 
 const ReviewsAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem } = useAdminReviews();
-  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<Review | null>(null);
   const [form, setForm] = useState<{
     clientName: string;
@@ -30,13 +30,11 @@ const ReviewsAdmin: React.FC = () => {
     }
     setEditing(null);
     setForm({ clientName: '', text: '', clientPhotoUrl: null });
+    setTouched(false);
   };
 
   return (
-    <div className={styles.crudPage}>
-      <h2>Отзывы</h2>
-
-      {error && <div className={styles.error}>Ошибка: {error}</div>}
+    <AdminPageLayout title="Отзывы" error={error}>
 
       <div className={styles.form}>
         <input
@@ -93,19 +91,14 @@ const ReviewsAdmin: React.FC = () => {
                 <td>{item.text.length > 50 ? `${item.text.substring(0, 50)}...` : item.text}</td>
                 <td>
                   <button aria-label="Редактировать" onClick={() => { setEditing(item); setForm({ clientName: item.clientName, text: item.text, clientPhotoUrl: item.clientPhotoUrl }); }}>✏️</button>
-                  <button aria-label="Удалить" onClick={async () => {
-                  if (await confirm(`Удалить отзыв "${item.clientName}"? Это действие нельзя отменить.`)) {
-                    await deleteItem(item.id);
-                  }
-                }}>🗑️</button>
+                  <DeleteButton itemName={`отзыв "${item.clientName}"`} onDelete={() => deleteItem(item.id)} />
                  </td>
                </tr>
             ))}
           </tbody>
         </table>
       )}
-      <ConfirmDialogComponent />
-    </div>
+    </AdminPageLayout>
   );
 };
 
