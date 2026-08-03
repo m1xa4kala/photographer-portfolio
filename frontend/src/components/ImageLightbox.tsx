@@ -27,7 +27,6 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
   const nextBtnRef = useRef<HTMLButtonElement>(null);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
-  const lastTouchX = useRef(0);
   const isSwiping = useRef(false);
 
   // Zoom dragging state
@@ -277,7 +276,6 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     if (e.touches.length === 1) {
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
-      lastTouchX.current = e.touches[0].clientX;
       isSwiping.current = false;
       dragPos.current = { ...position };
     }
@@ -324,7 +322,6 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     if (Math.abs(deltaY) > Math.abs(deltaX) * 2) return;
 
     isSwiping.current = true;
-    lastTouchX.current = e.touches[0].clientX;
     e.preventDefault();
   }, [isZoomed, computeOrigin]);
 
@@ -413,6 +410,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       role="dialog"
       aria-modal="true"
       aria-label="Просмотр изображения"
