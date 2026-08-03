@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth, useContacts, useDocumentTitle } from '../hooks';
 import Contacts from './Contacts';
+import OverlayButtons from './OverlayButtons';
 import Footer from './Footer';
 import Logo from './Logo';
 import styles from './Layout.module.css';
@@ -173,6 +174,7 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
       <Footer contacts={contacts} />
+      <OverlayButtons contacts={contacts} />
     </div>
   );
 };
