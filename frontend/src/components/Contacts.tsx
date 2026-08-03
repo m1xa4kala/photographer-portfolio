@@ -8,13 +8,14 @@ interface ContactsProps {
   contacts: Contact[];
   className?: string;
   iconSize?: number;
+  vertical?: boolean;
 }
 
-const Contacts: React.FC<ContactsProps> = ({ contacts, className, iconSize = 24 }) => {
+const Contacts: React.FC<ContactsProps> = ({ contacts, className, iconSize = 24, vertical = false }) => {
   if (contacts.length === 0) return null;
 
   return (
-    <div className={`${styles.contacts} ${className ?? ''}`}>
+    <div className={`${vertical ? styles.contactsVertical : styles.contacts} ${className ?? ''}`}>
       {contacts.map((contact) => {
         if (contact.type === 'phone') {
           const telHref = `tel:${contact.value.replace(/[^\d+]/g, '')}`;

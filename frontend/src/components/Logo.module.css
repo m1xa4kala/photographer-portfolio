@@ -1,0 +1,29 @@
+/* frontend/src/components/Logo.module.css */
+.logo {
+  display: flex;
+  width: fit-content;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+.name {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--logo-color, inherit);
+  text-shadow: var(--logo-shadow, none);
+}
+
+.sub {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: var(--logo-color, inherit);
+  text-shadow: var(--logo-shadow, none);
+  opacity: 0.8;
+  align-self: center;
+}

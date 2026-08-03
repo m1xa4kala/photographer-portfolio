@@ -7,6 +7,28 @@
   justify-content: center;
 }
 
+/* Vertical variant — for burger menu, sidebar, stacked layouts */
+.contactsVertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.contactsVertical .contactItem {
+  width: 100%;
+}
+
+.contactsVertical .phoneLink {
+  font-size: 1rem;
+  padding: 0.25rem 0;
+}
+
+.contactsVertical .socialLink {
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
 .contactItem {
   display: inline-flex;
   align-items: center;

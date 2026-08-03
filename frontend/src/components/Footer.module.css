@@ -1,0 +1,75 @@
+/* frontend/src/components/Footer.module.css */
+.footer {
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  border-top: 1px solid var(--border);
+  padding: 3rem 2rem 2rem;
+  color: var(--text-secondary);
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.info {
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footerLogo {
+  color: var(--text-primary);
+  --logo-color: var(--accent);
+}
+
+.copyright {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+.contactsSection {
+  flex: 1 1 300px;
+}
+
+.contactsHeading {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem;
+}
+
+.footerContacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+}
+
+/* Mobile: stack info and contacts vertically */
+@media (max-width: 600px) {
+  .footer {
+    padding: 2rem 1.25rem 1.5rem;
+  }
+
+  .inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .contactsSection {
+    width: 100%;
+  }
+
+  .footerContacts {
+    justify-content: center;
+  }
+}

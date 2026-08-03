@@ -31,17 +31,23 @@
   align-items: center;
   padding: 0.75rem 2rem;
   background: transparent;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
-  transition: background 0.4s ease, box-shadow 0.4s ease;
+  transition: background 0.4s ease, box-shadow 0.4s ease, transform 0.3s ease;
 }
 
 /* Прозрачный хедер — белый текст с тенью для читаемости на фото */
-.header .nav a,
-.header .logo {
+.header .nav a {
   color: #ffffff;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+
+.header .headerLogo {
+  --logo-color: #ffffff;
+  --logo-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
 }
 
 /* Скролленый хедер — тёмный фон, тёмный текст */
@@ -57,32 +63,14 @@
   text-shadow: none;
 }
 
-.header.scrolled .logo {
-  color: var(--accent);
-  text-shadow: none;
+.header.scrolled .headerLogo {
+  --logo-color: var(--accent);
+  --logo-shadow: none;
 }
 
-.logo {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.logoName {
-  font-family: var(--font-heading);
-  font-size: 1.3rem;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-}
-
-.logoSub {
-  font-family: var(--font-body);
-  font-size: 0.65rem;
-  font-weight: 400;
-  letter-spacing: 0.55em;
-  text-transform: uppercase;
-  opacity: 0.8;
-  align-self: center;
+/* Скрытый хедер — уезжает вверх */
+.headerHidden {
+  transform: translateY(-100%);
 }
 
 .nav {
@@ -149,19 +137,25 @@
 .main {
   flex: 1;
   padding: 2rem;
+  padding-top: 80px;
 }
 
-.footer {
-  text-align: center;
-  padding: 1.5rem;
-  background-color: var(--bg-secondary);
+/* Nav contacts section (mobile burger menu) */
+.navContacts {
+  display: none;
+  padding-top: 1.25rem;
+  margin-top: auto;
   border-top: 1px solid var(--border);
-  font-size: 0.9rem;
-  color: var(--text-secondary);
 }
 
-.socials a {
-  margin: 0 0.5rem;
+.navContactsTitle {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
 }
 
 @media (max-width: 767px) {
@@ -190,6 +184,7 @@
     transform: translateX(100%);
     transition: transform 0.3s ease;
     z-index: 105;
+    overflow-y: auto;
   }
 
   .nav.navOpen {
@@ -204,7 +199,7 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .nav a:last-child {
+  .nav a:last-of-type {
     border-bottom: none;
   }
 
@@ -212,6 +207,10 @@
     color: var(--accent);
     border-bottom: 2px solid var(--accent);
     padding-bottom: calc(0.75rem - 2px);
+  }
+
+  .navContacts {
+    display: block;
   }
 
   .overlay {
@@ -224,6 +223,7 @@
 
   .main {
     padding: 1rem;
+    padding-top: 64px;
   }
 }
 
@@ -239,9 +239,5 @@
 
   .nav a {
     font-size: 0.9rem;
-  }
-
-  .logoName {
-    font-size: 1.1rem;
   }
 }
