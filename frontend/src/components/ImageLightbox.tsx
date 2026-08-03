@@ -324,39 +324,60 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     e.preventDefault();
   }, [isZoomed, computeOrigin]);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (isPinching.current) {
       isPinching.current = false;
       return;
     }
 
+    // Get end position for tap/distance detection
+    let endX = touchStartX.current;
+    let endY = touchStartY.current;
+    if (e.changedTouches.length > 0) {
+      endX = e.changedTouches[0].clientX;
+      endY = e.changedTouches[0].clientY;
+    }
+
+    const deltaX = endX - touchStartX.current;
+    const deltaY = endY - touchStartY.current;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const isShortTap = distance < DRAG_THRESHOLD;
+
     if (isZoomed) {
-      // Save drag position for continued panning
+      if (isShortTap) {
+        // Tap while zoomed → reset zoom
+        resetZoomState();
+        return;
+      }
+      // Swipe down while zoomed → close
+      if (deltaY > 80) {
+        onClose();
+        return;
+      }
+      // Pan while zoomed
       dragPos.current = { ...position };
       return;
     }
 
-    if (!isSwiping.current) {
-      // Check for double-tap
-      const now = Date.now();
-      if (now - lastTapTime.current < DOUBLE_TAP_DELAY) {
-        toggleZoomAtPoint(touchStartX.current, touchStartY.current);
-        lastTapTime.current = 0;
-        return;
+    if (!isShortTap) {
+      // Swipe to navigate
+      if (deltaX < -50 && hasNext) {
+        goNext();
+      } else if (deltaX > 50 && hasPrev) {
+        goPrev();
       }
-      lastTapTime.current = now;
       return;
     }
 
-    isSwiping.current = false;
-    const deltaX = lastTouchX.current - touchStartX.current;
-
-    if (deltaX < -50 && hasNext) {
-      goNext();
-    } else if (deltaX > 50 && hasPrev) {
-      goPrev();
+    // Double-tap detection
+    const now = Date.now();
+    if (now - lastTapTime.current < DOUBLE_TAP_DELAY) {
+      toggleZoomAtPoint(endX, endY);
+      lastTapTime.current = 0;
+      return;
     }
-  }, [hasNext, hasPrev, isZoomed, computeOrigin, position]);
+    lastTapTime.current = now;
+  }, [isZoomed, computeOrigin, position, hasNext, hasPrev, onClose]);
 
   const toggleZoomAtPoint = (clientX: number, clientY: number) => {
     if (isZoomed) {
