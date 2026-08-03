@@ -324,7 +324,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     e.preventDefault();
   }, [isZoomed, computeOrigin]);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  const handleTouchEnd = useCallback(() => {
     if (isPinching.current) {
       isPinching.current = false;
       return;
