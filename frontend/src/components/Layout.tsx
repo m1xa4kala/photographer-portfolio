@@ -42,22 +42,16 @@ const Layout: React.FC = () => {
   useEffect(() => {
     const scrollY = window.scrollY;
     if (menuOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
+      document.body.classList.add('scroll-lock');
     } else {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
+      document.body.classList.remove('scroll-lock');
       document.body.style.top = '';
-      document.body.style.width = '';
       window.scrollTo(0, scrollY);
     }
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
+      document.body.classList.remove('scroll-lock');
       document.body.style.top = '';
-      document.body.style.width = '';
     };
   }, [menuOpen]);
 

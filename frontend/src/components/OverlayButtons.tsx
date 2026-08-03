@@ -56,19 +56,19 @@ const OverlayButtons: React.FC<OverlayButtonsProps> = ({ contacts }) => {
   useEffect(() => {
     if (sheetOpen) {
       scrollPositionRef.current = window.scrollY;
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollPositionRef.current}px`;
-      document.body.style.width = '100%';
+      document.body.classList.add('scroll-lock');
     } else {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
+      document.body.classList.remove('scroll-lock');
       document.body.style.top = '';
-      document.body.style.width = '';
       if (scrollPositionRef.current > 0) {
         window.scrollTo(0, scrollPositionRef.current);
       }
     }
+    return () => {
+      document.body.classList.remove('scroll-lock');
+      document.body.style.top = '';
+    };
   }, [sheetOpen]);
 
   return (

@@ -36,6 +36,13 @@
   --font-admin: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* Scroll lock — используется Layout (бургер-меню) и OverlayButtons (контакты) */
+body.scroll-lock {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
 /* Анимации */
 @keyframes fadeIn {
   from { opacity: 0; }
