@@ -25,11 +25,12 @@
   padding: 1rem 1.25rem;
 }
 
-/* ── Masonry columns ── */
+/* ── CSS Grid (слева направо, сверху вниз) ── */
 .grid {
-  columns: 3;
-  column-gap: 2rem;
-  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem 2rem;
+  margin-bottom: 0.5rem;
 }
 
 /* ── Note ── */
@@ -43,13 +44,13 @@
 /* ── Tablet & mobile ── */
 @media (max-width: 768px) {
   .grid {
-    columns: 2;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 480px) {
   .grid {
-    columns: 1;
-    column-gap: 0;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }
