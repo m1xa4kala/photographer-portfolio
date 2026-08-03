@@ -180,9 +180,25 @@
   }
 }
 
-/* На телефонах/планшетах скрываем стрелки — навигация через swipe */
+/* Маленькие стрелки на мобильных — полупрозрачные, не мешают просмотру */
 @media (hover: none) {
   .arrow {
-    display: none;
+    width: 32px;
+    height: 32px;
+    opacity: 0.6;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .arrowLeft {
+    left: 0.4rem;
+  }
+
+  .arrowRight {
+    right: 0.4rem;
   }
 }
