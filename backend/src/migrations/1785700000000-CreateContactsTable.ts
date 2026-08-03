@@ -45,7 +45,7 @@ export class CreateContactsTable1785700000000 implements MigrationInterface {
     // Restore data from contacts back to social_links
     await queryRunner.query(
       `INSERT INTO "social_links" ("platform", "url", "iconName", "orderIndex")
-       SELECT "platform", "value", "iconName", "orderIndex"
+       SELECT COALESCE("platform", ''), "value", COALESCE("iconName", ''), "orderIndex"
        FROM "contacts"
        WHERE "type" = 'social'`,
     );
