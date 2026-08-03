@@ -46,7 +46,6 @@ const About: React.FC = () => {
         <div className={styles.bio}>
           <h1>{about.fullName}</h1>
           <p>{about.bioText}</p>
-          <Contacts contacts={contacts} />
         </div>
       </div>
     </AnimatedSection>
