@@ -11,46 +11,28 @@
   color: var(--accent);
 }
 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
+/* ── Card skeleton ── */
+.skeletonCard {
+  break-inside: avoid;
+  margin-bottom: 2rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.skeletonBody {
+  padding: 1rem 1.25rem;
+}
+
+/* ── Masonry columns ── */
+.grid {
+  columns: 3;
+  column-gap: 2rem;
   margin-bottom: 2rem;
 }
 
-.card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 8px var(--shadow);
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 24px var(--shadow);
-}
-
-.card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: var(--accent);
-}
-
-.card p {
-  color: var(--text-secondary);
-  margin: 1rem 0;
-}
-
-.priceValue {
-  display: inline-block;
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: var(--accent);
-}
-
+/* ── Note ── */
 .note {
   text-align: center;
   font-size: 0.9rem;
@@ -58,7 +40,16 @@
   margin-top: 2rem;
 }
 
-.loader, .error {
-  text-align: center;
-  padding: 3rem;
+/* ── Tablet & mobile ── */
+@media (max-width: 768px) {
+  .grid {
+    columns: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    columns: 1;
+    column-gap: 0;
+  }
 }

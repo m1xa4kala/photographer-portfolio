@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useAdminBestPhotos } from '../../hooks';
-import { useConfirm } from '../../hooks/useConfirm';
+import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import DropZone from '../../components/DropZone';
 import type { UploadedFileInfo } from '../../components/DropZone';
 import DraggableTable from '../../components/DraggableTable';
+import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
 import type { Column } from '../../components/DraggableTable';
 import styles from './adminCrud.module.css';
 
 const BestPhotosAdmin: React.FC = () => {
   const { items, loading, error, createItem, deleteItem, reorderItems } = useAdminBestPhotos();
-  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [bulkError, setBulkError] = useState<string | null>(null);
 
   const handleBulkUpload = async (files: UploadedFileInfo[]) => {
@@ -23,12 +23,6 @@ const BestPhotosAdmin: React.FC = () => {
         setBulkError(`Ошибка при сохранении "${name}": ${message}`);
         continue;
       }
-    }
-  };
-
-  const handleDelete = async (id: number, title: string) => {
-    if (await confirm(`Удалить "${title}"? Это действие нельзя отменить.`)) {
-      await deleteItem(id);
     }
   };
 
@@ -47,10 +41,7 @@ const BestPhotosAdmin: React.FC = () => {
   ];
 
   return (
-    <div className={styles.crudPage}>
-      <h2>Лучшие фото</h2>
-
-      {error && <div className={styles.error}>Ошибка: {error}</div>}
+    <AdminPageLayout title="Лучшие фото" error={error}>
 
       <div className={styles.sectionCard}>
         <h3>📸 Загрузка лучших фото</h3>
@@ -64,11 +55,10 @@ const BestPhotosAdmin: React.FC = () => {
         loading={loading}
         onReorder={handleReorder}
         actions={(item) => (
-          <button aria-label="Удалить" onClick={() => handleDelete(item.id, item.title)}>🗑️</button>
+          <DeleteButton itemName={`"${item.title}"`} onDelete={() => deleteItem(item.id)} />
         )}
       />
-    <ConfirmDialogComponent />
-    </div>
+    </AdminPageLayout>
   );
 };
 

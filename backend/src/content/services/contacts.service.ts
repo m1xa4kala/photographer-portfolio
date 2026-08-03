@@ -1,22 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SocialLink } from '../entities/social-link.entity';
-import { CreateSocialLinkDto } from '../dtos/create-social-link.dto';
-import { UpdateSocialLinkDto } from '../dtos/update-social-link.dto';
+import { Contact } from '../entities/contact.entity';
+import { CreateContactDto } from '../dtos/create-contact.dto';
+import { UpdateContactDto } from '../dtos/update-contact.dto';
 import { ReorderDto } from '../dtos/reorder.dto';
 
 @Injectable()
-export class SocialLinksService {
+export class ContactsService {
   constructor(
-    @InjectRepository(SocialLink)
-    private repo: Repository<SocialLink>,
+    @InjectRepository(Contact)
+    private repo: Repository<Contact>,
   ) {}
 
-  async findAll(
-    limit: number = 100,
-    offset: number = 0,
-  ): Promise<SocialLink[]> {
+  async findAll(limit: number = 100, offset: number = 0): Promise<Contact[]> {
     return this.repo.find({
       order: { orderIndex: 'ASC' },
       take: limit,
@@ -24,21 +21,21 @@ export class SocialLinksService {
     });
   }
 
-  async findOne(id: number): Promise<SocialLink> {
+  async findOne(id: number): Promise<Contact> {
     const item = await this.repo.findOne({ where: { id } });
     if (!item) {
-      throw new NotFoundException(`Social link with id ${id} not found`);
+      throw new NotFoundException(`Contact with id ${id} not found`);
     }
     return item;
   }
 
-  async create(dto: CreateSocialLinkDto): Promise<SocialLink> {
+  async create(dto: CreateContactDto): Promise<Contact> {
     const max = await this.repo.maximum('orderIndex');
     const newItem = this.repo.create({ ...dto, orderIndex: (max ?? -1) + 1 });
     return this.repo.save(newItem);
   }
 
-  async update(id: number, dto: UpdateSocialLinkDto): Promise<SocialLink> {
+  async update(id: number, dto: UpdateContactDto): Promise<Contact> {
     const item = await this.findOne(id);
     Object.assign(item, dto);
     return this.repo.save(item);
@@ -47,7 +44,7 @@ export class SocialLinksService {
   async delete(id: number): Promise<void> {
     const result = await this.repo.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Social link with id ${id} not found`);
+      throw new NotFoundException(`Contact with id ${id} not found`);
     }
   }
 

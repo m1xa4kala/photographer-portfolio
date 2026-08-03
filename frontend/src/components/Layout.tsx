@@ -1,7 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { useAuth, useSocialLinks, useDocumentTitle } from '../hooks';
-import SocialLinks from './SocialLinks';
+import { useAuth, useContacts, useDocumentTitle } from '../hooks';
+import Contacts from './Contacts';
+import OverlayButtons from './OverlayButtons';
+import Footer from './Footer';
+import Logo from './Logo';
 import styles from './Layout.module.css';
 
 const TITLE_MAP: Record<string, string> = {
@@ -14,7 +17,7 @@ const TITLE_MAP: Record<string, string> = {
 
 const Layout: React.FC = () => {
   const { user } = useAuth();
-  const { socialLinks } = useSocialLinks();
+  const { contacts } = useContacts();
   const location = useLocation();
 
   // Adaptive document title
@@ -22,7 +25,10 @@ const Layout: React.FC = () => {
   useDocumentTitle(title);
   const isHome = location.pathname === '/';
   const [scrolled, setScrolled] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const lastScrollY = useRef(0);
+  const HIDE_THRESHOLD = 5;
 
   const toggleMenu = useCallback(() => {
     setMenuOpen(prev => !prev);
@@ -32,15 +38,20 @@ const Layout: React.FC = () => {
     setMenuOpen(false);
   }, []);
 
-  // Lock body scroll when menu is open
+  // Lock body scroll when menu is open (works on iOS Safari too)
   useEffect(() => {
+    const scrollY = window.scrollY;
     if (menuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.classList.add('scroll-lock');
     } else {
-      document.body.style.overflow = '';
+      document.body.classList.remove('scroll-lock');
+      document.body.style.top = '';
+      window.scrollTo(0, scrollY);
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.classList.remove('scroll-lock');
+      document.body.style.top = '';
     };
   }, [menuOpen]);
 
@@ -56,14 +67,24 @@ const Layout: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!isHome) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setScrolled(true);
-      return;
-    }
-
     const handleScroll = () => {
-      setScrolled(window.scrollY > window.innerHeight - 80);
+      const currentScrollY = window.scrollY;
+
+      // Scrolled state — controls background transparency
+      if (isHome) {
+        setScrolled(currentScrollY > window.innerHeight - 80);
+      } else {
+        setScrolled(true);
+      }
+
+      // Header visibility — hide on scroll down, show on scroll up
+      if (currentScrollY > lastScrollY.current + HIDE_THRESHOLD && currentScrollY > 80) {
+        setHeaderHidden(true);
+      } else if (currentScrollY < lastScrollY.current || currentScrollY <= 80) {
+        setHeaderHidden(false);
+      }
+
+      lastScrollY.current = currentScrollY;
     };
 
     handleScroll();
@@ -71,18 +92,23 @@ const Layout: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isHome]);
 
+  // Show header when menu opens
+  useEffect(() => {
+    if (menuOpen) {
+      setHeaderHidden(false);
+    }
+  }, [menuOpen]);
+
   return (
     <div className={styles.container}>
       <a href="#main-content" className={styles.skipLink}>
         Перейти к содержимому
       </a>
       <header
-        className={`${styles.header} ${scrolled || !isHome ? styles.scrolled : ''} ${menuOpen ? styles.headerMenuOpen : ''}`}
+        className={`${styles.header} ${scrolled || !isHome ? styles.scrolled : ''} ${headerHidden ? styles.headerHidden : ''} ${menuOpen ? styles.headerMenuOpen : ''}`}
       >
-        <div className={styles.logo}>
-          <span className={styles.logoName}>Vlada Khaybullina</span>
-          <span className={styles.logoSub}>Photographer</span>
-        </div>
+        <Logo linkTo="/" className={styles.headerLogo} />
+        
         <button
           className={styles.hamburger}
           onClick={toggleMenu}
@@ -131,17 +157,18 @@ const Layout: React.FC = () => {
               Админка
             </NavLink>
           )}
+          {/* Contacts in burger menu */}
+          <div className={styles.navContacts}>
+            <span className={styles.navContactsTitle}>Контакты</span>
+            <Contacts contacts={contacts} vertical />
+          </div>
         </nav>
       </header>
       <main id="main-content" className={styles.main}>
         <Outlet />
       </main>
-      <footer className={styles.footer}>
-        <p>© {new Date().getFullYear()} Vlada Khaybullina. Все права защищены.</p>
-        <div className={styles.socials}>
-          <SocialLinks links={socialLinks} />
-        </div>
-      </footer>
+      <Footer contacts={contacts} />
+      <OverlayButtons contacts={contacts} />
     </div>
   );
 };

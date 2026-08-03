@@ -1,24 +1,29 @@
 import React from 'react';
 import { usePrice } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
+import PriceCard from '../components/PriceCard/PriceCard';
+import ErrorState from '../components/ErrorState/ErrorState';
 import Skeleton from '../components/Skeleton';
 import styles from './Price.module.css';
 
 const PriceSkeleton: React.FC = () => (
   <AnimatedSection>
-    <div className={styles.price}>
+    <section className={styles.price}>
       <Skeleton variant="text" width="250px" height="2.5rem" style={{ margin: '0 auto 2rem' }} />
-      <div className={styles.cards}>
+      <div className={styles.grid}>
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className={styles.card}>
-            <Skeleton variant="text" width="60%" height="1.5rem" style={{ margin: '0 auto 0.5rem' }} />
-            <Skeleton variant="text" width="100%" height="1rem" />
-            <Skeleton variant="text" width="80%" height="1rem" style={{ margin: '0 auto 1rem' }} />
-            <Skeleton variant="text" width="100px" height="1.8rem" style={{ margin: '0 auto' }} />
+          <div key={i} className={styles.skeletonCard}>
+            <Skeleton variant="rect" width="100%" height="320px" style={{ borderRadius: '1rem 1rem 0 0' }} />
+            <div className={styles.skeletonBody}>
+              <Skeleton variant="text" width="60%" height="1.5rem" style={{ marginBottom: '0.5rem' }} />
+              <Skeleton variant="text" width="100%" height="0.85rem" />
+              <Skeleton variant="text" width="80%" height="0.85rem" />
+              <Skeleton variant="text" width="100px" height="1.5rem" style={{ marginTop: '1rem' }} />
+            </div>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   </AnimatedSection>
 );
 
@@ -30,29 +35,20 @@ const Price: React.FC = () => {
   }
 
   if (error) {
-    return (
-      <div className={styles.error}>
-        <p>{error}</p>
-        <button onClick={refetch}>Повторить</button>
-      </div>
-    );
+    return <ErrorState message={error} onRetry={refetch} />;
   }
 
   return (
     <AnimatedSection>
-      <div className={styles.price}>
+      <section className={styles.price}>
         <h1>Прайс-лист</h1>
-        <div className={styles.cards}>
+        <div className={styles.grid}>
           {items.map((item) => (
-            <div key={item.id} className={styles.card}>
-              <h3>{item.name}</h3>
-              <p>{item.description}</p>
-              <span className={styles.price}>{item.price} ₽</span>
-            </div>
+            <PriceCard key={item.id} item={item} />
           ))}
         </div>
         <p className={styles.note}>* Точная стоимость обсуждается индивидуально в зависимости от ваших пожеланий</p>
-      </div>
+      </section>
     </AnimatedSection>
   );
 };

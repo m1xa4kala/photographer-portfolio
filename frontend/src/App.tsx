@@ -20,7 +20,7 @@ const PortfolioCategoriesAdmin = lazy(() => import('./pages/admin/PortfolioCateg
 const PortfolioSessionsAdmin = lazy(() => import('./pages/admin/PortfolioSessionsAdmin'));
 const PortfolioPhotosAdmin = lazy(() => import('./pages/admin/PortfolioPhotosAdmin'));
 const FullSessionsAdmin = lazy(() => import('./pages/admin/FullSessionsAdmin'));
-const SocialLinksAdmin = lazy(() => import('./pages/admin/SocialLinksAdmin'));
+const ContactsAdmin = lazy(() => import('./pages/admin/ContactsAdmin'));
 const PriceItemsAdmin = lazy(() => import('./pages/admin/PriceItemsAdmin'));
 const ReviewsAdmin = lazy(() => import('./pages/admin/ReviewsAdmin'));
 const AboutAdmin = lazy(() => import('./pages/admin/AboutAdmin'));
@@ -94,9 +94,9 @@ const App: React.FC = () => {
                 <AboutAdmin />
               </Suspense>
             } />
-            <Route path="social-links" element={
+            <Route path="contacts" element={
               <Suspense fallback={<div>Loading...</div>}>
-                <SocialLinksAdmin />
+                <ContactsAdmin />
               </Suspense>
             } />
           </Route>

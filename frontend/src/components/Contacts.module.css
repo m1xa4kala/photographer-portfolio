@@ -1,0 +1,87 @@
+/* frontend/src/components/Contacts.module.css */
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Vertical variant — for burger menu, sidebar, stacked layouts */
+.contactsVertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.contactsVertical .contactItem {
+  width: 100%;
+}
+
+.contactsVertical .phoneLink {
+  font-size: 1rem;
+  padding: 0.25rem 0;
+}
+
+.contactsVertical .socialLink {
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.contactItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.phoneLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.phoneLink:hover {
+  color: var(--accent);
+}
+
+.phoneLink:hover .phoneValue {
+  text-decoration: underline;
+}
+
+.copied {
+  color: var(--accent);
+}
+
+.phoneIcon {
+  font-size: 1.2rem;
+}
+
+.phoneValue {
+  text-decoration: none;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.socialLink:hover {
+  transform: scale(1.1);
+}
+
+.label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}

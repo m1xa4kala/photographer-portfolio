@@ -1,0 +1,9 @@
+.layout {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.layout h2 {
+  margin-bottom: 1.5rem;
+  color: var(--accent);
+}

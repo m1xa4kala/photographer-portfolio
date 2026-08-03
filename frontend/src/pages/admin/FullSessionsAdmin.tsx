@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAdminFullSessions, useAdminFullSessionFiles } from '../../hooks';
 import { useConfirm } from '../../hooks/useConfirm';
 import api from '../../services/api';
+import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import DropZone from '../../components/DropZone';
+import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
 import type { UploadedFileInfo } from '../../components/DropZone';
 import type { FullSession } from '../../types';
 import styles from './adminCrud.module.css';
@@ -107,12 +109,10 @@ const FullSessionsAdmin: React.FC = () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  if (loading) return <div className={styles.crudPage}><p>Загрузка...</p></div>;
-  if (error) return <div className={styles.crudPage}><div className={styles.error}>Ошибка: {error}</div></div>;
+  if (loading) return <div><p>Загрузка...</p></div>;
 
   return (
-    <div className={styles.crudPage}>
-      <h2>📦 Полные фотосессии</h2>
+    <AdminPageLayout title="📦 Полные фотосессии" error={error}>
 
       <div className={styles.form}>
         <input
@@ -148,13 +148,12 @@ const FullSessionsAdmin: React.FC = () => {
             <span>{s.title}</span>
             <span className={styles.badge}>{s.originalFiles?.length || 0} файлов</span>
             <button aria-label="Редактировать" onClick={e => { e.stopPropagation(); handleEdit(s); }}>✏️</button>
-            <button aria-label="Удалить" onClick={async e => {
-              e.stopPropagation();
-              if (await confirm(`Удалить полную сессию "${s.title}"? Это действие нельзя отменить.`)) {
+            <span onClick={e => e.stopPropagation()}>
+              <DeleteButton itemName={`полную сессию "${s.title}"`} onDelete={async () => {
                 await deleteItem(s.id);
                 if (selectedId === s.id) setSelectedId(null);
-              }
-            }}>🗑️</button>
+              }} />
+            </span>
           </div>
         ))}
         {sessions.length === 0 && <p className={styles.hint}>Нет полных фотосессий</p>}
@@ -243,7 +242,7 @@ const FullSessionsAdmin: React.FC = () => {
         </div>
       )}
       <ConfirmDialogComponent />
-    </div>
+    </AdminPageLayout>
   );
 };
 

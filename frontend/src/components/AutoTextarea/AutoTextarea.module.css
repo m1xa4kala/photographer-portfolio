@@ -1,0 +1,17 @@
+.textarea {
+  field-sizing: content;
+  min-height: 3.2em;
+  max-height: 20em;
+  resize: vertical;
+  line-height: 1.5;
+  width: 100%;
+  box-sizing: border-box;
+
+  /* Hide scrollbar visually but keep scroll functionality */
+  scrollbar-width: none;
+  overflow-y: auto;
+}
+
+.textarea::-webkit-scrollbar {
+  display: none;
+}

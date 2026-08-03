@@ -41,19 +41,32 @@
   color: #fff;
 }
 
-.loader, .error {
-  text-align: center;
-  padding: 3rem;
-  font-size: 1.1rem;
-  color: var(--text-secondary);
+/* ── Price list section ── */
+.priceCards {
+  columns: 3;
+  column-gap: 1.5rem;
 }
 
-.error button {
-  margin-top: 1rem;
-  background: var(--accent);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
+.priceSkeleton {
+  break-inside: avoid;
+  margin-bottom: 1.5rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .priceCards {
+    columns: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .priceCards {
+    columns: 1;
+    column-gap: 0;
+  }
 }
 
 @media (max-width: 768px) {

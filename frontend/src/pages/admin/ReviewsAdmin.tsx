@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAdminReviews } from '../../hooks';
-import { useConfirm } from '../../hooks/useConfirm';
+import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import ImageUploadButton from '../../components/ImageUploadButton';
+import AutoTextarea from '../../components/AutoTextarea/AutoTextarea';
+import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
+import ReviewCard from '../../components/ReviewCard';
 import type { Review } from '../../types';
 import styles from './adminCrud.module.css';
 
 const ReviewsAdmin: React.FC = () => {
   const { items, loading, error, createItem, updateItem, deleteItem } = useAdminReviews();
-  const { confirm, ConfirmDialogComponent } = useConfirm();
   const [editing, setEditing] = useState<Review | null>(null);
   const [form, setForm] = useState<{
     clientName: string;
@@ -30,13 +32,19 @@ const ReviewsAdmin: React.FC = () => {
     }
     setEditing(null);
     setForm({ clientName: '', text: '', clientPhotoUrl: null });
+    setTouched(false);
   };
 
-  return (
-    <div className={styles.crudPage}>
-      <h2>Отзывы</h2>
+  const previewReview: Review = useMemo(() => ({
+    id: -1,
+    clientName: form.clientName || 'Имя клиента',
+    text: form.text || 'Текст отзыва',
+    clientPhotoUrl: form.clientPhotoUrl,
+    orderIndex: 0,
+  }), [form]);
 
-      {error && <div className={styles.error}>Ошибка: {error}</div>}
+  return (
+    <AdminPageLayout title="Отзывы" error={error}>
 
       <div className={styles.form}>
         <input
@@ -46,7 +54,7 @@ const ReviewsAdmin: React.FC = () => {
           onChange={e => { setForm({ ...form, clientName: e.target.value }); setTouched(true); }}
           className={!form.clientName.trim() && touched ? styles.inputError : ''}
         />
-        <textarea
+        <AutoTextarea
           placeholder="Текст отзыва"
           value={form.text}
           onChange={e => { setForm({ ...form, text: e.target.value }); setTouched(true); }}
@@ -63,6 +71,14 @@ const ReviewsAdmin: React.FC = () => {
         <button onClick={handleSubmit} disabled={!isFormValid}>{editing ? 'Обновить' : 'Создать'}</button>
         {editing && <button onClick={() => { setEditing(null); setForm({ clientName: '', text: '', clientPhotoUrl: null }); setTouched(false); }}>Отмена</button>}
         {touched && !isFormValid && <p className={styles.validationError}>Заполните имя клиента и текст отзыва</p>}
+      </div>
+
+      {/* ── Live preview ── */}
+      <div className={styles.previewSection}>
+        <h3 className={styles.previewLabel}>Предпросмотр карточки</h3>
+        <div className={styles.previewCardWrapper}>
+          <ReviewCard review={previewReview} />
+        </div>
       </div>
 
       {loading ? (
@@ -93,19 +109,14 @@ const ReviewsAdmin: React.FC = () => {
                 <td>{item.text.length > 50 ? `${item.text.substring(0, 50)}...` : item.text}</td>
                 <td>
                   <button aria-label="Редактировать" onClick={() => { setEditing(item); setForm({ clientName: item.clientName, text: item.text, clientPhotoUrl: item.clientPhotoUrl }); }}>✏️</button>
-                  <button aria-label="Удалить" onClick={async () => {
-                  if (await confirm(`Удалить отзыв "${item.clientName}"? Это действие нельзя отменить.`)) {
-                    await deleteItem(item.id);
-                  }
-                }}>🗑️</button>
+                  <DeleteButton itemName={`отзыв "${item.clientName}"`} onDelete={() => deleteItem(item.id)} />
                  </td>
                </tr>
             ))}
           </tbody>
         </table>
       )}
-      <ConfirmDialogComponent />
-    </div>
+    </AdminPageLayout>
   );
 };
 

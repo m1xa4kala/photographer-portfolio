@@ -48,3 +48,9 @@ uploads/
 # Файлы отчётов покрытия
 coverage/
 .nyc_output/
+
+# Файлы суперсил (временные наброски, стейты)
+.superpowers/
+
+# Ворктри Claude Code
+.claude/worktrees/

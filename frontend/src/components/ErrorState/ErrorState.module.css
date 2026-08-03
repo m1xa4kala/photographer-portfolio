@@ -1,0 +1,23 @@
+/* src/components/ErrorState/ErrorState.module.css */
+.container {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.retryButton {
+  margin-top: 1rem;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: opacity 0.2s;
+}
+
+.retryButton:hover {
+  opacity: 0.85;
+}
