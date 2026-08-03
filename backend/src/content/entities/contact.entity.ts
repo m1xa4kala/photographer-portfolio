@@ -11,13 +11,13 @@ export class Contact {
   @Column()
   value!: string; // phone number or URL
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   platform!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   iconName!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   label!: string | null;
 
   @Column({ default: 0 })
