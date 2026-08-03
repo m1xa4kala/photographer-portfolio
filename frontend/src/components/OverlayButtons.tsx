@@ -1,6 +1,7 @@
 // frontend/src/components/OverlayButtons.tsx
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { type Contact } from '../types';
+import { lockScroll, unlockScroll } from '../utils/scrollLock';
 import Contacts from './Contacts';
 import styles from './OverlayButtons.module.css';
 
@@ -50,24 +51,15 @@ const OverlayButtons: React.FC<OverlayButtonsProps> = ({ contacts }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [sheetOpen, closeSheet]);
 
-  const scrollPositionRef = useRef(0);
-
-  // Lock body scroll when sheet is open
+  // Lock body scroll when sheet is open (shared counter with burger menu)
   useEffect(() => {
     if (sheetOpen) {
-      scrollPositionRef.current = window.scrollY;
-      document.body.style.top = `-${scrollPositionRef.current}px`;
-      document.body.classList.add('scroll-lock');
-    } else {
-      document.body.classList.remove('scroll-lock');
-      document.body.style.top = '';
-      if (scrollPositionRef.current > 0) {
-        window.scrollTo(0, scrollPositionRef.current);
-      }
+      lockScroll();
     }
     return () => {
-      document.body.classList.remove('scroll-lock');
-      document.body.style.top = '';
+      if (sheetOpen) {
+        unlockScroll();
+      }
     };
   }, [sheetOpen]);
 

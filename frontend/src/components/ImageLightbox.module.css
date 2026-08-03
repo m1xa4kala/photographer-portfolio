@@ -14,15 +14,40 @@
   overflow: hidden;
 }
 
+.imageWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 95vw;
+  max-height: 95vh;
+  overflow: hidden;
+  border-radius: 4px;
+  animation: scaleIn 0.25s ease;
+}
+
+.imageWrapper.zoomed {
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  animation: none;
+}
+
 .image {
   max-width: 95vw;
   max-height: 95vh;
   object-fit: contain;
-  cursor: default;
   border-radius: 4px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: scaleIn 0.25s ease;
   min-width: 0;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.imageWrapper.zoomed .image {
+  max-width: none;
+  max-height: none;
 }
 
 .closeBtn {
@@ -86,6 +111,22 @@
 
 .navNext {
   right: 1rem;
+}
+
+.zoomIndicator {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+  font-family: system-ui, sans-serif;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 1001;
+  animation: fadeIn 0.15s ease;
 }
 
 @keyframes fadeIn {

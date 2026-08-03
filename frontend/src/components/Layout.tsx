@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth, useContacts, useDocumentTitle } from '../hooks';
+import { lockScroll, unlockScroll } from '../utils/scrollLock';
 import Contacts from './Contacts';
 import OverlayButtons from './OverlayButtons';
 import Footer from './Footer';
@@ -39,19 +40,15 @@ const Layout: React.FC = () => {
   }, []);
 
   // Lock body scroll when menu is open (works on iOS Safari too)
+  // Uses a shared counter so multiple overlays can lock independently
   useEffect(() => {
-    const scrollY = window.scrollY;
     if (menuOpen) {
-      document.body.style.top = `-${scrollY}px`;
-      document.body.classList.add('scroll-lock');
-    } else {
-      document.body.classList.remove('scroll-lock');
-      document.body.style.top = '';
-      window.scrollTo(0, scrollY);
+      lockScroll();
     }
     return () => {
-      document.body.classList.remove('scroll-lock');
-      document.body.style.top = '';
+      if (menuOpen) {
+        unlockScroll();
+      }
     };
   }, [menuOpen]);
 

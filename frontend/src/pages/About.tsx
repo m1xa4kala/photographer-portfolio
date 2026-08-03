@@ -1,7 +1,6 @@
 import React from 'react';
-import { useAbout, useContacts } from '../hooks';
+import { useAbout } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
-import Contacts from '../components/Contacts';
 import ErrorState from '../components/ErrorState/ErrorState';
 import Skeleton from '../components/Skeleton';
 import ImageWithSkeleton from '../components/ImageWithSkeleton';
@@ -27,7 +26,6 @@ const AboutSkeleton: React.FC = () => (
 
 const About: React.FC = () => {
   const { about, loading, error, refetch } = useAbout();
-  const { contacts } = useContacts();
 
   if (loading) return <AboutSkeleton />;
   if (error) return <ErrorState message={`Ошибка: ${error}`} onRetry={refetch} />;
@@ -46,7 +44,6 @@ const About: React.FC = () => {
         <div className={styles.bio}>
           <h1>{about.fullName}</h1>
           <p>{about.bioText}</p>
-          <Contacts contacts={contacts} />
         </div>
       </div>
     </AnimatedSection>
