@@ -1,5 +1,5 @@
 // frontend/src/components/OverlayButtons.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { type Contact } from '../types';
 import Contacts from './Contacts';
 import styles from './OverlayButtons.module.css';
@@ -50,30 +50,25 @@ const OverlayButtons: React.FC<OverlayButtonsProps> = ({ contacts }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [sheetOpen, closeSheet]);
 
+  const scrollPositionRef = useRef(0);
+
   // Lock body scroll when sheet is open
   useEffect(() => {
     if (sheetOpen) {
-      const scrollY = window.scrollY;
+      scrollPositionRef.current = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
+      document.body.style.top = `-${scrollPositionRef.current}px`;
       document.body.style.width = '100%';
     } else {
-      const scrollY = Math.abs(parseInt(document.body.style.top || '0', 10));
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-      if (scrollY > 0) {
-        window.scrollTo(0, scrollY);
+      if (scrollPositionRef.current > 0) {
+        window.scrollTo(0, scrollPositionRef.current);
       }
     }
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-    };
   }, [sheetOpen]);
 
   return (
