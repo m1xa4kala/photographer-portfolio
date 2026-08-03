@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePortfolioCategories, usePortfolioSessions, usePortfolioPhotos } from '../hooks';
 import AnimatedSection from '../components/AnimatedSection';
@@ -69,14 +69,7 @@ const Portfolio: React.FC = () => {
   const { photos, loading: photosLoading, error: photosError, refetch: refetchPhotos } = usePortfolioPhotos(activeSessionId);
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const lightboxImages = photos.map(p => p.imageUrl);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent, path: string) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      navigate(path);
-    }
-  }, [navigate]);
+  const lightboxImages = useMemo(() => photos.map(p => p.imageUrl), [photos]);
 
   // Show full-page skeleton only while categories load
   if (categoriesLoading) {

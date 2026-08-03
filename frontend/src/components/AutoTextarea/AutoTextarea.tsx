@@ -21,7 +21,7 @@ const AutoTextarea: React.FC<AutoTextareaProps> = ({
     el.style.height = el.scrollHeight + 'px';
   }, [autoResize, props.value]);
 
-  const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+  const handleInput = (e: React.InputEvent<HTMLTextAreaElement>) => {
     if (!autoResize) return;
     const el = e.currentTarget;
     el.style.height = 'auto';

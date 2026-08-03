@@ -39,13 +39,6 @@ const Home: React.FC = () => {
   const { reviews, loading: reviewsLoading } = useReviews();
   const { items: priceItems, loading: priceLoading } = usePrice();
 
-  const handleKeyDown = (e: React.KeyboardEvent, path: string) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      navigate(path);
-    }
-  };
-
   if (loading && aboutLoading) {
     return <HomeSkeleton />;
   }
