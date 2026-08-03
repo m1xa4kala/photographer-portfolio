@@ -62,11 +62,13 @@ export interface LoginResponse {
   access_token: string;
 }
 
-export interface SocialLink {
+export interface Contact {
   id: number;
-  platform: string;
-  url: string;
-  iconName: string;
+  type: 'phone' | 'social';
+  value: string;
+  platform?: string | null;
+  iconName?: string | null;
+  label?: string | null;
   orderIndex?: number;
 }
 
