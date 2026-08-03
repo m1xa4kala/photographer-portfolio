@@ -1,0 +1,48 @@
+/* frontend/src/components/Contacts.module.css */
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.contactItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.phoneLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.phoneLink:hover {
+  color: var(--accent);
+}
+
+.phoneIcon {
+  font-size: 1.2rem;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.socialLink:hover {
+  transform: scale(1.1);
+}
+
+.label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
