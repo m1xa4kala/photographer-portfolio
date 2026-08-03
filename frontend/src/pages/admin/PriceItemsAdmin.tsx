@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAdminPriceItems } from '../../hooks';
 import ImageUploadButton from '../../components/ImageUploadButton';
 import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import DraggableTable from '../../components/DraggableTable';
 import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
+import PriceCard from '../../components/PriceCard/PriceCard';
+import AutoTextarea from '../../components/AutoTextarea/AutoTextarea';
 import type { Column } from '../../components/DraggableTable';
 import type { PriceItem } from '../../types';
 import styles from './adminCrud.module.css';
@@ -46,6 +48,15 @@ const PriceItemsAdmin: React.FC = () => {
     await reorderItems(orderedIds.map((id, idx) => ({ id, orderIndex: idx })));
   };
 
+  const previewItem: PriceItem = useMemo(() => ({
+    id: -1,
+    name: form.name || 'Название услуги',
+    description: form.description,
+    price: form.price || '0',
+    orderIndex: 0,
+    imageUrl: form.imageUrl,
+  }), [form]);
+
   const columns: Column<PriceItem>[] = [
     { key: 'id', header: 'ID', render: (item) => item.id },
     {
@@ -77,10 +88,11 @@ const PriceItemsAdmin: React.FC = () => {
           onChange={e => { setForm({ ...form, name: e.target.value }); setTouched(true); }}
           className={!form.name.trim() && touched ? styles.inputError : ''}
         />
-        <textarea
-          placeholder="Описание"
+        <AutoTextarea
+          placeholder="Описание (каждая строка — отдельный пункт)"
           value={form.description}
           onChange={e => setForm({ ...form, description: e.target.value })}
+          rows={2}
         />
         <input
           type="text"
@@ -101,6 +113,14 @@ const PriceItemsAdmin: React.FC = () => {
           {editing && <button onClick={handleCancel}>Отмена</button>}
         </div>
         {touched && !isFormValid && <p className={styles.validationError}>Заполните обязательные поля (название и цена)</p>}
+      </div>
+
+      {/* ── Live preview ── */}
+      <div className={styles.previewSection}>
+        <h3 className={styles.previewLabel}>Предпросмотр карточки</h3>
+        <div className={styles.previewCardWrapper}>
+          <PriceCard item={previewItem} />
+        </div>
       </div>
 
       <DraggableTable

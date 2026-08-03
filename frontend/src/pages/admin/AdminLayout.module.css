@@ -5,9 +5,9 @@
   font-family: var(--font-admin);
 }
 
-.adminLayout h1,
-.adminLayout h2,
-.adminLayout h3 {
+:where(.adminLayout) h1,
+:where(.adminLayout) h2,
+:where(.adminLayout) h3 {
   font-family: var(--font-admin);
 }
 

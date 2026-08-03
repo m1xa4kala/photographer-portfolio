@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAdminReviews } from '../../hooks';
 import DeleteButton from '../../components/DeleteButton/DeleteButton';
 import ImageUploadButton from '../../components/ImageUploadButton';
+import AutoTextarea from '../../components/AutoTextarea/AutoTextarea';
 import AdminPageLayout from '../../components/AdminPageLayout/AdminPageLayout';
+import ReviewCard from '../../components/ReviewCard';
 import type { Review } from '../../types';
 import styles from './adminCrud.module.css';
 
@@ -33,6 +35,14 @@ const ReviewsAdmin: React.FC = () => {
     setTouched(false);
   };
 
+  const previewReview: Review = useMemo(() => ({
+    id: -1,
+    clientName: form.clientName || 'Имя клиента',
+    text: form.text || 'Текст отзыва',
+    clientPhotoUrl: form.clientPhotoUrl,
+    orderIndex: 0,
+  }), [form]);
+
   return (
     <AdminPageLayout title="Отзывы" error={error}>
 
@@ -44,7 +54,7 @@ const ReviewsAdmin: React.FC = () => {
           onChange={e => { setForm({ ...form, clientName: e.target.value }); setTouched(true); }}
           className={!form.clientName.trim() && touched ? styles.inputError : ''}
         />
-        <textarea
+        <AutoTextarea
           placeholder="Текст отзыва"
           value={form.text}
           onChange={e => { setForm({ ...form, text: e.target.value }); setTouched(true); }}
@@ -61,6 +71,14 @@ const ReviewsAdmin: React.FC = () => {
         <button onClick={handleSubmit} disabled={!isFormValid}>{editing ? 'Обновить' : 'Создать'}</button>
         {editing && <button onClick={() => { setEditing(null); setForm({ clientName: '', text: '', clientPhotoUrl: null }); setTouched(false); }}>Отмена</button>}
         {touched && !isFormValid && <p className={styles.validationError}>Заполните имя клиента и текст отзыва</p>}
+      </div>
+
+      {/* ── Live preview ── */}
+      <div className={styles.previewSection}>
+        <h3 className={styles.previewLabel}>Предпросмотр карточки</h3>
+        <div className={styles.previewCardWrapper}>
+          <ReviewCard review={previewReview} />
+        </div>
       </div>
 
       {loading ? (
