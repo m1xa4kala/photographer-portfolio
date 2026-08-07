@@ -9,8 +9,7 @@
   justify-content: center;
   cursor: zoom-out;
   animation: fadeIn 0.2s ease;
-  padding: 2rem;
-  touch-action: pan-y;
+  touch-action: none;
   overflow: hidden;
 }
 
@@ -18,36 +17,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 95vw;
-  max-height: 95vh;
+  max-width: 100vw;
+  max-height: 100vh;
   overflow: hidden;
   border-radius: 4px;
-  animation: scaleIn 0.25s ease;
 }
 
 .imageWrapper.zoomed {
-  max-width: none;
-  max-height: none;
   overflow: visible;
-  animation: none;
 }
 
 .image {
-  max-width: 95vw;
-  max-height: 95vh;
+  max-width: 100vw;
+  max-height: 100vh;
   object-fit: contain;
   border-radius: 4px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   min-width: 0;
-  transition: transform 0.15s ease-out;
+  transition: transform 0.3s ease-out;
   will-change: transform;
   user-select: none;
   -webkit-user-drag: none;
-}
-
-.imageWrapper.zoomed .image {
-  max-width: none;
-  max-height: none;
 }
 
 .closeBtn {

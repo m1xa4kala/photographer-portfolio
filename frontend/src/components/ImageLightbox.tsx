@@ -9,9 +9,10 @@ interface ImageLightboxProps {
 }
 
 const MIN_SCALE = 1;
-const MAX_SCALE = 5;
+const MAX_SCALE = 2;
 const ZOOM_STEP = 0.25;
 const DOUBLE_TAP_DELAY = 300;
+const PINCH_SENSITIVITY = 0.5;
 
 type Origin = { x: number; y: number };
 
@@ -27,7 +28,6 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
   const nextBtnRef = useRef<HTMLButtonElement>(null);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
-  const lastTouchX = useRef(0);
   const isSwiping = useRef(false);
 
   // Zoom dragging state
@@ -41,9 +41,13 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
   // Pinch state
   const lastPinchDist = useRef(0);
   const isPinching = useRef(false);
+  const pinchEnded = useRef(false);
 
   // Double-tap state
   const lastTapTime = useRef(0);
+
+  // Flag to suppress synthetic click events after touch
+  const touchHandled = useRef(false);
 
   const hasPrev = index > 0;
   const hasNext = index < images.length - 1;
@@ -226,6 +230,13 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
 
   const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    // Ignore synthetic click events fired by the browser after touch gestures
+    // (touch handlers already handle tap/zoom on mobile)
+    if (touchHandled.current) {
+      touchHandled.current = false;
+      return;
+    }
+
     // Was a real drag (panning) — treat as a pan-end, not a click
     if (dragDist.current > DRAG_THRESHOLD) {
       dragDist.current = 0;
@@ -240,7 +251,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
       } else {
         const newOrigin = computeOrigin(e.clientX, e.clientY);
         setOrigin(newOrigin);
-        setScale(2.5);
+        setScale(2);
         setPosition({ x: 0, y: 0 });
       }
       lastClickTime.current = 0;
@@ -263,17 +274,25 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
   };
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Prevent browser from synthesizing click events after touch
+    e.preventDefault();
+    touchHandled.current = true;
+    pinchEnded.current = false;
+
     if (e.touches.length === 2) {
       isPinching.current = true;
       isSwiping.current = false;
       lastPinchDist.current = getTouchDist(e.touches);
+      // Disable CSS transition during pinch for smooth response
+      if (imageRef.current) {
+        imageRef.current.style.transition = 'none';
+      }
       return;
     }
 
     if (e.touches.length === 1) {
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
-      lastTouchX.current = e.touches[0].clientX;
       isSwiping.current = false;
       dragPos.current = { ...position };
     }
@@ -283,7 +302,8 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     if (e.touches.length === 2 && isPinching.current) {
       e.preventDefault();
       const dist = getTouchDist(e.touches);
-      const ratio = dist / lastPinchDist.current;
+      const rawRatio = dist / lastPinchDist.current;
+      const ratio = 1 + (rawRatio - 1) * PINCH_SENSITIVITY;
       lastPinchDist.current = dist;
 
       const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
@@ -320,43 +340,82 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     if (Math.abs(deltaY) > Math.abs(deltaX) * 2) return;
 
     isSwiping.current = true;
-    lastTouchX.current = e.touches[0].clientX;
     e.preventDefault();
   }, [isZoomed, computeOrigin]);
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (isPinching.current) {
+      // Restore CSS transition after pinch
+      if (imageRef.current) {
+        imageRef.current.style.transition = '';
+      }
       isPinching.current = false;
+      pinchEnded.current = true;
+      // Update touchStart to remaining finger position so that
+      // subsequent touchend (from the second finger lifting) doesn't
+      // use stale pre-pinch coordinates
+      if (e.touches.length > 0) {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+      }
       return;
     }
 
+    // If the previous event was a pinch end, this touchend is the
+    // second finger lifting — ignore it to prevent accidental tap/close
+    if (pinchEnded.current) {
+      pinchEnded.current = false;
+      return;
+    }
+
+    // Get end position for tap/distance detection
+    let endX = touchStartX.current;
+    let endY = touchStartY.current;
+    if (e.changedTouches.length > 0) {
+      endX = e.changedTouches[0].clientX;
+      endY = e.changedTouches[0].clientY;
+    }
+
+    const deltaX = endX - touchStartX.current;
+    const deltaY = endY - touchStartY.current;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const isShortTap = distance < DRAG_THRESHOLD;
+
     if (isZoomed) {
-      // Save drag position for continued panning
+      if (isShortTap) {
+        // Tap while zoomed → reset zoom
+        resetZoomState();
+        return;
+      }
+      // Pan while zoomed
       dragPos.current = { ...position };
       return;
     }
 
-    if (!isSwiping.current) {
-      // Check for double-tap
-      const now = Date.now();
-      if (now - lastTapTime.current < DOUBLE_TAP_DELAY) {
-        toggleZoomAtPoint(touchStartX.current, touchStartY.current);
-        lastTapTime.current = 0;
-        return;
+    if (!isShortTap) {
+      // Swipe to navigate
+      if (deltaX < -50 && hasNext) {
+        goNext();
+      } else if (deltaX > 50 && hasPrev) {
+        goPrev();
       }
-      lastTapTime.current = now;
       return;
     }
 
-    isSwiping.current = false;
-    const deltaX = lastTouchX.current - touchStartX.current;
-
-    if (deltaX < -50 && hasNext) {
-      goNext();
-    } else if (deltaX > 50 && hasPrev) {
-      goPrev();
+    // Double-tap detection
+    const now = Date.now();
+    if (now - lastTapTime.current < DOUBLE_TAP_DELAY) {
+      toggleZoomAtPoint(endX, endY);
+      lastTapTime.current = 0;
+      return;
     }
-  }, [hasNext, hasPrev, isZoomed, computeOrigin, position]);
+    lastTapTime.current = now;
+
+    // Single tap on overlay background — close the lightbox
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  }, [isZoomed, computeOrigin, position, hasNext, hasPrev, onClose]);
 
   const toggleZoomAtPoint = (clientX: number, clientY: number) => {
     if (isZoomed) {
@@ -364,12 +423,17 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     } else {
       const newOrigin = computeOrigin(clientX, clientY);
       setOrigin(newOrigin);
-      setScale(2.5);
+      setScale(2);
       setPosition({ x: 0, y: 0 });
     }
   };
 
   const handleOverlayClick = (e: React.MouseEvent) => {
+    // Ignore synthetic click events after touch gestures
+    if (touchHandled.current) {
+      touchHandled.current = false;
+      return;
+    }
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -384,6 +448,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       role="dialog"
       aria-modal="true"
       aria-label="Просмотр изображения"
@@ -398,7 +463,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
         ✕
       </button>
 
-      {hasPrev && (
+      {hasPrev && !isZoomed && (
         <button
           ref={prevBtnRef}
           className={`${styles.navBtn} ${styles.navPrev}`}
@@ -439,7 +504,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
         </span>
       )}
 
-      {hasNext && (
+      {hasNext && !isZoomed && (
         <button
           ref={nextBtnRef}
           className={`${styles.navBtn} ${styles.navNext}`}
