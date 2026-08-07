@@ -411,9 +411,15 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     }
     lastTapTime.current = now;
 
-    // Single tap on overlay background — close the lightbox
+    // Single tap on overlay background — close the lightbox.
+    // Prevent default + tiny delay to avoid ghost click on the
+    // element that was underneath the overlay (the synthetic click
+    // the browser fires after touchend would otherwise land on it).
     if (e.target === e.currentTarget) {
-      onClose();
+      e.preventDefault();
+      e.stopPropagation();
+      // Let the event system settle before unmounting the overlay
+      setTimeout(onClose, 80);
     }
   }, [isZoomed, computeOrigin, position, hasNext, hasPrev, onClose]);
 
