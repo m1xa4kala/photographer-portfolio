@@ -9,9 +9,10 @@ interface ImageLightboxProps {
 }
 
 const MIN_SCALE = 1;
-const MAX_SCALE = 5;
+const MAX_SCALE = 2;
 const ZOOM_STEP = 0.25;
 const DOUBLE_TAP_DELAY = 300;
+const PINCH_SENSITIVITY = 0.5;
 
 type Origin = { x: number; y: number };
 
@@ -40,9 +41,13 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
   // Pinch state
   const lastPinchDist = useRef(0);
   const isPinching = useRef(false);
+  const pinchEnded = useRef(false);
 
   // Double-tap state
   const lastTapTime = useRef(0);
+
+  // Flag to suppress synthetic click events after touch
+  const touchHandled = useRef(false);
 
   const hasPrev = index > 0;
   const hasNext = index < images.length - 1;
@@ -225,6 +230,13 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
 
   const handleImageClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    // Ignore synthetic click events fired by the browser after touch gestures
+    // (touch handlers already handle tap/zoom on mobile)
+    if (touchHandled.current) {
+      touchHandled.current = false;
+      return;
+    }
+
     // Was a real drag (panning) — treat as a pan-end, not a click
     if (dragDist.current > DRAG_THRESHOLD) {
       dragDist.current = 0;
@@ -239,7 +251,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
       } else {
         const newOrigin = computeOrigin(e.clientX, e.clientY);
         setOrigin(newOrigin);
-        setScale(2.5);
+        setScale(2);
         setPosition({ x: 0, y: 0 });
       }
       lastClickTime.current = 0;
@@ -262,6 +274,11 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
   };
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Prevent browser from synthesizing click events after touch
+    e.preventDefault();
+    touchHandled.current = true;
+    pinchEnded.current = false;
+
     if (e.touches.length === 2) {
       isPinching.current = true;
       isSwiping.current = false;
@@ -285,7 +302,8 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     if (e.touches.length === 2 && isPinching.current) {
       e.preventDefault();
       const dist = getTouchDist(e.touches);
-      const ratio = dist / lastPinchDist.current;
+      const rawRatio = dist / lastPinchDist.current;
+      const ratio = 1 + (rawRatio - 1) * PINCH_SENSITIVITY;
       lastPinchDist.current = dist;
 
       const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
@@ -332,6 +350,21 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
         imageRef.current.style.transition = '';
       }
       isPinching.current = false;
+      pinchEnded.current = true;
+      // Update touchStart to remaining finger position so that
+      // subsequent touchend (from the second finger lifting) doesn't
+      // use stale pre-pinch coordinates
+      if (e.touches.length > 0) {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+      }
+      return;
+    }
+
+    // If the previous event was a pinch end, this touchend is the
+    // second finger lifting — ignore it to prevent accidental tap/close
+    if (pinchEnded.current) {
+      pinchEnded.current = false;
       return;
     }
 
@@ -352,11 +385,6 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
       if (isShortTap) {
         // Tap while zoomed → reset zoom
         resetZoomState();
-        return;
-      }
-      // Swipe down while zoomed → close
-      if (deltaY > 80) {
-        onClose();
         return;
       }
       // Pan while zoomed
@@ -382,6 +410,11 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
       return;
     }
     lastTapTime.current = now;
+
+    // Single tap on overlay background — close the lightbox
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
   }, [isZoomed, computeOrigin, position, hasNext, hasPrev, onClose]);
 
   const toggleZoomAtPoint = (clientX: number, clientY: number) => {
@@ -390,12 +423,17 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
     } else {
       const newOrigin = computeOrigin(clientX, clientY);
       setOrigin(newOrigin);
-      setScale(2.5);
+      setScale(2);
       setPosition({ x: 0, y: 0 });
     }
   };
 
   const handleOverlayClick = (e: React.MouseEvent) => {
+    // Ignore synthetic click events after touch gestures
+    if (touchHandled.current) {
+      touchHandled.current = false;
+      return;
+    }
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -425,7 +463,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
         ✕
       </button>
 
-      {hasPrev && (
+      {hasPrev && !isZoomed && (
         <button
           ref={prevBtnRef}
           className={`${styles.navBtn} ${styles.navPrev}`}
@@ -466,7 +504,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ images, initialIndex, alt
         </span>
       )}
 
-      {hasNext && (
+      {hasNext && !isZoomed && (
         <button
           ref={nextBtnRef}
           className={`${styles.navBtn} ${styles.navNext}`}
