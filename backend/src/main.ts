@@ -30,8 +30,31 @@ async function bootstrap() {
     nodeEnv === 'development'
       ? join(__dirname, '..', '..', 'uploads')
       : join(process.cwd(), 'uploads');
+  // CORS: in development allow localhost + any local network IP
+  const corsOrigin =
+    nodeEnv === 'development'
+      ? (
+          origin: string | undefined,
+          callback: (err: Error | null, allow?: boolean) => void,
+        ) => {
+          // Allow requests with no origin (server-to-server, curl, etc.)
+          if (!origin) return callback(null, true);
+          // Allow localhost (any port)
+          if (/^https?:\/\/localhost(:\d+)?$/.test(origin))
+            return callback(null, true);
+          // Allow local network IPs (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+          if (
+            /^https?:\/\/(127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(
+              origin,
+            )
+          )
+            return callback(null, true);
+          callback(null, false);
+        }
+      : frontendUrl;
+
   app.enableCors({
-    origin: frontendUrl,
+    origin: corsOrigin,
     credentials: true,
   });
 
