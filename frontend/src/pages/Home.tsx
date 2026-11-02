@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useHome, useAbout, useHomePortfolio, useReviews, usePrice } from '../hooks';
+import { useHome, useAbout, useHomePortfolio, useReviews, usePrice, useWeddingPackages } from '../hooks';
 import HeroCarousel from '../components/HeroCarousel';
 import ReviewCard from '../components/ReviewCard';
 import AnimatedSection from '../components/AnimatedSection';
@@ -9,10 +9,12 @@ import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import Skeleton from '../components/Skeleton';
 import PriceCard from '../components/PriceCard/PriceCard';
 import SessionCard from '../components/SessionCard/SessionCard';
+import WeddingCard from '../components/WeddingCard/WeddingCard';
 import styles from './Home.module.css';
 import aboutStyles from './About.module.css';
 import portfolioStyles from './Portfolio.module.css';
 import reviewsStyles from './Reviews.module.css';
+import weddingStyles from './Wedding.module.css';
 
 const HomeSkeleton: React.FC = () => (
   <div className={styles.home}>
@@ -38,6 +40,7 @@ const Home: React.FC = () => {
   } = useHomePortfolio(6);
   const { reviews, loading: reviewsLoading } = useReviews();
   const { items: priceItems, loading: priceLoading } = usePrice();
+  const { items: weddingPackages, loading: weddingLoading } = useWeddingPackages();
 
   if (loading && aboutLoading) {
     return <HomeSkeleton />;
@@ -104,29 +107,34 @@ const Home: React.FC = () => {
           </div>
         </AnimatedSection>
 
-        {/* ===== Отзывы ===== */}
+        {/* ===== Свадебные пакеты ===== */}
         <AnimatedSection delay={0.4} className={styles.section}>
-          <h2 className={styles.sectionTitle}>Отзывы клиентов</h2>
-          {reviewsLoading ? (
-            <div className={reviewsStyles.list}>
-              {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className={reviewsStyles.skeletonCard}>
-                  <Skeleton variant="text" width="120px" height="1.5rem" />
-                  <Skeleton variant="text" width="100%" height="1rem" />
-                  <Skeleton variant="text" width="100%" height="1rem" />
-                  <Skeleton variant="text" width="40%" height="1rem" />
+          <h2 className={styles.sectionTitle}>Свадебные пакеты</h2>
+          {weddingLoading ? (
+            <div className={weddingStyles.grid}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className={weddingStyles.skeletonCard}>
+                  <Skeleton variant="rect" width="100%" height="320px" style={{ borderRadius: '1rem 1rem 0 0' }} />
+                  <div className={weddingStyles.skeletonBody}>
+                    <Skeleton variant="text" width="60%" height="1.5rem" style={{ marginBottom: '0.5rem' }} />
+                    <Skeleton variant="text" width="100%" height="0.85rem" />
+                    <Skeleton variant="text" width="80%" height="0.85rem" />
+                    <Skeleton variant="text" width="100px" height="1.5rem" style={{ marginTop: '1rem' }} />
+                  </div>
                 </div>
               ))}
             </div>
+          ) : weddingPackages.length === 0 ? (
+            <p className={weddingStyles.emptyState}>Ещё нет свадебных пакетов</p>
           ) : (
-            <div className={reviewsStyles.list}>
-              {reviews.slice(0, 3).map(review => (
-                <ReviewCard key={review.id} review={review} />
+            <div className={weddingStyles.grid}>
+              {weddingPackages.map(pkg => (
+                <WeddingCard key={pkg.id} item={pkg} />
               ))}
             </div>
           )}
           <div className={styles.viewAll}>
-            <Link to="/reviews" className={styles.viewAllLink}>Все отзывы →</Link>
+            <Link to="/wedding" className={styles.viewAllLink}>Все свадебные пакеты →</Link>
           </div>
         </AnimatedSection>
 
@@ -156,6 +164,32 @@ const Home: React.FC = () => {
           )}
           <div className={styles.viewAll}>
             <Link to="/price" className={styles.viewAllLink}>Полный прайс-лист →</Link>
+          </div>
+        </AnimatedSection>
+
+        {/* ===== Отзывы ===== */}
+        <AnimatedSection delay={0.6} className={styles.section}>
+          <h2 className={styles.sectionTitle}>Отзывы клиентов</h2>
+          {reviewsLoading ? (
+            <div className={reviewsStyles.list}>
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className={reviewsStyles.skeletonCard}>
+                  <Skeleton variant="text" width="120px" height="1.5rem" />
+                  <Skeleton variant="text" width="100%" height="1rem" />
+                  <Skeleton variant="text" width="100%" height="1rem" />
+                  <Skeleton variant="text" width="40%" height="1rem" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={reviewsStyles.list}>
+              {reviews.slice(0, 3).map(review => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+          )}
+          <div className={styles.viewAll}>
+            <Link to="/reviews" className={styles.viewAllLink}>Все отзывы →</Link>
           </div>
         </AnimatedSection>
       </div>

@@ -197,8 +197,8 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
     });
   };
 
-  const goToPrice = () => {
-    routerNavigate('/price');
+  const goToWedding = () => {
+    routerNavigate('/wedding');
   };
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -326,8 +326,8 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({
         </svg>
       </button>
 
-      <button className={styles.goToPrice} onClick={goToPrice} aria-label="Перейти к прайсу">
-        <span>Прайс</span>
+      <button className={styles.goToPrice} onClick={goToWedding} aria-label="Перейти к прайсу">
+        <span>Свадьбы</span>
       </button>
 
       <button className={styles.scrollDown} onClick={scrollToNext} aria-label="Прокрутить ниже">
