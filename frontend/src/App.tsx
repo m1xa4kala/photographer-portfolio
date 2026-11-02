@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Portfolio from './pages/Portfolio';
 import Price from './pages/Price';
 import Reviews from './pages/Reviews';
+import Wedding from './pages/Wedding';
 import About from './pages/About';
 import AdminLayout from './pages/admin/AdminLayout';
 import Login from './pages/admin/Login';
@@ -37,6 +38,7 @@ const App: React.FC = () => {
             <Route path="portfolio/category/:catId" element={<Portfolio />} />
             <Route path="portfolio/category/:catId/session/:sessionId" element={<Portfolio />} />
             <Route path="price" element={<Price />} />
+            <Route path="wedding" element={<Wedding />} />
             <Route path="reviews" element={<Reviews />} />
             <Route path="about" element={<About />} />
           </Route>

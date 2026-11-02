@@ -12,6 +12,7 @@ const TITLE_MAP: Record<string, string> = {
   '/': 'Влада | Фотограф',
   '/portfolio': 'Влада | Портфолио',
   '/price': 'Влада | Прайс',
+  '/wedding': 'Влада | Свадебные пакеты',
   '/reviews': 'Влада | Отзывы',
   '/about': 'Влада | Обо мне',
 };
@@ -142,6 +143,9 @@ const Layout: React.FC = () => {
           </NavLink>
           <NavLink to="/price" onClick={closeMenu} className={({ isActive }) => (isActive ? styles.active : '')}>
             Прайс
+          </NavLink>
+          <NavLink to="/wedding" onClick={closeMenu} className={({ isActive }) => (isActive ? styles.active : '')}>
+            Свадебные пакеты
           </NavLink>
           <NavLink to="/reviews" onClick={closeMenu} className={({ isActive }) => (isActive ? styles.active : '')}>
             Отзывы
