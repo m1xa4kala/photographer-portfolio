@@ -25,6 +25,8 @@ const ContactsAdmin = lazy(() => import('./pages/admin/ContactsAdmin'));
 const PriceItemsAdmin = lazy(() => import('./pages/admin/PriceItemsAdmin'));
 const ReviewsAdmin = lazy(() => import('./pages/admin/ReviewsAdmin'));
 const AboutAdmin = lazy(() => import('./pages/admin/AboutAdmin'));
+const WeddingPackagesAdmin = lazy(() => import('./pages/admin/WeddingPackagesAdmin'));
+const WeddingFaqAdmin = lazy(() => import('./pages/admin/WeddingFaqAdmin'));
 
 const App: React.FC = () => {
   return (
@@ -99,6 +101,16 @@ const App: React.FC = () => {
             <Route path="contacts" element={
               <Suspense fallback={<div>Loading...</div>}>
                 <ContactsAdmin />
+              </Suspense>
+            } />
+            <Route path="wedding-packages" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <WeddingPackagesAdmin />
+              </Suspense>
+            } />
+            <Route path="wedding-faq" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <WeddingFaqAdmin />
               </Suspense>
             } />
           </Route>
