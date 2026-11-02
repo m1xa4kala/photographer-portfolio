@@ -19,7 +19,7 @@ export class WeddingPackage {
   @Column('text', { nullable: true })
   includes!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   imageUrl!: string | null;
 
   @Column('json', { default: [] })
