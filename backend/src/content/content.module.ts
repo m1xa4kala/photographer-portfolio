@@ -11,6 +11,7 @@ import { FullSession } from './entities/full-session.entity';
 import { SessionOriginalFile } from './entities/session-original-file.entity';
 import { Contact } from './entities/contact.entity';
 import { WeddingPackage } from './entities/wedding-package.entity';
+import { WeddingFaqItem } from './entities/wedding-faq-item.entity';
 
 import { BestPhotosService } from './services/best-photos.service';
 import { PortfolioCategoriesService } from './services/portfolio-categories.service';
@@ -23,6 +24,7 @@ import { FullSessionsService } from './services/full-sessions.service';
 import { DownloadService } from './services/download.service';
 import { ContactsService } from './services/contacts.service';
 import { WeddingPackagesService } from './services/wedding-packages.service';
+import { WeddingFaqItemsService } from './services/wedding-faq-items.service';
 
 import { PublicContentController } from './controllers/public-content.controller';
 import { AdminBestPhotosController } from './controllers/admin-best-photos.controller';
@@ -36,6 +38,7 @@ import { AdminFullSessionsController } from './controllers/admin-full-sessions.c
 import { DownloadController } from './controllers/download.controller';
 import { AdminContactsController } from './controllers/admin-contacts.controller';
 import { AdminWeddingPackagesController } from './controllers/admin-wedding-packages.controller';
+import { AdminWeddingFaqController } from './controllers/admin-wedding-faq.controller';
 
 import { S3Module } from '../s3/s3.module';
 import { UploadModule } from '../upload/upload.module';
@@ -54,6 +57,7 @@ import { UploadModule } from '../upload/upload.module';
       SessionOriginalFile,
       Contact,
       WeddingPackage,
+      WeddingFaqItem,
     ]),
     S3Module,
     UploadModule,
@@ -70,6 +74,7 @@ import { UploadModule } from '../upload/upload.module';
     DownloadService,
     ContactsService,
     WeddingPackagesService,
+    WeddingFaqItemsService,
   ],
   controllers: [
     PublicContentController,
@@ -84,6 +89,7 @@ import { UploadModule } from '../upload/upload.module';
     DownloadController,
     AdminContactsController,
     AdminWeddingPackagesController,
+    AdminWeddingFaqController,
   ],
   exports: [
     BestPhotosService,
@@ -95,6 +101,7 @@ import { UploadModule } from '../upload/upload.module';
     AboutService,
     ContactsService,
     WeddingPackagesService,
+    WeddingFaqItemsService,
   ],
 })
 export class ContentModule {}
