@@ -30,7 +30,7 @@ const WeddingSkeleton: React.FC = () => (
 
 const Wedding: React.FC = () => {
   const { items: packages, loading: packagesLoading, error: packagesError, refetch: refetchPackages } = useWeddingPackages();
-  const { items: faqItems, loading: faqLoading } = useWeddingFaqItems();
+  const { items: faqItems, loading: faqLoading, error: faqError, refetch: refetchFaq } = useWeddingFaqItems();
   const [openFaqId, setOpenFaqId] = useState<number | null>(null);
 
   const toggleFaq = useCallback((id: number) => {
@@ -60,32 +60,41 @@ const Wedding: React.FC = () => {
           </div>
         )}
 
-        {faqItems.length > 0 && (
+        {(faqError || faqItems.length > 0) && (
           <div className={styles.faqSection}>
             <h2 className={styles.faqTitle}>Часто задаваемые вопросы</h2>
-            <div className={styles.faqList}>
-              {faqItems.map((faq) => {
-                const isOpen = openFaqId === faq.id;
-                return (
-                  <div key={faq.id} className={styles.faqItem}>
-                    <button
-                      type="button"
-                      className={styles.faqQuestion}
-                      onClick={() => toggleFaq(faq.id)}
-                      aria-expanded={isOpen}
-                    >
-                      <span>{faq.question}</span>
-                      <span className={styles.faqArrow}>{isOpen ? '▲' : '▼'}</span>
-                    </button>
-                    {isOpen && (
-                      <div className={styles.faqAnswer}>
-                        <p>{faq.answer}</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            {faqError ? (
+              <div className={styles.faqError}>
+                <p>Не удалось загрузить вопросы и ответы</p>
+                <button type="button" className={styles.faqRetry} onClick={refetchFaq}>
+                  Повторить
+                </button>
+              </div>
+            ) : (
+              <div className={styles.faqList}>
+                {faqItems.map((faq) => {
+                  const isOpen = openFaqId === faq.id;
+                  return (
+                    <div key={faq.id} className={styles.faqItem}>
+                      <button
+                        type="button"
+                        className={styles.faqQuestion}
+                        onClick={() => toggleFaq(faq.id)}
+                        aria-expanded={isOpen}
+                      >
+                        <span>{faq.question}</span>
+                        <span className={styles.faqArrow}>{isOpen ? '▲' : '▼'}</span>
+                      </button>
+                      {isOpen && (
+                        <div className={styles.faqAnswer}>
+                          <p>{faq.answer}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </section>
