@@ -67,11 +67,16 @@ const Wedding: React.FC = () => {
               {faqItems.map((faq) => {
                 const isOpen = openFaqId === faq.id;
                 return (
-                  <div key={faq.id} className={styles.faqItem} onClick={() => toggleFaq(faq.id)}>
-                    <div className={styles.faqQuestion}>
+                  <div key={faq.id} className={styles.faqItem}>
+                    <button
+                      type="button"
+                      className={styles.faqQuestion}
+                      onClick={() => toggleFaq(faq.id)}
+                      aria-expanded={isOpen}
+                    >
                       <span>{faq.question}</span>
                       <span className={styles.faqArrow}>{isOpen ? '▲' : '▼'}</span>
-                    </div>
+                    </button>
                     {isOpen && (
                       <div className={styles.faqAnswer}>
                         <p>{faq.answer}</p>
