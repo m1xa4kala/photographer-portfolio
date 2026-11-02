@@ -10,6 +10,8 @@ import { About } from './entities/about.entity';
 import { FullSession } from './entities/full-session.entity';
 import { SessionOriginalFile } from './entities/session-original-file.entity';
 import { Contact } from './entities/contact.entity';
+import { WeddingPackage } from './entities/wedding-package.entity';
+import { WeddingFaqItem } from './entities/wedding-faq-item.entity';
 
 import { BestPhotosService } from './services/best-photos.service';
 import { PortfolioCategoriesService } from './services/portfolio-categories.service';
@@ -21,6 +23,8 @@ import { AboutService } from './services/about.service';
 import { FullSessionsService } from './services/full-sessions.service';
 import { DownloadService } from './services/download.service';
 import { ContactsService } from './services/contacts.service';
+import { WeddingPackagesService } from './services/wedding-packages.service';
+import { WeddingFaqItemsService } from './services/wedding-faq-items.service';
 
 import { PublicContentController } from './controllers/public-content.controller';
 import { AdminBestPhotosController } from './controllers/admin-best-photos.controller';
@@ -33,6 +37,8 @@ import { AdminAboutController } from './controllers/admin-about.controller';
 import { AdminFullSessionsController } from './controllers/admin-full-sessions.controller';
 import { DownloadController } from './controllers/download.controller';
 import { AdminContactsController } from './controllers/admin-contacts.controller';
+import { AdminWeddingPackagesController } from './controllers/admin-wedding-packages.controller';
+import { AdminWeddingFaqController } from './controllers/admin-wedding-faq.controller';
 
 import { S3Module } from '../s3/s3.module';
 import { UploadModule } from '../upload/upload.module';
@@ -50,6 +56,8 @@ import { UploadModule } from '../upload/upload.module';
       FullSession,
       SessionOriginalFile,
       Contact,
+      WeddingPackage,
+      WeddingFaqItem,
     ]),
     S3Module,
     UploadModule,
@@ -65,6 +73,8 @@ import { UploadModule } from '../upload/upload.module';
     FullSessionsService,
     DownloadService,
     ContactsService,
+    WeddingPackagesService,
+    WeddingFaqItemsService,
   ],
   controllers: [
     PublicContentController,
@@ -78,6 +88,8 @@ import { UploadModule } from '../upload/upload.module';
     AdminFullSessionsController,
     DownloadController,
     AdminContactsController,
+    AdminWeddingPackagesController,
+    AdminWeddingFaqController,
   ],
   exports: [
     BestPhotosService,
@@ -88,6 +100,8 @@ import { UploadModule } from '../upload/upload.module';
     ReviewsService,
     AboutService,
     ContactsService,
+    WeddingPackagesService,
+    WeddingFaqItemsService,
   ],
 })
 export class ContentModule {}

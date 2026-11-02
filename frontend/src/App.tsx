@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Portfolio from './pages/Portfolio';
 import Price from './pages/Price';
 import Reviews from './pages/Reviews';
+import Wedding from './pages/Wedding';
 import About from './pages/About';
 import AdminLayout from './pages/admin/AdminLayout';
 import Login from './pages/admin/Login';
@@ -24,6 +25,8 @@ const ContactsAdmin = lazy(() => import('./pages/admin/ContactsAdmin'));
 const PriceItemsAdmin = lazy(() => import('./pages/admin/PriceItemsAdmin'));
 const ReviewsAdmin = lazy(() => import('./pages/admin/ReviewsAdmin'));
 const AboutAdmin = lazy(() => import('./pages/admin/AboutAdmin'));
+const WeddingPackagesAdmin = lazy(() => import('./pages/admin/WeddingPackagesAdmin'));
+const WeddingFaqAdmin = lazy(() => import('./pages/admin/WeddingFaqAdmin'));
 
 const App: React.FC = () => {
   return (
@@ -37,6 +40,7 @@ const App: React.FC = () => {
             <Route path="portfolio/category/:catId" element={<Portfolio />} />
             <Route path="portfolio/category/:catId/session/:sessionId" element={<Portfolio />} />
             <Route path="price" element={<Price />} />
+            <Route path="wedding" element={<Wedding />} />
             <Route path="reviews" element={<Reviews />} />
             <Route path="about" element={<About />} />
           </Route>
@@ -97,6 +101,16 @@ const App: React.FC = () => {
             <Route path="contacts" element={
               <Suspense fallback={<div>Loading...</div>}>
                 <ContactsAdmin />
+              </Suspense>
+            } />
+            <Route path="wedding-packages" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <WeddingPackagesAdmin />
+              </Suspense>
+            } />
+            <Route path="wedding-faq" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <WeddingFaqAdmin />
               </Suspense>
             } />
           </Route>

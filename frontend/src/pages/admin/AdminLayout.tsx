@@ -27,6 +27,8 @@ const AdminLayout: React.FC = () => {
             <li><NavLink to="/admin/portfolio-photos" className={({ isActive }) => isActive ? styles.active : ''}>Фото портфолио</NavLink></li>
             <li><NavLink to="/admin/full-sessions" className={({ isActive }) => isActive ? styles.active : ''}>📦 Полные сессии</NavLink></li>
             <li><NavLink to="/admin/price-items" className={({ isActive }) => isActive ? styles.active : ''}>Прайс-лист</NavLink></li>
+            <li><NavLink to="/admin/wedding-packages" className={({ isActive }) => isActive ? styles.active : ''}>💒 Свадебные пакеты</NavLink></li>
+            <li><NavLink to="/admin/wedding-faq" className={({ isActive }) => isActive ? styles.active : ''}>❓ FAQ</NavLink></li>
             <li><NavLink to="/admin/reviews" className={({ isActive }) => isActive ? styles.active : ''}>Отзывы</NavLink></li>
             <li><NavLink to="/admin/about" className={({ isActive }) => isActive ? styles.active : ''}>Обо мне</NavLink></li>
             <li><NavLink to="/admin/contacts" className={({ isActive }) => isActive ? styles.active : ''}>Контакты</NavLink></li>

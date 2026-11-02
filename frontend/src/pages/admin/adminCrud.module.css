@@ -237,3 +237,44 @@
     overflow-x: auto;
   }
 }
+
+/* ── Price options editor (wedding packages) ── */
+.pricesBlock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formLabel {
+  font-size: 0.9rem;
+  color: var(--admin-text-muted);
+  font-weight: 600;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.priceRow button.removeBtn {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  color: var(--admin-danger, #e74c3c);
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+button.addBtn {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--admin-border);
+  color: var(--accent);
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+}

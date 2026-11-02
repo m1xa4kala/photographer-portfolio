@@ -7,6 +7,8 @@ import { PriceItemsService } from '../services/price-items.service';
 import { ReviewsService } from '../services/reviews.service';
 import { AboutService } from '../services/about.service';
 import { ContactsService } from '../services/contacts.service';
+import { WeddingPackagesService } from '../services/wedding-packages.service';
+import { WeddingFaqItemsService } from '../services/wedding-faq-items.service';
 
 @Controller('content')
 export class PublicContentController {
@@ -19,6 +21,8 @@ export class PublicContentController {
     private reviewsService: ReviewsService,
     private aboutService: AboutService,
     private contactsService: ContactsService,
+    private weddingPackagesService: WeddingPackagesService,
+    private weddingFaqItemsService: WeddingFaqItemsService,
   ) {}
 
   @Get('best-photos')
@@ -158,5 +162,21 @@ export class PublicContentController {
     @Query('offset') offset?: number,
   ) {
     return this.contactsService.findAll(limit ?? 100, offset ?? 0);
+  }
+
+  @Get('wedding-packages')
+  async getWeddingPackages(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ) {
+    return this.weddingPackagesService.findAll(limit ?? 100, offset ?? 0);
+  }
+
+  @Get('wedding-faq')
+  async getWeddingFaq(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+  ) {
+    return this.weddingFaqItemsService.findAll(limit ?? 100, offset ?? 0);
   }
 }
