@@ -90,3 +90,20 @@ export interface SessionOriginalFile {
   fileSize: number;
   uploadedAt: string;
 }
+
+export interface WeddingPackage {
+  id: number;
+  name: string;
+  duration: string;
+  includes: string | null;
+  imageUrl: string | null;
+  prices: { label: string; amount: string }[];
+  orderIndex?: number;
+}
+
+export interface WeddingFaqItem {
+  id: number;
+  question: string;
+  answer: string;
+  orderIndex?: number;
+}

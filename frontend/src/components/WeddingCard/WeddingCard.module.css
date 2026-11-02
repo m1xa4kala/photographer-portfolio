@@ -1,0 +1,158 @@
+/* src/components/WeddingCard/WeddingCard.module.css */
+
+.card {
+  break-inside: avoid;
+  margin-bottom: 2rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 8px var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px var(--shadow);
+}
+
+/* ── Photo area ── */
+.photoWrapper {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photoPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--border) 0%, #f0f0f0 100%);
+}
+
+/* ── Gradient overlay (title only, no price) ── */
+.overlay {
+  position: absolute;
+  align-items: center;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2.5rem 1rem 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  line-height: normal;
+}
+
+.overlayTitle {
+  font-family: var(--font-heading-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Body (below photo: duration, includes, prices) ── */
+.body {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Duration row ── */
+.duration {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.durationIcon {
+  font-size: 1.1rem;
+}
+
+/* ── Includes list ── */
+.includesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.includesItem {
+  position: relative;
+  padding: 0.6rem 0 0.6rem 1.2rem;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  border-bottom: 1px dashed var(--border);
+}
+
+.includesItem:last-child {
+  border-bottom: none;
+}
+
+.includesItem::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ── Price options (pill chips row) ── */
+.pricesSection {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.priceOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 0.4rem 0.8rem;
+  background-color: var(--card-bg);
+}
+
+.priceLabel {
+  font-size: 0.82rem;
+  color: var(--accent);
+}
+
+.priceAmount {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+@media (max-width: 480px) {
+  .photoWrapper {
+    height: 260px;
+  }
+
+  .overlayTitle {
+    font-size: 1.2rem;
+  }
+}
